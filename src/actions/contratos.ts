@@ -107,8 +107,6 @@ export async function criarContrato(
 
   if(error || !contrato){
 
-    console.log(error);
-
     throw new Error(
       "Erro ao criar contrato"
     );
@@ -297,11 +295,6 @@ export async function criarContrato(
 
     if(erroRecebimentos){
 
-      console.log(
-        erroRecebimentos
-      );
-
-
       throw new Error(
         "Contrato criado, mas erro ao gerar recebimentos"
       );
@@ -387,8 +380,6 @@ export async function cancelarContrato(
 
 
   if(error){
-
-    console.log(error);
 
     throw new Error(
       "Erro ao cancelar contrato"

@@ -180,12 +180,6 @@ export default async function RelatorioRentabilidadeContratosPage() {
                   <button
                     type="button"
                     onClick={() => {
-
-                      console.log(
-                        "CLIQUE FUNCIONOU:",
-                        item.id
-                      );
-
                       window.location.assign(
                         `/relatorios/rentabilidade/${item.id}`
                       );

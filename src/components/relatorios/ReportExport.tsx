@@ -37,8 +37,6 @@ export default function ReportExport({
   const [loadingPDF, setLoadingPDF] = useState(false);
 
   async function handleExportPDF() {
-    console.log("CLICOU");
-
     try {
       setLoadingPDF(true);
 
@@ -47,7 +45,6 @@ export default function ReportExport({
         fileName: reportTitle,
       });
 
-      console.log("PDF GERADO");
     } catch (error) {
       console.error(error);
       alert(String(error));

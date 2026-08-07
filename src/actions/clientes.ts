@@ -12,7 +12,6 @@ export async function inativarCliente(id: string) {
     .eq("id", id);
 
   if (error) {
-    console.log(error);
     return;
   }
 

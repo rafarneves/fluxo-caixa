@@ -110,52 +110,6 @@ export default async function Dashboard() {
       ? 0
       : faturamentoMensal / contratosAtivos;
 
-  // ==========================
-  // LOGS TEMPORÁRIOS
-  // ==========================
-
-  console.log("========== DASHBOARD ==========");
-
-  console.log("clientesData:", clientesData.length);
-
-  console.log("contratosData:", contratosData);
-
-  console.log(
-    "Valores dos contratos:",
-    contratosData.map((c) => ({
-      id: c.id,
-      nome: c.nome,
-      valor: c.valor,
-      status: c.status,
-    }))
-  );
-
-  console.log("recebimentosData:", recebimentosData);
-
-  console.log(
-    "Recebimentos:",
-    recebimentosData.map((r) => ({
-      id: r.id,
-      valor: r.valor,
-      valor_recebido: r.valor_recebido,
-      status: r.status,
-    }))
-  );
-
-  console.log("financeiro:", financeiro);
-
-  console.log("faturamentoMensal:", faturamentoMensal);
-
-  console.log("ticketMedio:", ticketMedio);
-
-  console.log("despesasTotal:", despesasTotal);
-
-  console.log("custosTotal:", custosTotal);
-
-  console.log("resultadoEmpresa:", resultadoEmpresa);
-
-  console.log("================================");
-
   const atividades = [
     ...clientesData.slice(0, 3).map((cliente: any) => ({
       id: cliente.id,

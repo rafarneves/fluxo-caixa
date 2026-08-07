@@ -36,7 +36,6 @@ export async function criarDespesa(
     });
 
   if (error) {
-    console.log(error);
     throw new Error(error.message);
   }
 

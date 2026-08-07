@@ -46,8 +46,6 @@ export async function criarCustoContrato(
     });
 
   if (error) {
-    console.log(error);
-
     throw new Error(
       JSON.stringify(error)
     );
@@ -65,8 +63,6 @@ export async function removerCustoContrato(
     .eq("id", id);
 
   if (error) {
-    console.log(error);
-
     throw new Error(
       JSON.stringify(error)
     );

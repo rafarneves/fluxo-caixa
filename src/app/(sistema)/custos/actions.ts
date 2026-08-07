@@ -42,7 +42,6 @@ export async function criarCusto(
     });
 
   if (error) {
-    console.log(error);
     throw new Error(JSON.stringify(error));
   }
 
@@ -59,7 +58,6 @@ export async function removerCusto(
     .eq("id", id);
 
   if (error) {
-    console.log(error);
     throw new Error(JSON.stringify(error));
   }
 

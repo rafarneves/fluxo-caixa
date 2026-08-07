@@ -22,7 +22,7 @@ const grupos = [
     itens: [
       {
         nome: "Dashboard",
-        href: "/dashboard",
+        href: "/",
         icon: LayoutDashboard,
       },
     ],

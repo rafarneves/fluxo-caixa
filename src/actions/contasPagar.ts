@@ -17,7 +17,6 @@ export async function pagarConta(
     .eq("id", id);
 
   if (error) {
-    console.log(error);
     return;
   }
 
@@ -31,7 +30,6 @@ export async function pagarConta(
     });
 
   if (erroFluxo) {
-    console.log(erroFluxo);
     return;
   }
 

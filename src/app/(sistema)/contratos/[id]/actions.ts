@@ -43,8 +43,6 @@ export async function adicionarCustoContrato(
     });
 
   if (error) {
-    console.log(error);
-
     throw new Error(
       JSON.stringify(error)
     );
