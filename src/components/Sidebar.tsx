@@ -99,26 +99,26 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
     const userInitial = userName.charAt(0).toUpperCase();
 
     return (
-        <aside className="flex min-h-screen w-72 flex-col border-r border-zinc-900 bg-[#06080B]">
+        <aside className="flex h-screen w-72 shrink-0 flex-col overflow-hidden border-r border-zinc-900 bg-[#06080B]">
             {/* LOGO */}
-            <div className="flex justify-center border-b border-zinc-900 py-3">
+            <div className="shrink-0 border-b border-zinc-900 py-2">
                 <img
                     src="/logo-altuza-horizontal.png"
                     alt="Altuza"
-                    className="-ml-3 w-[170px] select-none"
+                    className="mx-auto w-[145px] select-none"
                     draggable={false}
                 />
             </div>
 
             {/* MENU */}
-            <div className="flex-1 space-y-8 overflow-y-auto px-4 py-5">
+            <nav className="min-h-0 flex-1 space-y-4 overflow-hidden px-3 py-3">
                 {grupos.map((grupo) => (
                     <div key={grupo.titulo}>
-                        <p className="mb-3 px-3 text-[11px] font-bold tracking-[0.22em] text-zinc-600">
+                        <p className="mb-1.5 px-3 text-[10px] font-bold tracking-[0.22em] text-zinc-600">
                             {grupo.titulo}
                         </p>
 
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                             {grupo.itens.map((item) => {
                                 const Icon = item.icon;
 
@@ -130,7 +130,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                                         href={item.href}
                                         onMouseEnter={() => router.prefetch(item.href)}
                                         onFocus={() => router.prefetch(item.href)}
-                                        className={`relative flex items-center gap-3 rounded-xl border px-4 py-3 transition-all duration-300 ${
+                                        className={`relative flex items-center gap-3 rounded-xl border px-3 py-2 transition-all duration-300 ${
                                             ativo
                                                 ? `border-green-500/30 bg-green-500/10 text-green-400 shadow-lg shadow-green-500/10`
                                                 : `border-transparent text-zinc-400 hover:bg-zinc-900 hover:text-white`
@@ -140,21 +140,21 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                                             <div className="absolute top-2 bottom-2 left-0 w-1 rounded-r-full bg-green-400" />
                                         )}
 
-                                        <Icon size={20} strokeWidth={2} />
+                                        <Icon size={18} strokeWidth={2} />
 
-                                        <span className="text-[16px] font-medium">{item.nome}</span>
+                                        <span className="text-sm font-medium">{item.nome}</span>
                                     </Link>
                                 );
                             })}
                         </div>
                     </div>
                 ))}
-            </div>
+            </nav>
 
             {/* RODAPÉ */}
-            <div className="border-t border-zinc-900 p-5">
+            <div className="shrink-0 border-t border-zinc-900 p-3">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 font-bold text-black">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-500 text-sm font-bold text-black">
                         {userInitial}
                     </div>
 
@@ -165,15 +165,15 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
                     </div>
                 </div>
 
-                <div className="mt-4 border-t border-zinc-900 pt-4">
+                <div className="mt-3 border-t border-zinc-900 pt-3">
                     <p className="text-xs text-zinc-600">Altuza ERP</p>
 
                     <p className="text-xs text-zinc-700">Versão 1.0.0</p>
 
-                    <form action={logout} className="mt-4">
+                    <form action={logout} className="mt-2">
                         <button
                             type="submit"
-                            className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-red-400"
+                            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-red-400"
                         >
                             <LogOut size={15} />
                             Sair do sistema

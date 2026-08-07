@@ -16,6 +16,35 @@ body {
     box-sizing: border-box;
 }
 
+.erp-content,
+.erp-content * {
+    scrollbar-color: #3f3f46 transparent;
+    scrollbar-width: thin;
+}
+
+.erp-content::-webkit-scrollbar,
+.erp-content *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.erp-content::-webkit-scrollbar-track,
+.erp-content *::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.erp-content::-webkit-scrollbar-thumb,
+.erp-content *::-webkit-scrollbar-thumb {
+    border: 2px solid #0b0f14;
+    border-radius: 999px;
+    background: #3f3f46;
+}
+
+.erp-content::-webkit-scrollbar-thumb:hover,
+.erp-content *::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
+}
+
 html[data-interface-compacta='true'] .erp-content {
     padding: 1.5rem;
 }

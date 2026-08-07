@@ -1,8 +1,6 @@
-'use client';
+import { type LucideIcon, TrendingDown, TrendingUp } from 'lucide-react';
 
-import { LucideIcon, TrendingDown, TrendingUp } from 'lucide-react';
-
-import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+import ReportKPIValue from '@/components/relatorios/ReportKPIValue';
 
 type ReportKPICardProps = {
     title: string;
@@ -55,11 +53,7 @@ export default function ReportKPICard({
     trend,
     isCurrency = true,
 }: ReportKPICardProps) {
-    const { formatarMoedaCompacta } = useConfiguracoes();
     const style = colors[color];
-
-    const displayValue =
-        typeof value === 'number' ? (isCurrency ? formatarMoedaCompacta(value) : value.toLocaleString('pt-BR')) : value;
 
     return (
         <div
@@ -72,7 +66,7 @@ export default function ReportKPICard({
                     <p className="text-xs font-semibold tracking-[0.18em] text-zinc-500 uppercase">{title}</p>
 
                     <h2 className={`mt-4 text-3xl font-bold tracking-tight whitespace-nowrap ${style.text} `}>
-                        {displayValue}
+                        <ReportKPIValue value={value} isCurrency={isCurrency} />
                     </h2>
 
                     {description && <p className="mt-2 text-sm text-zinc-500">{description}</p>}
