@@ -1,3 +1,7 @@
+'use client';
+
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+
 type Despesa = {
     categoria: string | null;
     valor: number;
@@ -68,6 +72,3 @@ export default function ExpenseBreakdown({ despesas }: Props) {
         </section>
     );
 }
-('use client');
-
-import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';

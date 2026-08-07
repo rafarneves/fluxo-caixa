@@ -1,5 +1,4 @@
 'use client';
-
 import { excluirDespesa } from './actions';
 
 export default function ExcluirDespesa({ id }: { id: string }) {

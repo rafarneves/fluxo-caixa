@@ -1,3 +1,7 @@
+'use client';
+
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+
 interface CardResumoProps {
     titulo: string;
     valor: number;
@@ -15,6 +19,3 @@ export default function CardResumo({ titulo, valor, cor }: CardResumoProps) {
         </div>
     );
 }
-('use client');
-
-import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';

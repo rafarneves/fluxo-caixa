@@ -1,3 +1,7 @@
+'use client';
+
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+
 type Custo = {
     id: string;
     descricao: string;
@@ -34,6 +38,3 @@ export default function HistoricoCustos({ custos }: Props) {
         </div>
     );
 }
-('use client');
-
-import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';

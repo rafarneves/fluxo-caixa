@@ -1,3 +1,7 @@
+'use client';
+
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+
 type Custo = {
     id: string;
     categoria: string;
@@ -56,6 +60,3 @@ export default function ListaCustos({ custos }: { custos: Custo[] }) {
         </div>
     );
 }
-('use client');
-
-import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';

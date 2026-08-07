@@ -1,3 +1,7 @@
+'use client';
+
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+
 type Props = {
     receita: number;
     custos: number;
@@ -45,6 +49,3 @@ export default function CardsFinanceiros({ receita, custos }: Props) {
         </div>
     );
 }
-('use client');
-
-import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
