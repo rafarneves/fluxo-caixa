@@ -1,57 +1,54 @@
-import { supabase } from "@/lib/supabase";
-import { buscarBeneficioIndicacao } from "@/lib/indicacoes";
+import { createClient } from '@/lib/supabase/server';
+import { buscarBeneficioIndicacao } from '@/lib/indicacoes';
 
 export async function gerarRecebimentosContrato({
-  contratoId,
-  clienteId,
-  valor,
-  vencimento,
-  duracao,
+    contratoId,
+    clienteId,
+    valor,
+    vencimento,
+    duracao,
 }: {
-  contratoId: string;
-  clienteId: string;
-  valor: number;
-  vencimento: number;
-  duracao: number;
+    contratoId: string;
+    clienteId: string;
+    valor: number;
+    vencimento: number;
+    duracao: number;
 }) {
-  const descontoIndicacao = await buscarBeneficioIndicacao(clienteId);
+    const supabase = await createClient();
+    const descontoIndicacao = await buscarBeneficioIndicacao(clienteId);
 
-  const valorFinal = valor - descontoIndicacao;
+    const valorFinal = valor - descontoIndicacao;
 
-  for (let i = 0; i < duracao; i++) {
-    const competenciaData = new Date();
+    for (let i = 0; i < duracao; i++) {
+        const competenciaData = new Date();
 
-    competenciaData.setMonth(competenciaData.getMonth() + i);
+        competenciaData.setMonth(competenciaData.getMonth() + i);
 
-    const competencia = `${String(competenciaData.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}/${competenciaData.getFullYear()}`;
+        const competencia = `${String(competenciaData.getMonth() + 1).padStart(
+            2,
+            '0'
+        )}/${competenciaData.getFullYear()}`;
 
-    const dataVencimento = new Date(
-      competenciaData.getFullYear(),
-      competenciaData.getMonth(),
-      vencimento
-    );
+        const dataVencimento = new Date(competenciaData.getFullYear(), competenciaData.getMonth(), vencimento);
 
-    const { error } = await supabase.from("recebimentos").insert({
-      contrato_id: contratoId,
+        const { error } = await supabase.from('recebimentos').insert({
+            contrato_id: contratoId,
 
-      competencia,
+            competencia,
 
-      valor_original: valor,
+            valor_original: valor,
 
-      desconto_indicacao: descontoIndicacao,
+            desconto_indicacao: descontoIndicacao,
 
-      valor: valorFinal,
+            valor: valorFinal,
 
-      vencimento: dataVencimento.toISOString().split("T")[0],
+            vencimento: dataVencimento.toISOString().split('T')[0],
 
-      status: "Pendente",
-    });
+            status: 'Pendente',
+        });
 
-    if (error) {
-      throw error;
+        if (error) {
+            throw error;
+        }
     }
-  }
 }

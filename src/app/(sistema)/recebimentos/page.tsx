@@ -1,16 +1,17 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/server';
 
-import RecebimentosHeader from "@/components/recebimentos/RecebimentosHeader";
-import RecebimentosSummary from "@/components/recebimentos/RecebimentosSummary";
-import RecebimentosTable from "@/components/recebimentos/RecebimentosTable";
+import RecebimentosHeader from '@/components/recebimentos/RecebimentosHeader';
+import RecebimentosSummary from '@/components/recebimentos/RecebimentosSummary';
+import RecebimentosTable from '@/components/recebimentos/RecebimentosTable';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function RecebimentosPage() {
-  const { data: recebimentos } = await supabase
-    .from("recebimentos")
-    .select(
-      `
+    const supabase = await createClient();
+    const { data: recebimentos } = await supabase
+        .from('recebimentos')
+        .select(
+            `
       *,
       contratos (
         nome,
@@ -19,45 +20,45 @@ export default async function RecebimentosPage() {
         )
       )
     `
-    )
-    .order("vencimento", {
-      ascending: true,
-    });
+        )
+        .order('vencimento', {
+            ascending: true,
+        });
 
-  const dados = recebimentos ?? [];
+    const dados = recebimentos ?? [];
 
-  const recebido = dados
-    .filter((r: any) => r.status === "Pago")
-    .reduce((total: number, r: any) => total + Number(r.valor_recebido ?? r.valor), 0);
+    const recebido = dados
+        .filter((r: any) => r.status === 'Pago')
+        .reduce((total: number, r: any) => total + Number(r.valor_recebido ?? r.valor), 0);
 
-  const emAberto = dados
-    .filter((r: any) => r.status !== "Pago")
-    .reduce((total: number, r: any) => total + Number(r.valor), 0);
+    const emAberto = dados
+        .filter((r: any) => r.status !== 'Pago')
+        .reduce((total: number, r: any) => total + Number(r.valor), 0);
 
-  const receberHoje = dados
-    .filter((r: any) => {
-      const hoje = new Date().toISOString().split("T")[0];
+    const receberHoje = dados
+        .filter((r: any) => {
+            const hoje = new Date().toISOString().split('T')[0];
 
-      return r.vencimento === hoje && r.status !== "Pago";
-    })
-    .reduce((total: number, r: any) => total + Number(r.valor), 0);
+            return r.vencimento === hoje && r.status !== 'Pago';
+        })
+        .reduce((total: number, r: any) => total + Number(r.valor), 0);
 
-  const atrasados = dados.filter((r: any) => {
-    return r.status !== "Pago" && new Date(r.vencimento) < new Date();
-  }).length;
+    const atrasados = dados.filter((r: any) => {
+        return r.status !== 'Pago' && new Date(r.vencimento) < new Date();
+    }).length;
 
-  return (
-    <main className="space-y-8">
-      <RecebimentosHeader />
+    return (
+        <main className="space-y-8">
+            <RecebimentosHeader />
 
-      <RecebimentosSummary
-        receberHoje={receberHoje}
-        emAberto={emAberto}
-        recebido={recebido}
-        atrasados={atrasados}
-      />
+            <RecebimentosSummary
+                receberHoje={receberHoje}
+                emAberto={emAberto}
+                recebido={recebido}
+                atrasados={atrasados}
+            />
 
-      <RecebimentosTable recebimentos={dados} />
-    </main>
-  );
+            <RecebimentosTable recebimentos={dados} />
+        </main>
+    );
 }

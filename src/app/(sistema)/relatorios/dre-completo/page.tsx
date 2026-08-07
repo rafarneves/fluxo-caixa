@@ -1,172 +1,173 @@
-import { DollarSign, TrendingDown, TrendingUp, Percent, Wallet, Landmark } from "lucide-react";
+import { formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
+import { DollarSign, TrendingDown, TrendingUp, Percent, Wallet, Landmark } from 'lucide-react';
 
-import ReportHeader from "@/components/relatorios/ReportHeader";
-import ReportKPICard from "@/components/relatorios/ReportKPICard";
-import ReportExport from "@/components/relatorios/ReportExport";
-import ReportTable from "@/components/relatorios/ReportTable";
+import ReportHeader from '@/components/relatorios/ReportHeader';
+import ReportKPICard from '@/components/relatorios/ReportKPICard';
+import ReportExport from '@/components/relatorios/ReportExport';
+import ReportTable from '@/components/relatorios/ReportTable';
 
-import { getDashboardExecutivo } from "@/lib/relatorios/dashboard";
-import { formatMoneyCompact } from "@/lib/formatMoneyCompact";
+import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
 export default async function DRECompletoPage() {
-  const dados = await getDashboardExecutivo();
+    const { configuracoes } = await getContextoConfiguracoes();
+    const dados = await getDashboardExecutivo();
 
-  const receitaBruta = dados.recebido;
+    const receitaBruta = dados.recebido;
 
-  const custos = dados.custosTotal;
+    const custos = dados.custosTotal;
 
-  const despesas = dados.despesasTotal;
+    const despesas = dados.despesasTotal;
 
-  const lucroBruto = receitaBruta - custos;
+    const lucroBruto = receitaBruta - custos;
 
-  const lucroLiquido = lucroBruto - despesas;
+    const lucroLiquido = lucroBruto - despesas;
 
-  const margem = receitaBruta === 0 ? 0 : (lucroLiquido / receitaBruta) * 100;
+    const margem = receitaBruta === 0 ? 0 : (lucroLiquido / receitaBruta) * 100;
 
-  const linhas = [
-    {
-      conta: "Receita Bruta",
-      grupo: "Receitas",
-      valor: receitaBruta,
-    },
+    const linhas = [
+        {
+            conta: 'Receita Bruta',
+            grupo: 'Receitas',
+            valor: receitaBruta,
+        },
 
-    {
-      conta: "(-) Custos",
-      grupo: "Custos",
-      valor: -custos,
-    },
+        {
+            conta: '(-) Custos',
+            grupo: 'Custos',
+            valor: -custos,
+        },
 
-    {
-      conta: "Lucro Bruto",
-      grupo: "Resultado",
-      valor: lucroBruto,
-    },
+        {
+            conta: 'Lucro Bruto',
+            grupo: 'Resultado',
+            valor: lucroBruto,
+        },
 
-    {
-      conta: "(-) Despesas Operacionais",
-      grupo: "Despesas",
-      valor: -despesas,
-    },
+        {
+            conta: '(-) Despesas Operacionais',
+            grupo: 'Despesas',
+            valor: -despesas,
+        },
 
-    {
-      conta: "Lucro Líquido",
-      grupo: "Resultado Final",
-      valor: lucroLiquido,
-    },
-  ];
+        {
+            conta: 'Lucro Líquido',
+            grupo: 'Resultado Final',
+            valor: lucroLiquido,
+        },
+    ];
 
-  return (
-    <main className="space-y-8">
-      <ReportHeader
-        title="DRE Completo"
+    return (
+        <main className="space-y-8">
+            <ReportHeader
+                title="DRE Completo"
 
-        description="Demonstrativo completo do resultado do exercício."
+                description="Demonstrativo completo do resultado do exercício."
 
-        actions={<ReportExport disabledPDF disabledExcel />}
-      />
+                actions={<ReportExport disabledPDF disabledExcel />}
+            />
 
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <ReportKPICard
-          title="Receita"
+            <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                <ReportKPICard
+                    title="Receita"
 
-          value={formatMoneyCompact(receitaBruta)}
+                    value={formatarMoedaServidor(receitaBruta, configuracoes, true)}
 
-          icon={DollarSign}
+                    icon={DollarSign}
 
-          color="green"
-        />
+                    color="green"
+                />
 
-        <ReportKPICard
-          title="Custos"
+                <ReportKPICard
+                    title="Custos"
 
-          value={formatMoneyCompact(custos)}
+                    value={formatarMoedaServidor(custos, configuracoes, true)}
 
-          icon={Wallet}
+                    icon={Wallet}
 
-          color="yellow"
-        />
+                    color="yellow"
+                />
 
-        <ReportKPICard
-          title="Lucro Bruto"
+                <ReportKPICard
+                    title="Lucro Bruto"
 
-          value={formatMoneyCompact(lucroBruto)}
+                    value={formatarMoedaServidor(lucroBruto, configuracoes, true)}
 
-          icon={TrendingUp}
+                    icon={TrendingUp}
 
-          color={lucroBruto >= 0 ? "green" : "red"}
-        />
+                    color={lucroBruto >= 0 ? 'green' : 'red'}
+                />
 
-        <ReportKPICard
-          title="Despesas"
+                <ReportKPICard
+                    title="Despesas"
 
-          value={formatMoneyCompact(despesas)}
+                    value={formatarMoedaServidor(despesas, configuracoes, true)}
 
-          icon={TrendingDown}
+                    icon={TrendingDown}
 
-          color="red"
-        />
+                    color="red"
+                />
 
-        <ReportKPICard
-          title="Lucro Líquido"
+                <ReportKPICard
+                    title="Lucro Líquido"
 
-          value={formatMoneyCompact(lucroLiquido)}
+                    value={formatarMoedaServidor(lucroLiquido, configuracoes, true)}
 
-          icon={Landmark}
+                    icon={Landmark}
 
-          color={lucroLiquido >= 0 ? "green" : "red"}
-        />
+                    color={lucroLiquido >= 0 ? 'green' : 'red'}
+                />
 
-        <ReportKPICard
-          title="Margem"
+                <ReportKPICard
+                    title="Margem"
 
-          value={`${margem.toFixed(2)}%`}
+                    value={`${margem.toFixed(2)}%`}
 
-          icon={Percent}
+                    icon={Percent}
 
-          color="blue"
-        />
-      </section>
+                    color="blue"
+                />
+            </section>
 
-      <ReportTable
-        title="Demonstrativo"
+            <ReportTable
+                title="Demonstrativo"
 
-        description="Composição completa do DRE."
+                description="Composição completa do DRE."
 
-        columns={[
-          {
-            key: "grupo",
+                columns={[
+                    {
+                        key: 'grupo',
 
-            title: "Grupo",
-          },
+                        title: 'Grupo',
+                    },
 
-          {
-            key: "conta",
+                    {
+                        key: 'conta',
 
-            title: "Conta",
-          },
+                        title: 'Conta',
+                    },
 
-          {
-            key: "valor",
+                    {
+                        key: 'valor',
 
-            title: "Valor",
+                        title: 'Valor',
 
-            align: "right",
+                        align: 'right',
 
-            render: (item: any) =>
-              item.valor.toLocaleString(
-                "pt-BR",
+                        render: (item: any) =>
+                            item.valor.toLocaleString(
+                                'pt-BR',
 
-                {
-                  style: "currency",
+                                {
+                                    style: 'currency',
 
-                  currency: "BRL",
-                }
-              ),
-          },
-        ]}
+                                    currency: configuracoes.moeda,
+                                }
+                            ),
+                    },
+                ]}
 
-        data={linhas}
-      />
-    </main>
-  );
+                data={linhas}
+            />
+        </main>
+    );
 }

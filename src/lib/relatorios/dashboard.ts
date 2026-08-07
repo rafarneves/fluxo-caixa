@@ -1,113 +1,116 @@
-import { buscarDadosFinanceiros } from "@/lib/financeiro/buscarDados";
-import { calcularIndicadores } from "@/lib/financeiro/calcularIndicadores";
+import { buscarDadosFinanceiros } from '@/lib/financeiro/buscarDados';
+import { calcularIndicadores } from '@/lib/financeiro/calcularIndicadores';
+import { getContextoConfiguracoes } from '@/lib/configuracoes-server';
 
-function getMesAno(data: string | Date) {
-  const d = new Date(data);
+function getMesAno(data: string | Date, timeZone: string) {
+    const d = new Date(data);
 
-  return d.toLocaleDateString("pt-BR", {
-    month: "short",
-    year: "2-digit",
-  });
+    return d.toLocaleDateString('pt-BR', {
+        month: 'short',
+        year: '2-digit',
+        timeZone,
+    });
 }
 
 export async function getDashboardExecutivo() {
-  const dados = await buscarDadosFinanceiros();
+    const { configuracoes } = await getContextoConfiguracoes();
+    const dados = await buscarDadosFinanceiros();
 
-  const indicadores = calcularIndicadores(dados);
+    const indicadores = calcularIndicadores(dados, configuracoes.fusoHorario);
 
-  const mapa = new Map<
-    string,
-    {
-      mes: string;
-      recebido: number;
-      despesas: number;
-      custos: number;
-    }
-  >();
+    const mapa = new Map<
+        string,
+        {
+            mes: string;
+            recebido: number;
+            despesas: number;
+            custos: number;
+        }
+    >();
 
-  dados.recebimentos
-    .filter((r: any) => r.status === "Pago")
-    .forEach((r: any) => {
-      const chave = getMesAno(r.vencimento);
+    dados.recebimentos
+        .filter((r: any) => r.status === 'Pago')
+        .forEach((r: any) => {
+            const chave = getMesAno(r.vencimento, configuracoes.fusoHorario);
 
-      if (!mapa.has(chave)) {
-        mapa.set(chave, {
-          mes: chave,
-          recebido: 0,
-          despesas: 0,
-          custos: 0,
+            if (!mapa.has(chave)) {
+                mapa.set(chave, {
+                    mes: chave,
+                    recebido: 0,
+                    despesas: 0,
+                    custos: 0,
+                });
+            }
+
+            mapa.get(chave)!.recebido += Number(r.valor);
         });
-      }
 
-      mapa.get(chave)!.recebido += Number(r.valor);
+    dados.despesas.forEach((d: any) => {
+        if (!d.data) return;
+
+        const chave = getMesAno(d.data, configuracoes.fusoHorario);
+
+        if (!mapa.has(chave)) {
+            mapa.set(chave, {
+                mes: chave,
+                recebido: 0,
+                despesas: 0,
+                custos: 0,
+            });
+        }
+
+        mapa.get(chave)!.despesas += Number(d.valor);
     });
 
-  dados.despesas.forEach((d: any) => {
-    if (!d.data) return;
+    dados.custosContrato.forEach((c: any) => {
+        if (!c.data) return;
 
-    const chave = getMesAno(d.data);
+        const chave = getMesAno(c.data, configuracoes.fusoHorario);
 
-    if (!mapa.has(chave)) {
-      mapa.set(chave, {
-        mes: chave,
-        recebido: 0,
-        despesas: 0,
-        custos: 0,
-      });
-    }
+        if (!mapa.has(chave)) {
+            mapa.set(chave, {
+                mes: chave,
+                recebido: 0,
+                despesas: 0,
+                custos: 0,
+            });
+        }
 
-    mapa.get(chave)!.despesas += Number(d.valor);
-  });
+        mapa.get(chave)!.custos += Number(c.valor);
+    });
 
-  dados.custosContrato.forEach((c: any) => {
-    if (!c.data) return;
+    const grafico = Array.from(mapa.values()).map((item) => ({
+        ...item,
+        lucro: item.recebido - item.despesas - item.custos,
+    }));
 
-    const chave = getMesAno(c.data);
+    grafico.sort((a, b) => a.mes.localeCompare(b.mes));
 
-    if (!mapa.has(chave)) {
-      mapa.set(chave, {
-        mes: chave,
-        recebido: 0,
-        despesas: 0,
-        custos: 0,
-      });
-    }
+    const resumo = {
+        clientes: indicadores.totalClientes,
+        contratos: indicadores.contratosAtivos,
+        ticketMedio: indicadores.ticketMedio,
+        recebimentosPendentes: indicadores.emAberto,
+        faturamento: indicadores.faturamentoMensal,
+        lucro: indicadores.lucro,
+    };
 
-    mapa.get(chave)!.custos += Number(c.valor);
-  });
+    const kpis = {
+        recebido: indicadores.recebido,
+        emAberto: indicadores.emAberto,
+        despesas: indicadores.despesasTotal,
+        custos: indicadores.custosTotal,
+        lucro: indicadores.lucro,
+        margem: indicadores.margem,
+        faturamento: indicadores.faturamentoMensal,
+        ticketMedio: indicadores.ticketMedio,
+    };
 
-  const grafico = Array.from(mapa.values()).map((item) => ({
-    ...item,
-    lucro: item.recebido - item.despesas - item.custos,
-  }));
-
-  grafico.sort((a, b) => a.mes.localeCompare(b.mes));
-
-  const resumo = {
-    clientes: indicadores.totalClientes,
-    contratos: indicadores.contratosAtivos,
-    ticketMedio: indicadores.ticketMedio,
-    recebimentosPendentes: indicadores.emAberto,
-    faturamento: indicadores.faturamentoMensal,
-    lucro: indicadores.lucro,
-  };
-
-  const kpis = {
-    recebido: indicadores.recebido,
-    emAberto: indicadores.emAberto,
-    despesas: indicadores.despesasTotal,
-    custos: indicadores.custosTotal,
-    lucro: indicadores.lucro,
-    margem: indicadores.margem,
-    faturamento: indicadores.faturamentoMensal,
-    ticketMedio: indicadores.ticketMedio,
-  };
-
-  return {
-    ...dados,
-    ...indicadores,
-    grafico,
-    resumo,
-    kpis,
-  };
+    return {
+        ...dados,
+        ...indicadores,
+        grafico,
+        resumo,
+        kpis,
+    };
 }

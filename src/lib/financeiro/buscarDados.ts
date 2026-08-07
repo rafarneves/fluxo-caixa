@@ -1,36 +1,37 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from '@/lib/supabase/server';
 
 export async function buscarDadosFinanceiros() {
-  const [
-    { data: clientes, error: clientesError },
-    { data: contratos, error: contratosError },
-    { data: recebimentos, error: recebimentosError },
-    { data: despesas, error: despesasError },
-    { data: custosContrato, error: custosError },
-  ] = await Promise.all([
-    supabase.from("clientes").select("*").order("created_at", { ascending: false }),
+    const supabase = await createClient();
+    const [
+        { data: clientes, error: clientesError },
+        { data: contratos, error: contratosError },
+        { data: recebimentos, error: recebimentosError },
+        { data: despesas, error: despesasError },
+        { data: custosContrato, error: custosError },
+    ] = await Promise.all([
+        supabase.from('clientes').select('*').order('created_at', { ascending: false }),
 
-    supabase.from("contratos").select(`
+        supabase.from('contratos').select(`
         *,
         clientes(nome)
       `),
 
-    supabase
-      .from("recebimentos")
-      .select(
-        `
+        supabase
+            .from('recebimentos')
+            .select(
+                `
         *,
         contratos(
           nome,
           clientes(nome)
         )
       `
-      )
-      .order("vencimento", { ascending: true }),
+            )
+            .order('vencimento', { ascending: true }),
 
-    supabase.from("despesas").select("*"),
+        supabase.from('despesas').select('*'),
 
-    supabase.from("custos_contrato").select(`
+        supabase.from('custos_contrato').select(`
         *,
         contratos(
           id,
@@ -38,17 +39,17 @@ export async function buscarDadosFinanceiros() {
           clientes(nome)
         )
       `),
-  ]);
+    ]);
 
-  if (clientesError || contratosError || recebimentosError || despesasError || custosError) {
-    throw new Error("Erro ao buscar informações financeiras do sistema.");
-  }
+    if (clientesError || contratosError || recebimentosError || despesasError || custosError) {
+        throw new Error('Erro ao buscar informações financeiras do sistema.');
+    }
 
-  return {
-    clientes: clientes ?? [],
-    contratos: contratos ?? [],
-    recebimentos: recebimentos ?? [],
-    despesas: despesas ?? [],
-    custosContrato: custosContrato ?? [],
-  };
+    return {
+        clientes: clientes ?? [],
+        contratos: contratos ?? [],
+        recebimentos: recebimentos ?? [],
+        despesas: despesas ?? [],
+        custosContrato: custosContrato ?? [],
+    };
 }

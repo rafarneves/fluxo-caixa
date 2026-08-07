@@ -1,91 +1,88 @@
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { PDF_THEME } from "./theme";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { PDF_THEME } from './theme';
 
 export type PDFTableColumn = {
-  header: string;
-  dataKey: string;
+    header: string;
+    dataKey: string;
 };
 
-export function drawTable(
-  pdf: jsPDF,
-  columns: PDFTableColumn[],
-  rows: Record<string, any>[],
-  startY = 85
-) {
-  autoTable(pdf, {
-    startY,
+export function drawTable(pdf: jsPDF, columns: PDFTableColumn[], rows: Record<string, any>[], startY = 85) {
+    autoTable(pdf, {
+        startY,
 
-    columns,
+        columns,
 
-    body: rows,
+        body: rows,
 
-    // ==========================
-    // CABEÇALHO
-    // ==========================
+        // ==========================
+        // CABEÇALHO
+        // ==========================
 
-    headStyles: {
-      fillColor: PDF_THEME.colors.primary,
+        headStyles: {
+            fillColor: PDF_THEME.colors.primary,
 
-      textColor: [255, 255, 255],
+            textColor: [255, 255, 255],
 
-      fontStyle: "bold",
+            fontStyle: 'bold',
 
-      fontSize: 10,
+            fontSize: 10,
 
-      halign: "left",
-    },
+            halign: 'left',
+        },
 
-    // ==========================
-    // CORPO
-    // ==========================
+        // ==========================
+        // CORPO
+        // ==========================
 
-    bodyStyles: {
-      fontSize: 9,
+        bodyStyles: {
+            fontSize: 9,
 
-      textColor: PDF_THEME.colors.text,
+            textColor: PDF_THEME.colors.text,
 
-      cellPadding: 5,
-    },
+            cellPadding: 5,
+        },
 
-    alternateRowStyles: {
-      fillColor: [248, 250, 252],
-    },
+        alternateRowStyles: {
+            fillColor: [248, 250, 252],
+        },
 
-    // ==========================
-    // BORDAS
-    // ==========================
+        // ==========================
+        // BORDAS
+        // ==========================
 
-    styles: {
-      lineColor: PDF_THEME.colors.border,
+        styles: {
+            lineColor: PDF_THEME.colors.border,
 
-      lineWidth: 0.2,
-    },
+            lineWidth: 0.2,
+        },
 
-    // ==========================
-    // VALOR DIREITA
-    // ==========================
+        // ==========================
+        // VALOR DIREITA
+        // ==========================
 
-    columnStyles: {
-      valor: {
-        halign: "right",
-      },
-    },
+        columnStyles: {
+            valor: {
+                halign: 'right',
+            },
+        },
 
-    didParseCell(data) {
-      if (data.section === "body" && data.column.dataKey === "valor") {
-        const texto = String(data.cell.text[0]);
+        didParseCell(data) {
+            if (data.section === 'body' && data.column.dataKey === 'valor') {
+                const texto = String(data.cell.text[0]);
 
-        if (texto.includes("-")) {
-          data.cell.styles.textColor = PDF_THEME.colors.danger;
-        } else {
-          data.cell.styles.textColor = PDF_THEME.colors.success;
-        }
-      }
+                if (texto.includes('-')) {
+                    data.cell.styles.textColor = PDF_THEME.colors.danger;
+                } else {
+                    data.cell.styles.textColor = PDF_THEME.colors.success;
+                }
+            }
 
-      if (data.section === "body" && data.row.raw.tipo === "Resultado") {
-        data.cell.styles.fontStyle = "bold";
-      }
-    },
-  });
+            const raw = data.row.raw as { tipo?: string };
+
+            if (data.section === 'body' && raw.tipo === 'Resultado') {
+                data.cell.styles.fontStyle = 'bold';
+            }
+        },
+    });
 }

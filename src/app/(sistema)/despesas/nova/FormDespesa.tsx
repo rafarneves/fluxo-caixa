@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { criarDespesa } from "./actions";
+import { useState } from 'react';
+import { criarDespesa } from './actions';
 
 export default function FormDespesa() {
-  const [tipo, setTipo] = useState("Fixa");
+    const [tipo, setTipo] = useState('Fixa');
 
-  const inputClass = `
+    const inputClass = `
     w-full
     mt-2
     bg-[#0B0F14]
@@ -22,142 +22,142 @@ export default function FormDespesa() {
     transition
   `;
 
-  const labelClass = `
+    const labelClass = `
     text-sm
     font-semibold
     text-zinc-400
   `;
 
-  return (
-    <form
-      action={criarDespesa}
+    return (
+        <form
+            action={criarDespesa}
 
-      className="space-y-8"
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="md:col-span-2">
-          <label className={labelClass}>Descrição</label>
+            className="space-y-8"
+        >
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="md:col-span-2">
+                    <label className={labelClass}>Descrição</label>
 
-          <input
-            name="descricao"
+                    <input
+                        name="descricao"
 
-            placeholder="Ex: Assinatura ChatGPT"
+                        placeholder="Ex: Assinatura ChatGPT"
 
-            className={inputClass}
+                        className={inputClass}
 
-            required
-          />
-        </div>
+                        required
+                    />
+                </div>
 
-        <div>
-          <label className={labelClass}>Categoria</label>
+                <div>
+                    <label className={labelClass}>Categoria</label>
 
-          <select
-            name="categoria"
+                    <select
+                        name="categoria"
 
-            defaultValue="Softwares"
+                        defaultValue="Softwares"
 
-            className={inputClass}
-          >
-            <option>Pró-labore</option>
-            <option>Salários</option>
-            <option>Estrutura</option>
-            <option>Softwares</option>
-            <option>Marketing</option>
-            <option>Transporte</option>
-            <option>Comercial</option>
-            <option>Telefonia</option>
-            <option>Equipamentos</option>
-            <option>Informática</option>
-            <option>Capacitação</option>
-            <option>Contabilidade e Jurídico</option>
-            <option>Impostos</option>
-            <option>Financeiro</option>
-            <option>Materiais</option>
-            <option>Benefícios</option>
-            <option>Eventos</option>
-            <option>Outros</option>
-          </select>
-        </div>
+                        className={inputClass}
+                    >
+                        <option>Pró-labore</option>
+                        <option>Salários</option>
+                        <option>Estrutura</option>
+                        <option>Softwares</option>
+                        <option>Marketing</option>
+                        <option>Transporte</option>
+                        <option>Comercial</option>
+                        <option>Telefonia</option>
+                        <option>Equipamentos</option>
+                        <option>Informática</option>
+                        <option>Capacitação</option>
+                        <option>Contabilidade e Jurídico</option>
+                        <option>Impostos</option>
+                        <option>Financeiro</option>
+                        <option>Materiais</option>
+                        <option>Benefícios</option>
+                        <option>Eventos</option>
+                        <option>Outros</option>
+                    </select>
+                </div>
 
-        <div>
-          <label className={labelClass}>Tipo da despesa</label>
+                <div>
+                    <label className={labelClass}>Tipo da despesa</label>
 
-          <select
-            name="tipo"
+                    <select
+                        name="tipo"
 
-            value={tipo}
+                        value={tipo}
 
-            onChange={(e) => setTipo(e.target.value)}
+                        onChange={(e) => setTipo(e.target.value)}
 
-            className={inputClass}
-          >
-            <option value="Fixa">Fixa</option>
+                        className={inputClass}
+                    >
+                        <option value="Fixa">Fixa</option>
 
-            <option value="Variável">Variável</option>
-          </select>
-        </div>
+                        <option value="Variável">Variável</option>
+                    </select>
+                </div>
 
-        {tipo === "Fixa" && (
-          <div>
-            <label className={labelClass}>Dia do vencimento</label>
+                {tipo === 'Fixa' && (
+                    <div>
+                        <label className={labelClass}>Dia do vencimento</label>
 
-            <input
-              name="dia_vencimento"
+                        <input
+                            name="dia_vencimento"
 
-              type="number"
+                            type="number"
 
-              min="1"
+                            min="1"
 
-              max="31"
+                            max="31"
 
-              placeholder="Ex: 5"
+                            placeholder="Ex: 5"
 
-              className={inputClass}
-            />
-          </div>
-        )}
+                            className={inputClass}
+                        />
+                    </div>
+                )}
 
-        {tipo === "Variável" && (
-          <div>
-            <label className={labelClass}>Data</label>
+                {tipo === 'Variável' && (
+                    <div>
+                        <label className={labelClass}>Data</label>
 
-            <input
-              name="data"
+                        <input
+                            name="data"
 
-              type="date"
+                            type="date"
 
-              className={inputClass}
-            />
-          </div>
-        )}
+                            className={inputClass}
+                        />
+                    </div>
+                )}
 
-        <div>
-          <label className={labelClass}>Valor</label>
+                <div>
+                    <label className={labelClass}>Valor</label>
 
-          <input
-            name="valor"
+                    <input
+                        name="valor"
 
-            type="number"
+                        type="number"
 
-            step="0.01"
+                        step="0.01"
 
-            min="0"
+                        min="0"
 
-            placeholder="Ex: 120,00"
+                        placeholder="Ex: 120,00"
 
-            className={inputClass}
+                        className={inputClass}
 
-            required
-          />
-        </div>
-      </div>
+                        required
+                    />
+                </div>
+            </div>
 
-      <div className="flex justify-end pt-4 border-t border-zinc-800">
-        <button className="bg-green-500 hover:bg-green-400 transition text-black font-bold px-10 py-4 rounded-xl shadow-lg">
-          Salvar Despesa
-        </button>
-      </div>
-    </form>
-  );
+            <div className="flex justify-end border-t border-zinc-800 pt-4">
+                <button className="rounded-xl bg-green-500 px-10 py-4 font-bold text-black shadow-lg transition hover:bg-green-400">
+                    Salvar Despesa
+                </button>
+            </div>
+        </form>
+    );
 }

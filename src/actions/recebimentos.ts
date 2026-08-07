@@ -1,15 +1,16 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { supabase } from "@/lib/supabase";
+import { revalidatePath } from 'next/cache';
+import { createClient } from '@/lib/supabase/server';
 
 export async function receberRecebimento(id: string) {
-  const hoje = new Date().toISOString();
+    const supabase = await createClient();
+    const hoje = new Date().toISOString();
 
-  const { data: recebimento, error } = await supabase
-    .from("recebimentos")
-    .select(
-      `
+    const { data: recebimento, error } = await supabase
+        .from('recebimentos')
+        .select(
+            `
       *,
       contratos (
         id,
@@ -20,50 +21,51 @@ export async function receberRecebimento(id: string) {
         )
       )
     `
-    )
-    .eq("id", id)
-    .single();
+        )
+        .eq('id', id)
+        .single();
 
-  if (error || !recebimento) return;
+    if (error || !recebimento) return;
 
-  await supabase
-    .from("recebimentos")
-    .update({
-      status: "Pago",
-      data_pagamento: hoje,
-    })
-    .eq("id", id);
+    await supabase
+        .from('recebimentos')
+        .update({
+            status: 'Pago',
+            data_pagamento: hoje,
+        })
+        .eq('id', id);
 
-  await supabase.from("fluxo_caixa").insert({
-    descricao: `Recebimento - ${recebimento.contratos.clientes.nome}`,
-    tipo: "Entrada",
-    valor: recebimento.valor,
-    cliente_id: recebimento.contratos.clientes.id,
-  });
+    await supabase.from('fluxo_caixa').insert({
+        descricao: `Recebimento - ${recebimento.contratos.clientes.nome}`,
+        tipo: 'Entrada',
+        valor: recebimento.valor,
+        cliente_id: recebimento.contratos.clientes.id,
+    });
 
-  revalidatePath("/contas-receber");
-  revalidatePath("/fluxo-caixa");
-  revalidatePath("/dashboard");
+    revalidatePath('/contas-receber');
+    revalidatePath('/fluxo-caixa');
+    revalidatePath('/dashboard');
 }
 
 export async function criarRecebimento({
-  contrato_id,
-  competencia,
-  valor,
-  vencimento,
-}: {
-  contrato_id: string;
-  competencia: string;
-  valor: number;
-  vencimento: string;
-}) {
-  await supabase.from("recebimentos").insert({
     contrato_id,
     competencia,
     valor,
     vencimento,
-    status: "Pendente",
-  });
+}: {
+    contrato_id: string;
+    competencia: string;
+    valor: number;
+    vencimento: string;
+}) {
+    const supabase = await createClient();
+    await supabase.from('recebimentos').insert({
+        contrato_id,
+        competencia,
+        valor,
+        vencimento,
+        status: 'Pendente',
+    });
 
-  revalidatePath("/contas-receber");
+    revalidatePath('/contas-receber');
 }

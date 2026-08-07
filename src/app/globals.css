@@ -1,17 +1,25 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
-  --background: #0b0f14;
-  --foreground: #ffffff;
+    --background: #0b0f14;
+    --foreground: #ffffff;
 }
 
 html,
 body {
-  background: #0b0f14;
-  color: white;
-  min-height: 100%;
+    background: #0b0f14;
+    color: white;
+    min-height: 100%;
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html[data-interface-compacta='true'] .erp-content {
+    padding: 1.5rem;
+}
+
+html[data-interface-compacta='true'] .erp-content .space-y-8 {
+    row-gap: 1.25rem;
 }

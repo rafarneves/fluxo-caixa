@@ -1,19 +1,19 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "Altuza ERP",
-  description: "Sistema de gestão",
+    title: 'Altuza ERP',
+    description: 'Sistema de gestão',
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="pt-BR">
-      <body className="bg-[#0B0F14] text-white">{children}</body>
-    </html>
-  );
+    return (
+        <html lang="pt-BR">
+            <body className="bg-[#0B0F14] text-white">{children}</body>
+        </html>
+    );
 }

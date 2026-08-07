@@ -1,21 +1,15 @@
-"use client";
+'use client';
 
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes } from 'react';
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "danger" | "ghost";
-  icon?: React.ReactNode;
+    variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+    icon?: React.ReactNode;
 };
 
-export default function Button({
-  children,
-  variant = "primary",
-  icon,
-  className = "",
-  ...props
-}: Props) {
-  const variants = {
-    primary: `
+export default function Button({ children, variant = 'primary', icon, className = '', ...props }: Props) {
+    const variants = {
+        primary: `
       bg-green-500
       hover:bg-green-400
       text-black
@@ -25,7 +19,7 @@ export default function Button({
       border-green-400/20
     `,
 
-    secondary: `
+        secondary: `
       bg-zinc-800
       hover:bg-zinc-700
       text-white
@@ -33,7 +27,7 @@ export default function Button({
       border-zinc-700
     `,
 
-    danger: `
+        danger: `
       bg-red-500
       hover:bg-red-400
       text-white
@@ -41,40 +35,23 @@ export default function Button({
       border-red-400/20
     `,
 
-    ghost: `
+        ghost: `
       bg-transparent
       hover:bg-zinc-800
       text-zinc-300
       border
       border-zinc-800
     `,
-  };
+    };
 
-  return (
-    <button
-      {...props}
-      className={`
-        inline-flex
-        items-center
-        justify-center
-        gap-2
-        rounded-xl
-        px-5
-        py-3
-        text-sm
-        font-semibold
-        transition-all
-        duration-200
-        active:scale-95
-        disabled:opacity-50
-        disabled:cursor-not-allowed
-        ${variants[variant]}
-        ${className}
-      `}
-    >
-      {icon}
+    return (
+        <button
+            {...props}
+            className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className} `}
+        >
+            {icon}
 
-      {children}
-    </button>
-  );
+            {children}
+        </button>
+    );
 }

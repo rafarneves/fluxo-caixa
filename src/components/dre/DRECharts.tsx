@@ -1,189 +1,175 @@
-"use client";
+'use client';
 
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  CartesianGrid,
-  Tooltip,
-  XAxis,
-  YAxis,
-  Dot,
-} from "recharts";
+import { ResponsiveContainer, AreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, Dot } from 'recharts';
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 
 type Props = {
-  dados: {
-    mes: string;
-    receita: number;
-    lucro: number;
-  }[];
+    dados: {
+        mes: string;
+        receita: number;
+        lucro: number;
+    }[];
 };
 
 function formatarMes(valor: string) {
-  if (!valor.includes("-")) {
-    return valor;
-  }
+    if (!valor.includes('-')) {
+        return valor;
+    }
 
-  const [ano, mes] = valor.split("-");
+    const [ano, mes] = valor.split('-');
 
-  const nomes = [
-    "Jan",
-    "Fev",
-    "Mar",
-    "Abr",
-    "Mai",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Set",
-    "Out",
-    "Nov",
-    "Dez",
-  ];
+    const nomes = [
+        'Jan',
+        'Fev',
+        'Mar',
+        'Abr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Out',
+        'Nov',
+        'Dez',
+    ];
 
-  return `${nomes[Number(mes) - 1]}/${ano.slice(2)}`;
-}
-
-function moeda(valor: number) {
-  return valor.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: 0,
-  });
+    return `${nomes[Number(mes) - 1]}/${ano.slice(2)}`;
 }
 
 function CustomTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) {
-    return null;
-  }
+    const moeda = useConfiguracoes().formatarMoeda;
 
-  return (
-    <div className="rounded-2xl border border-zinc-700 bg-[#090B10] p-4 shadow-2xl min-w-[180px]">
-      <p className="text-zinc-400 text-sm mb-4">{formatarMes(label)}</p>
+    if (!active || !payload?.length) {
+        return null;
+    }
 
-      <div className="space-y-2">
-        <div className="flex justify-between gap-6">
-          <span className="text-green-400 text-sm">Receita</span>
+    return (
+        <div className="min-w-[180px] rounded-2xl border border-zinc-700 bg-[#090B10] p-4 shadow-2xl">
+            <p className="mb-4 text-sm text-zinc-400">{formatarMes(label)}</p>
 
-          <strong className="text-white">{moeda(payload[0]?.value ?? 0)}</strong>
+            <div className="space-y-2">
+                <div className="flex justify-between gap-6">
+                    <span className="text-sm text-green-400">Receita</span>
+
+                    <strong className="text-white">{moeda(payload[0]?.value ?? 0)}</strong>
+                </div>
+
+                <div className="flex justify-between gap-6">
+                    <span className="text-sm text-cyan-400">Lucro</span>
+
+                    <strong className="text-white">{moeda(payload[1]?.value ?? 0)}</strong>
+                </div>
+            </div>
         </div>
-
-        <div className="flex justify-between gap-6">
-          <span className="text-cyan-400 text-sm">Lucro</span>
-
-          <strong className="text-white">{moeda(payload[1]?.value ?? 0)}</strong>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 export default function DRECharts({ dados }: Props) {
-  return (
-    <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
-      <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.20em] text-zinc-500">
-          PERFORMANCE
-        </p>
+    const { formatarMoedaCompacta } = useConfiguracoes();
 
-        <h2 className="mt-3 text-2xl font-bold">Evolução Financeira</h2>
+    return (
+        <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
+            <div className="mb-8">
+                <p className="text-xs font-semibold tracking-[0.20em] text-zinc-500 uppercase">PERFORMANCE</p>
 
-        <p className="mt-2 text-zinc-500">Comparativo entre receita e lucro líquido.</p>
-      </div>
+                <h2 className="mt-3 text-2xl font-bold">Evolução Financeira</h2>
 
-      <div className="h-[360px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={dados}>
-            <defs>
-              <linearGradient id="receitaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.35} />
+                <p className="mt-2 text-zinc-500">Comparativo entre receita e lucro líquido.</p>
+            </div>
 
-                <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-              </linearGradient>
+            <div className="h-[360px]">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={dados}>
+                        <defs>
+                            <linearGradient id="receitaGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.35} />
 
-              <linearGradient id="lucroGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.18} />
+                                <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                            </linearGradient>
 
-                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
-              </linearGradient>
-            </defs>
+                            <linearGradient id="lucroGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.18} />
 
-            <CartesianGrid stroke="#27272a" vertical={false} />
+                                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
 
-            <XAxis
-              dataKey="mes"
+                        <CartesianGrid stroke="#27272a" vertical={false} />
 
-              tickFormatter={formatarMes}
+                        <XAxis
+                            dataKey="mes"
 
-              stroke="#71717a"
+                            tickFormatter={formatarMes}
 
-              axisLine={false}
+                            stroke="#71717a"
 
-              tickLine={false}
-            />
+                            axisLine={false}
 
-            <YAxis
-              stroke="#71717a"
+                            tickLine={false}
+                        />
 
-              axisLine={false}
+                        <YAxis
+                            stroke="#71717a"
 
-              tickLine={false}
+                            axisLine={false}
 
-              tickFormatter={(valor) => `R$${valor / 1000}k`}
-            />
+                            tickLine={false}
 
-            <Tooltip content={<CustomTooltip />} />
+                            tickFormatter={(valor) => formatarMoedaCompacta(Number(valor))}
+                        />
 
-            <Area
-              type="monotone"
+                        <Tooltip content={<CustomTooltip />} />
 
-              dataKey="receita"
+                        <Area
+                            type="monotone"
 
-              name="Receita"
+                            dataKey="receita"
 
-              stroke="#22c55e"
+                            name="Receita"
 
-              strokeWidth={3}
+                            stroke="#22c55e"
 
-              fill="url(#receitaGradient)"
+                            strokeWidth={3}
 
-              animationDuration={1200}
+                            fill="url(#receitaGradient)"
 
-              dot={{
-                r: 4,
-              }}
+                            animationDuration={1200}
 
-              activeDot={{
-                r: 7,
-              }}
-            />
+                            dot={{
+                                r: 4,
+                            }}
 
-            <Area
-              type="monotone"
+                            activeDot={{
+                                r: 7,
+                            }}
+                        />
 
-              dataKey="lucro"
+                        <Area
+                            type="monotone"
 
-              name="Lucro"
+                            dataKey="lucro"
 
-              stroke="#06b6d4"
+                            name="Lucro"
 
-              strokeWidth={3}
+                            stroke="#06b6d4"
 
-              fill="url(#lucroGradient)"
+                            strokeWidth={3}
 
-              animationDuration={1400}
+                            fill="url(#lucroGradient)"
 
-              dot={{
-                r: 4,
-              }}
+                            animationDuration={1400}
 
-              activeDot={{
-                r: 7,
-              }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </section>
-  );
+                            dot={{
+                                r: 4,
+                            }}
+
+                            activeDot={{
+                                r: 7,
+                            }}
+                        />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
+        </section>
+    );
 }

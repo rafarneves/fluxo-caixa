@@ -1,25 +1,24 @@
-import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { editarDespesa } from "./actions";
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
+import { editarDespesa } from './actions';
 
 export default async function EditarDespesaPage({
-  params,
+    params,
 }: {
-  params: {
-    id: string;
-  };
+    params: Promise<{
+        id: string;
+    }>;
 }) {
-  const { data: despesa } = await supabase
-    .from("despesas")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+    const supabase = await createClient();
+    const { id } = await params;
 
-  if (!despesa) {
-    return <div className="text-red-400 text-2xl">Despesa não encontrada.</div>;
-  }
+    const { data: despesa } = await supabase.from('despesas').select('*').eq('id', id).single();
 
-  const inputClass = `
+    if (!despesa) {
+        return <div className="text-2xl text-red-400">Despesa não encontrada.</div>;
+    }
+
+    const inputClass = `
     w-full
     mt-2
     bg-[#0B0F14]
@@ -34,144 +33,140 @@ export default async function EditarDespesaPage({
     transition
   `;
 
-  const labelClass = `
+    const labelClass = `
     text-sm
     font-semibold
     text-zinc-400
   `;
 
-  return (
-    <main className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] font-semibold text-zinc-500">
-            FINANCEIRO
-          </p>
+    return (
+        <main className="space-y-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-xs font-semibold tracking-[0.25em] text-zinc-500 uppercase">FINANCEIRO</p>
 
-          <h1 className="mt-3 text-5xl font-bold text-white">
-            Editar
-            <span className="text-green-400"> Despesa</span>
-          </h1>
+                    <h1 className="mt-3 text-5xl font-bold text-white">
+                        Editar
+                        <span className="text-green-400"> Despesa</span>
+                    </h1>
 
-          <p className="text-zinc-400 mt-3 text-lg">
-            Atualize as informações do custo operacional.
-          </p>
-        </div>
+                    <p className="mt-3 text-lg text-zinc-400">Atualize as informações do custo operacional.</p>
+                </div>
 
-        <Link
-          href="/despesas"
+                <Link
+                    href="/despesas"
 
-          className="bg-[#1C2430] border border-zinc-800 hover:border-zinc-600 transition px-6 py-3 rounded-xl font-semibold text-white"
-        >
-          ← Voltar
-        </Link>
-      </div>
-
-      <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white">Informações da despesa</h2>
-
-          <p className="text-zinc-500 mt-2">Altere os dados e salve as modificações.</p>
-        </div>
-
-        <form
-          action={editarDespesa.bind(null, despesa.id)}
-
-          className="space-y-8"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className={labelClass}>Descrição</label>
-
-              <input
-                name="descricao"
-
-                defaultValue={despesa.descricao}
-
-                className={inputClass}
-              />
+                    className="rounded-xl border border-zinc-800 bg-[#1C2430] px-6 py-3 font-semibold text-white transition hover:border-zinc-600"
+                >
+                    ← Voltar
+                </Link>
             </div>
 
-            <div>
-              <label className={labelClass}>Categoria</label>
+            <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-white">Informações da despesa</h2>
 
-              <input
-                name="categoria"
+                    <p className="mt-2 text-zinc-500">Altere os dados e salve as modificações.</p>
+                </div>
 
-                defaultValue={despesa.categoria}
+                <form
+                    action={editarDespesa.bind(null, despesa.id)}
 
-                className={inputClass}
-              />
-            </div>
+                    className="space-y-8"
+                >
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div className="md:col-span-2">
+                            <label className={labelClass}>Descrição</label>
 
-            <div>
-              <label className={labelClass}>Tipo da despesa</label>
+                            <input
+                                name="descricao"
 
-              <select
-                name="tipo"
+                                defaultValue={despesa.descricao}
 
-                defaultValue={despesa.tipo}
+                                className={inputClass}
+                            />
+                        </div>
 
-                className={inputClass}
-              >
-                <option value="Fixa">Fixa</option>
+                        <div>
+                            <label className={labelClass}>Categoria</label>
 
-                <option value="Variável">Variável</option>
-              </select>
-            </div>
+                            <input
+                                name="categoria"
 
-            <div>
-              <label className={labelClass}>Valor</label>
+                                defaultValue={despesa.categoria}
 
-              <input
-                name="valor"
+                                className={inputClass}
+                            />
+                        </div>
 
-                type="number"
+                        <div>
+                            <label className={labelClass}>Tipo da despesa</label>
 
-                step="0.01"
+                            <select
+                                name="tipo"
 
-                defaultValue={despesa.valor}
+                                defaultValue={despesa.tipo}
 
-                className={inputClass}
-              />
-            </div>
+                                className={inputClass}
+                            >
+                                <option value="Fixa">Fixa</option>
 
-            <div>
-              <label className={labelClass}>Dia vencimento (fixa)</label>
+                                <option value="Variável">Variável</option>
+                            </select>
+                        </div>
 
-              <input
-                name="dia_vencimento"
+                        <div>
+                            <label className={labelClass}>Valor</label>
 
-                type="number"
+                            <input
+                                name="valor"
 
-                defaultValue={despesa.dia_vencimento ?? ""}
+                                type="number"
 
-                className={inputClass}
-              />
-            </div>
+                                step="0.01"
 
-            <div>
-              <label className={labelClass}>Data (variável)</label>
+                                defaultValue={despesa.valor}
 
-              <input
-                name="data"
+                                className={inputClass}
+                            />
+                        </div>
 
-                type="date"
+                        <div>
+                            <label className={labelClass}>Dia vencimento (fixa)</label>
 
-                defaultValue={despesa.data ?? ""}
+                            <input
+                                name="dia_vencimento"
 
-                className={inputClass}
-              />
-            </div>
-          </div>
+                                type="number"
 
-          <div className="flex justify-end pt-4 border-t border-zinc-800">
-            <button className="bg-green-500 hover:bg-green-400 transition text-black font-bold px-10 py-4 rounded-xl">
-              Salvar Alterações
-            </button>
-          </div>
-        </form>
-      </section>
-    </main>
-  );
+                                defaultValue={despesa.dia_vencimento ?? ''}
+
+                                className={inputClass}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelClass}>Data (variável)</label>
+
+                            <input
+                                name="data"
+
+                                type="date"
+
+                                defaultValue={despesa.data ?? ''}
+
+                                className={inputClass}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end border-t border-zinc-800 pt-4">
+                        <button className="rounded-xl bg-green-500 px-10 py-4 font-bold text-black transition hover:bg-green-400">
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    );
 }

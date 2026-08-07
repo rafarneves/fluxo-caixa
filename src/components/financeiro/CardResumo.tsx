@@ -1,20 +1,20 @@
 interface CardResumoProps {
-  titulo: string;
-  valor: number;
-  cor: string;
+    titulo: string;
+    valor: number;
+    cor: string;
 }
 
 export default function CardResumo({ titulo, valor, cor }: CardResumoProps) {
-  return (
-    <div className="bg-[#161B22] rounded-2xl p-6">
-      <p className="text-zinc-400 text-sm">{titulo}</p>
+    const { formatarMoeda } = useConfiguracoes();
 
-      <h2 className={`text-3xl font-bold mt-2 ${cor}`}>
-        {valor.toLocaleString("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        })}
-      </h2>
-    </div>
-  );
+    return (
+        <div className="rounded-2xl bg-[#161B22] p-6">
+            <p className="text-sm text-zinc-400">{titulo}</p>
+
+            <h2 className={`mt-2 text-3xl font-bold ${cor}`}>{formatarMoeda(valor)}</h2>
+        </div>
+    );
 }
+('use client');
+
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';

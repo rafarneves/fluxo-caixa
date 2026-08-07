@@ -1,33 +1,34 @@
-"use server";
+'use server';
 
-import { supabase } from "@/lib/supabase";
-import { redirect } from "next/navigation";
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
 export async function criarDespesa(formData: FormData) {
-  const tipo = formData.get("tipo");
+    const supabase = await createClient();
+    const tipo = formData.get('tipo');
 
-  const { error } = await supabase.from("despesas").insert({
-    descricao: formData.get("descricao"),
+    const { error } = await supabase.from('despesas').insert({
+        descricao: formData.get('descricao'),
 
-    categoria: formData.get("categoria"),
+        categoria: formData.get('categoria'),
 
-    // Sempre operacional (o usuário não precisa escolher)
-    tipo_dre: "Operacional",
+        // Sempre operacional (o usuário não precisa escolher)
+        tipo_dre: 'Operacional',
 
-    tipo,
+        tipo,
 
-    valor: Number(formData.get("valor")),
+        valor: Number(formData.get('valor')),
 
-    data: tipo === "Variável" ? formData.get("data") : null,
+        data: tipo === 'Variável' ? formData.get('data') : null,
 
-    dia_vencimento: tipo === "Fixa" ? Number(formData.get("dia_vencimento")) : null,
+        dia_vencimento: tipo === 'Fixa' ? Number(formData.get('dia_vencimento')) : null,
 
-    status: "Pago",
-  });
+        status: 'Pago',
+    });
 
-  if (error) {
-    throw new Error(error.message);
-  }
+    if (error) {
+        throw new Error(error.message);
+    }
 
-  redirect("/despesas");
+    redirect('/despesas');
 }

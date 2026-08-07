@@ -1,143 +1,144 @@
-import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
+import { formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
+import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 
-import ReportHeader from "@/components/relatorios/ReportHeader";
-import ReportKPICard from "@/components/relatorios/ReportKPICard";
-import ReportExport from "@/components/relatorios/ReportExport";
-import ReportTable from "@/components/relatorios/ReportTable";
+import ReportHeader from '@/components/relatorios/ReportHeader';
+import ReportKPICard from '@/components/relatorios/ReportKPICard';
+import ReportExport from '@/components/relatorios/ReportExport';
+import ReportTable from '@/components/relatorios/ReportTable';
 
-import { getDashboardExecutivo } from "@/lib/relatorios/dashboard";
-import { formatMoneyCompact } from "@/lib/formatMoneyCompact";
+import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
 export default async function DREResumidoPage() {
-  const dados = await getDashboardExecutivo();
+    const { configuracoes } = await getContextoConfiguracoes();
+    const dados = await getDashboardExecutivo();
 
-  const receita = dados.recebido;
+    const receita = dados.recebido;
 
-  const custos = dados.custosTotal;
+    const custos = dados.custosTotal;
 
-  const despesas = dados.despesasTotal;
+    const despesas = dados.despesasTotal;
 
-  const lucro = dados.lucro;
+    const lucro = dados.lucro;
 
-  const margem = receita === 0 ? 0 : (lucro / receita) * 100;
+    const margem = receita === 0 ? 0 : (lucro / receita) * 100;
 
-  return (
-    <main className="space-y-8">
-      <ReportHeader
-        title="DRE Resumido"
+    return (
+        <main className="space-y-8">
+            <ReportHeader
+                title="DRE Resumido"
 
-        description="Demonstrativo resumido do resultado do exercício."
+                description="Demonstrativo resumido do resultado do exercício."
 
-        actions={<ReportExport disabledPDF disabledExcel />}
-      />
+                actions={<ReportExport disabledPDF disabledExcel />}
+            />
 
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <ReportKPICard
-          title="Receita"
+            <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                <ReportKPICard
+                    title="Receita"
 
-          value={formatMoneyCompact(receita)}
+                    value={formatarMoedaServidor(receita, configuracoes, true)}
 
-          icon={DollarSign}
+                    icon={DollarSign}
 
-          color="green"
-        />
+                    color="green"
+                />
 
-        <ReportKPICard
-          title="Custos"
+                <ReportKPICard
+                    title="Custos"
 
-          value={formatMoneyCompact(custos)}
+                    value={formatarMoedaServidor(custos, configuracoes, true)}
 
-          icon={TrendingDown}
+                    icon={TrendingDown}
 
-          color="yellow"
-        />
+                    color="yellow"
+                />
 
-        <ReportKPICard
-          title="Despesas"
+                <ReportKPICard
+                    title="Despesas"
 
-          value={formatMoneyCompact(despesas)}
+                    value={formatarMoedaServidor(despesas, configuracoes, true)}
 
-          icon={TrendingDown}
+                    icon={TrendingDown}
 
-          color="red"
-        />
+                    color="red"
+                />
 
-        <ReportKPICard
-          title="Lucro"
+                <ReportKPICard
+                    title="Lucro"
 
-          value={formatMoneyCompact(lucro)}
+                    value={formatarMoedaServidor(lucro, configuracoes, true)}
 
-          icon={TrendingUp}
+                    icon={TrendingUp}
 
-          color={lucro >= 0 ? "green" : "red"}
-        />
-      </section>
+                    color={lucro >= 0 ? 'green' : 'red'}
+                />
+            </section>
 
-      <ReportTable
-        title="Resumo Financeiro"
+            <ReportTable
+                title="Resumo Financeiro"
 
-        description="Resumo dos principais indicadores do DRE."
+                description="Resumo dos principais indicadores do DRE."
 
-        columns={[
-          {
-            key: "conta",
+                columns={[
+                    {
+                        key: 'conta',
 
-            title: "Conta",
-          },
+                        title: 'Conta',
+                    },
 
-          {
-            key: "valor",
+                    {
+                        key: 'valor',
 
-            title: "Valor",
+                        title: 'Valor',
 
-            align: "right",
-          },
-        ]}
+                        align: 'right',
+                    },
+                ]}
 
-        data={[
-          {
-            conta: "Receita Bruta",
+                data={[
+                    {
+                        conta: 'Receita Bruta',
 
-            valor: receita.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }),
-          },
+                        valor: receita.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: configuracoes.moeda,
+                        }),
+                    },
 
-          {
-            conta: "(-) Custos",
+                    {
+                        conta: '(-) Custos',
 
-            valor: custos.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }),
-          },
+                        valor: custos.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: configuracoes.moeda,
+                        }),
+                    },
 
-          {
-            conta: "(-) Despesas",
+                    {
+                        conta: '(-) Despesas',
 
-            valor: despesas.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }),
-          },
+                        valor: despesas.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: configuracoes.moeda,
+                        }),
+                    },
 
-          {
-            conta: "Lucro Líquido",
+                    {
+                        conta: 'Lucro Líquido',
 
-            valor: lucro.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }),
-          },
+                        valor: lucro.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: configuracoes.moeda,
+                        }),
+                    },
 
-          {
-            conta: "Margem",
+                    {
+                        conta: 'Margem',
 
-            valor: `${margem.toFixed(2)}%`,
-          },
-        ]}
-      />
-    </main>
-  );
+                        valor: `${margem.toFixed(2)}%`,
+                    },
+                ]}
+            />
+        </main>
+    );
 }

@@ -1,116 +1,93 @@
-import { Users, FileText, Wallet, Landmark } from "lucide-react";
+'use client';
 
-import StatCard from "@/components/ui/StatCard";
+import { Users, FileText, Wallet, Landmark } from 'lucide-react';
+
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+import StatCard from '@/components/ui/StatCard';
 
 type Props = {
-  totalClientes: number;
-  contratosAtivos: number;
-  faturamentoMensal: number;
-  emAberto: number;
+    totalClientes: number;
+    contratosAtivos: number;
+    faturamentoMensal: number;
+    emAberto: number;
 };
 
-function formatCompact(value: number) {
-  if (value >= 1000000) {
-    return `R$ ${(value / 1000000).toFixed(1)}M`;
-  }
+export default function DashboardMetrics({ totalClientes, contratosAtivos, faturamentoMensal, emAberto }: Props) {
+    const { formatarMoedaCompacta } = useConfiguracoes();
 
-  if (value >= 1000) {
-    return `R$ ${(value / 1000).toFixed(1)}k`;
-  }
+    return (
+        <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+                titulo="Clientes"
 
-  return value.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-}
+                valor={totalClientes.toString()}
 
-export default function DashboardMetrics({
-  totalClientes,
-  contratosAtivos,
-  faturamentoMensal,
-  emAberto,
-}: Props) {
-  return (
-    <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-      <StatCard
-        titulo="Clientes"
+                subtitulo="Clientes cadastrados"
 
-        valor={totalClientes.toString()}
+                status="Ativos"
 
-        subtitulo="Clientes cadastrados"
+                tendencia="Carteira atual"
 
-        status="Ativos"
+                progresso={100}
 
-        tendencia="Carteira atual"
+                cor="blue"
 
-        progresso={100}
+                icone={<Users size={22} />}
+            />
 
-        cor="blue"
+            <StatCard
+                titulo="Contratos"
 
-        tamanho="grande"
+                valor={contratosAtivos.toString()}
 
-        icone={<Users size={22} />}
-      />
+                subtitulo="Contratos ativos"
 
-      <StatCard
-        titulo="Contratos"
+                status="Em andamento"
 
-        valor={contratosAtivos.toString()}
+                tendencia="Operação"
 
-        subtitulo="Contratos ativos"
+                progresso={100}
 
-        status="Em andamento"
+                cor="green"
 
-        tendencia="Operação"
+                icone={<FileText size={22} />}
+            />
 
-        progresso={100}
+            <StatCard
+                titulo="Faturamento"
 
-        cor="green"
+                valor={formatarMoedaCompacta(faturamentoMensal)}
 
-        tamanho="grande"
+                subtitulo="Receita do período"
 
-        icone={<FileText size={22} />}
-      />
+                status="Receita"
 
-      <StatCard
-        titulo="Faturamento"
+                tendencia="Financeiro"
 
-        valor={formatCompact(faturamentoMensal)}
+                progresso={100}
 
-        subtitulo="Receita do período"
+                cor="yellow"
 
-        status="Receita"
+                icone={<Wallet size={22} />}
+            />
 
-        tendencia="Financeiro"
+            <StatCard
+                titulo="Em Aberto"
 
-        progresso={100}
+                valor={formatarMoedaCompacta(emAberto)}
 
-        cor="yellow"
+                subtitulo="Valores a receber"
 
-        tamanho="grande"
+                status="Cobranças"
 
-        icone={<Wallet size={22} />}
-      />
+                tendencia="Pendências"
 
-      <StatCard
-        titulo="Em Aberto"
+                progresso={faturamentoMensal > 0 ? (emAberto / faturamentoMensal) * 100 : 0}
 
-        valor={formatCompact(emAberto)}
+                cor="red"
 
-        subtitulo="Valores a receber"
-
-        status="Cobranças"
-
-        tendencia="Pendências"
-
-        progresso={faturamentoMensal > 0 ? (emAberto / faturamentoMensal) * 100 : 0}
-
-        cor="red"
-
-        tamanho="grande"
-
-        icone={<Landmark size={22} />}
-      />
-    </section>
-  );
+                icone={<Landmark size={22} />}
+            />
+        </section>
+    );
 }

@@ -1,119 +1,125 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
-export default function EditarCliente({ params }: { params: { id: string } }) {
-  const router = useRouter();
+const supabase = createClient();
 
-  const [cliente, setCliente] = useState<any>(null);
+export default function EditarCliente() {
+    const router = useRouter();
+    const params = useParams<{ id: string }>();
+    const id = params.id;
 
-  async function carregarCliente() {
-    const { data } = await supabase.from("clientes").select("*").eq("id", params.id).single();
+    const [cliente, setCliente] = useState<any>(null);
 
-    setCliente(data);
-  }
+    useEffect(() => {
+        async function carregarCliente() {
+            const { data } = await supabase.from('clientes').select('*').eq('id', id).single();
 
-  if (!cliente) {
-    carregarCliente();
+            setCliente(data);
+        }
 
-    return <div className="text-white">Carregando...</div>;
-  }
+        void carregarCliente();
+    }, [id]);
 
-  async function salvar() {
-    const { error } = await supabase
-      .from("clientes")
-      .update({
-        nome: cliente.nome,
-
-        telefone: cliente.telefone,
-
-        cidade: cliente.cidade,
-      })
-      .eq("id", params.id);
-
-    if (error) {
-      alert(error.message);
-
-      return;
+    if (!cliente) {
+        return <div className="text-white">Carregando...</div>;
     }
 
-    router.push("/clientes");
+    async function salvar() {
+        const { error } = await supabase
+            .from('clientes')
+            .update({
+                nome: cliente.nome,
 
-    router.refresh();
-  }
+                telefone: cliente.telefone,
 
-  return (
-    <main className="space-y-8">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">CLIENTES</p>
+                cidade: cliente.cidade,
+            })
+            .eq('id', id);
 
-        <h1 className="mt-3 text-5xl font-bold text-white">Editar Cliente</h1>
+        if (error) {
+            alert(error.message);
 
-        <p className="mt-2 text-lg text-zinc-400">Altere as informações cadastrais do cliente.</p>
-      </div>
+            return;
+        }
 
-      <div className="max-w-3xl rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8 space-y-6">
-        <div>
-          <label className="text-sm text-zinc-400">Nome</label>
+        router.push('/clientes');
 
-          <input
-            value={cliente.nome ?? ""}
+        router.refresh();
+    }
 
-            onChange={(e) =>
-              setCliente({
-                ...cliente,
-                nome: e.target.value,
-              })
-            }
+    return (
+        <main className="space-y-8">
+            <div>
+                <p className="text-xs font-semibold tracking-[0.22em] text-zinc-500 uppercase">CLIENTES</p>
 
-            className="mt-2 w-full bg-[#0B0F14] border border-zinc-800 rounded-xl p-4 text-white outline-none focus:border-green-500"
-          />
-        </div>
+                <h1 className="mt-3 text-5xl font-bold text-white">Editar Cliente</h1>
 
-        <div>
-          <label className="text-sm text-zinc-400">Telefone</label>
+                <p className="mt-2 text-lg text-zinc-400">Altere as informações cadastrais do cliente.</p>
+            </div>
 
-          <input
-            value={cliente.telefone ?? ""}
+            <div className="max-w-3xl space-y-6 rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
+                <div>
+                    <label className="text-sm text-zinc-400">Nome</label>
 
-            onChange={(e) =>
-              setCliente({
-                ...cliente,
-                telefone: e.target.value,
-              })
-            }
+                    <input
+                        value={cliente.nome ?? ''}
 
-            className="mt-2 w-full bg-[#0B0F14] border border-zinc-800 rounded-xl p-4 text-white outline-none focus:border-green-500"
-          />
-        </div>
+                        onChange={(e) =>
+                            setCliente({
+                                ...cliente,
+                                nome: e.target.value,
+                            })
+                        }
 
-        <div>
-          <label className="text-sm text-zinc-400">Cidade</label>
+                        className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4 text-white outline-none focus:border-green-500"
+                    />
+                </div>
 
-          <input
-            value={cliente.cidade ?? ""}
+                <div>
+                    <label className="text-sm text-zinc-400">Telefone</label>
 
-            onChange={(e) =>
-              setCliente({
-                ...cliente,
-                cidade: e.target.value,
-              })
-            }
+                    <input
+                        value={cliente.telefone ?? ''}
 
-            className="mt-2 w-full bg-[#0B0F14] border border-zinc-800 rounded-xl p-4 text-white outline-none focus:border-green-500"
-          />
-        </div>
+                        onChange={(e) =>
+                            setCliente({
+                                ...cliente,
+                                telefone: e.target.value,
+                            })
+                        }
 
-        <button
-          onClick={salvar}
+                        className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4 text-white outline-none focus:border-green-500"
+                    />
+                </div>
 
-          className="mt-4 bg-green-500 hover:bg-green-400 text-black px-8 py-4 rounded-xl font-bold transition hover:-translate-y-0.5 shadow-lg shadow-green-500/20"
-        >
-          Salvar Alterações
-        </button>
-      </div>
-    </main>
-  );
+                <div>
+                    <label className="text-sm text-zinc-400">Cidade</label>
+
+                    <input
+                        value={cliente.cidade ?? ''}
+
+                        onChange={(e) =>
+                            setCliente({
+                                ...cliente,
+                                cidade: e.target.value,
+                            })
+                        }
+
+                        className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4 text-white outline-none focus:border-green-500"
+                    />
+                </div>
+
+                <button
+                    onClick={salvar}
+
+                    className="mt-4 rounded-xl bg-green-500 px-8 py-4 font-bold text-black shadow-lg shadow-green-500/20 transition hover:-translate-y-0.5 hover:bg-green-400"
+                >
+                    Salvar Alterações
+                </button>
+            </div>
+        </main>
+    );
 }

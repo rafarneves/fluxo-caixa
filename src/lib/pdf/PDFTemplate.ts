@@ -1,48 +1,41 @@
-import jsPDF from "jspdf";
-import { drawHeader } from "./header";
-import { drawCards, PDFCard } from "./cards";
-import { drawTable, PDFTableColumn } from "./table";
+import jsPDF from 'jspdf';
+import { drawHeader } from './header';
+import { drawCards, PDFCard } from './cards';
+import { drawTable, PDFTableColumn } from './table';
 
 type PDFTemplateProps = {
-  title: string;
+    title: string;
 
-  logo?: HTMLImageElement;
+    logo?: HTMLImageElement;
 
-  cards?: PDFCard[];
+    cards?: PDFCard[];
 
-  columns?: PDFTableColumn[];
+    columns?: PDFTableColumn[];
 
-  rows?: Record<string, any>[];
+    rows?: Record<string, any>[];
 
-  fileName?: string;
+    fileName?: string;
 };
 
-export async function generatePDF({
-  title,
-  logo,
-  cards = [],
-  columns = [],
-  rows = [],
-  fileName,
-}: PDFTemplateProps) {
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-  });
+export async function generatePDF({ title, logo, cards = [], columns = [], rows = [], fileName }: PDFTemplateProps) {
+    const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+    });
 
-  await drawHeader(pdf, {
-    title,
-    logo,
-  });
+    await drawHeader(pdf, {
+        title,
+        logo,
+    });
 
-  if (cards.length) {
-    drawCards(pdf, cards);
-  }
+    if (cards.length) {
+        drawCards(pdf, cards);
+    }
 
-  if (columns.length && rows.length) {
-    drawTable(pdf, columns, rows, 82);
-  }
+    if (columns.length && rows.length) {
+        drawTable(pdf, columns, rows, 82);
+    }
 
-  pdf.save(fileName ?? `${title}.pdf`);
+    pdf.save(fileName ?? `${title}.pdf`);
 }
