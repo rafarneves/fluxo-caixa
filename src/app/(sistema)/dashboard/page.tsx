@@ -39,41 +39,38 @@ type CustoContrato = {
 };
 
 export default async function Dashboard() {
-  const { data: clientes } = await supabase
-    .from("clientes")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  const { data: contratos } = await supabase
-    .from("contratos")
-    .select(
-      `
+  const [
+    { data: clientes },
+    { data: contratos },
+    { data: recebimentos },
+    { data: despesas },
+    { data: custosContrato },
+  ] = await Promise.all([
+    supabase.from("clientes").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("contratos")
+      .select(
+        `
       *,
       clientes(nome)
-    `
-    )
-    .eq("status", "Ativo");
-
-  const { data: recebimentos } = await supabase
-    .from("recebimentos")
-    .select(
-      `
+`
+      )
+      .eq("status", "Ativo"),
+    supabase
+      .from("recebimentos")
+      .select(
+        `
       *,
       contratos(
         nome,
         clientes(nome)
       )
-    `
-    )
-    .order("vencimento", { ascending: true });
-
-  const { data: despesas } = await supabase
-    .from("despesas")
-    .select("*");
-
-  const { data: custosContrato } = await supabase
-    .from("custos_contrato")
-    .select("id, valor");
+`
+      )
+      .order("vencimento", { ascending: true }),
+    supabase.from("despesas").select("*"),
+    supabase.from("custos_contrato").select("id, valor"),
+  ]);
 
   const clientesData = clientes ?? [];
   const contratosData = (contratos ?? []) as Contrato[];
@@ -96,19 +93,13 @@ export default async function Dashboard() {
     0
   );
 
-  const custosTotal = custosData.reduce(
-    (total, custo) => total + Number(custo.valor),
-    0
-  );
+  const custosTotal = custosData.reduce((total, custo) => total + Number(custo.valor), 0);
 
   const saidasTotal = despesasTotal + custosTotal;
 
   const resultadoEmpresa = financeiro.recebido - saidasTotal;
 
-  const ticketMedio =
-    contratosAtivos === 0
-      ? 0
-      : faturamentoMensal / contratosAtivos;
+  const ticketMedio = contratosAtivos === 0 ? 0 : faturamentoMensal / contratosAtivos;
 
   const atividades = [
     ...clientesData.slice(0, 3).map((cliente: any) => ({
@@ -160,22 +151,10 @@ export default async function Dashboard() {
         />
 
         <PlansCard
-          performance={
-            contratosData.filter((c) => c.nome === "Plano Performance").length
-          }
-          altaPerformance={
-            contratosData.filter(
-              (c) => c.nome === "Plano Alta Performance"
-            ).length
-          }
-          pro={
-            contratosData.filter((c) => c.nome === "Plano PRO").length
-          }
-          personalizado={
-            contratosData.filter(
-              (c) => c.nome === "Plano Personalizado"
-            ).length
-          }
+          performance={contratosData.filter((c) => c.nome === "Plano Performance").length}
+          altaPerformance={contratosData.filter((c) => c.nome === "Plano Alta Performance").length}
+          pro={contratosData.filter((c) => c.nome === "Plano PRO").length}
+          personalizado={contratosData.filter((c) => c.nome === "Plano Personalizado").length}
         />
       </div>
 

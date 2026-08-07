@@ -4,12 +4,9 @@ interface Props {
   contratoId: string;
 }
 
-export default function FiltroRecebimentos({
-  contratoId,
-}: Props) {
+export default function FiltroRecebimentos({ contratoId }: Props) {
   return (
     <div className="bg-[#161B22] rounded-2xl p-5 mb-6 flex items-center justify-between">
-
       <input
         type="text"
         placeholder="Pesquisar cliente..."
@@ -17,27 +14,18 @@ export default function FiltroRecebimentos({
       />
 
       <div className="flex items-center gap-3">
-
         <button className="bg-green-500 text-black px-4 py-2 rounded-lg font-semibold">
           Todos
         </button>
 
-        <button className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg">
-          Pendentes
-        </button>
+        <button className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg">Pendentes</button>
 
-        <button className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg">
-          Pagos
-        </button>
+        <button className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg">Pagos</button>
 
-        <button className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg">
-          Atrasados
-        </button>
+        <button className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg">Atrasados</button>
 
         <NovoRecebimentoModal contratoId={contratoId} />
-
       </div>
-
     </div>
   );
 }

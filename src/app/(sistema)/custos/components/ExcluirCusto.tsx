@@ -2,17 +2,11 @@
 
 import { removerCusto } from "../actions";
 
-export default function ExcluirCusto({
-  id,
-}: {
-  id: string;
-}) {
+export default function ExcluirCusto({ id }: { id: string }) {
   return (
     <button
       onClick={async () => {
-        const confirmar = confirm(
-          "Deseja realmente excluir este custo?"
-        );
+        const confirmar = confirm("Deseja realmente excluir este custo?");
 
         if (!confirmar) return;
 

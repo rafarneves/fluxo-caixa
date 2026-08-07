@@ -1,19 +1,11 @@
-export type TipoPeriodo =
-  | "hoje"
-  | "semana"
-  | "mes"
-  | "30dias"
-  | "ano"
-  | "personalizado";
+export type TipoPeriodo = "hoje" | "semana" | "mes" | "30dias" | "ano" | "personalizado";
 
 export type Periodo = {
   inicio: Date;
   fim: Date;
 };
 
-export function obterPeriodo(
-  periodo: string
-): Periodo {
+export function obterPeriodo(periodo: string): Periodo {
   const hoje = new Date();
 
   let inicio = new Date(hoje);
@@ -49,11 +41,7 @@ export function obterPeriodo(
       break;
 
     case "ano":
-      inicio = new Date(
-        hoje.getFullYear(),
-        0,
-        1
-      );
+      inicio = new Date(hoje.getFullYear(), 0, 1);
       inicio.setHours(0, 0, 0, 0);
 
       fim = new Date();
@@ -62,11 +50,7 @@ export function obterPeriodo(
 
     case "mes":
     default:
-      inicio = new Date(
-        hoje.getFullYear(),
-        hoje.getMonth(),
-        1
-      );
+      inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
       inicio.setHours(0, 0, 0, 0);
 
       fim = new Date();

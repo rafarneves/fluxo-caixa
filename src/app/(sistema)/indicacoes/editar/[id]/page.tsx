@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import {
-  ArrowLeft,
-  Handshake,
-  Save,
-  UserRound,
-  Gift,
-} from "lucide-react";
+import { ArrowLeft, Handshake, Save, UserRound, Gift } from "lucide-react";
 
 export default function EditarIndicacaoPage() {
   const router = useRouter();
@@ -44,11 +38,7 @@ export default function EditarIndicacaoPage() {
       setClientes(clientesData);
     }
 
-    const { data: indicacao } = await supabase
-      .from("indicacoes")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const { data: indicacao } = await supabase.from("indicacoes").select("*").eq("id", id).single();
 
     if (indicacao) {
       setClienteIndicador(indicacao.cliente_indicador);
@@ -107,13 +97,9 @@ export default function EditarIndicacaoPage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white">
-            Editar Indicação
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white">Editar Indicação</h1>
 
-          <p className="text-zinc-400 mt-2 text-lg">
-            Atualize os dados da indicação.
-          </p>
+          <p className="text-zinc-400 mt-2 text-lg">Atualize os dados da indicação.</p>
         </div>
 
         <button
@@ -126,29 +112,20 @@ export default function EditarIndicacaoPage() {
       </div>
 
       <div className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-[#171F2B] to-[#111827] p-8 shadow-2xl">
-
         <div className="flex items-center gap-3 mb-8">
-
           <div className="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center">
             <Handshake className="text-green-400" size={28} />
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-white">
-              Dados da Indicação
-            </h2>
+            <h2 className="text-2xl font-bold text-white">Dados da Indicação</h2>
 
-            <p className="text-zinc-400">
-              Edite as informações abaixo.
-            </p>
+            <p className="text-zinc-400">Edite as informações abaixo.</p>
           </div>
-
         </div>
 
         <div className="grid gap-7">
-
           <div>
-
             <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 mb-3">
               <UserRound size={18} />
               Cliente Indicador
@@ -159,26 +136,17 @@ export default function EditarIndicacaoPage() {
               onChange={(e) => setClienteIndicador(e.target.value)}
               className="w-full rounded-2xl border border-zinc-700 bg-[#0F172A] px-5 py-4 text-white"
             >
-
-              <option value="">
-                Selecione
-              </option>
+              <option value="">Selecione</option>
 
               {clientes.map((cliente) => (
-                <option
-                  key={cliente.id}
-                  value={cliente.id}
-                >
+                <option key={cliente.id} value={cliente.id}>
                   {cliente.nome}
                 </option>
               ))}
-
             </select>
-
           </div>
 
           <div>
-
             <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 mb-3">
               <UserRound size={18} />
               Cliente Indicado
@@ -189,26 +157,17 @@ export default function EditarIndicacaoPage() {
               onChange={(e) => setClienteIndicado(e.target.value)}
               className="w-full rounded-2xl border border-zinc-700 bg-[#0F172A] px-5 py-4 text-white"
             >
-
-              <option value="">
-                Selecione
-              </option>
+              <option value="">Selecione</option>
 
               {clientes.map((cliente) => (
-                <option
-                  key={cliente.id}
-                  value={cliente.id}
-                >
+                <option key={cliente.id} value={cliente.id}>
                   {cliente.nome}
                 </option>
               ))}
-
             </select>
-
           </div>
 
           <div>
-
             <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 mb-3">
               <Gift size={18} />
               Benefício Mensal
@@ -220,14 +179,10 @@ export default function EditarIndicacaoPage() {
               onChange={(e) => setValorDesconto(e.target.value)}
               className="w-full rounded-2xl border border-zinc-700 bg-[#0F172A] px-5 py-4 text-white"
             />
-
           </div>
 
           <div>
-
-            <label className="block text-sm font-medium text-zinc-300 mb-3">
-              Status
-            </label>
+            <label className="block text-sm font-medium text-zinc-300 mb-3">Status</label>
 
             <select
               value={status}
@@ -237,11 +192,9 @@ export default function EditarIndicacaoPage() {
               <option value="Ativo">Ativo</option>
               <option value="Suspenso">Suspenso</option>
             </select>
-
           </div>
 
           <div className="flex justify-end pt-4">
-
             <button
               onClick={salvar}
               disabled={salvando}
@@ -250,13 +203,9 @@ export default function EditarIndicacaoPage() {
               <Save size={20} />
               {salvando ? "Salvando..." : "Salvar Alterações"}
             </button>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-      );
-    }
+  );
+}

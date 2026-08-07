@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   LayoutDashboard,
@@ -91,19 +91,10 @@ const grupos = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
-    <aside
-      className="
-        w-72
-        min-h-screen
-        bg-[#06080B]
-        border-r
-        border-zinc-900
-        flex
-        flex-col
-      "
-    >
+    <aside className="w-72 min-h-screen bg-[#06080B] border-r border-zinc-900 flex flex-col">
       {/* LOGO */}
       <div className="flex justify-center py-3 border-b border-zinc-900">
         <img
@@ -132,6 +123,8 @@ export default function Sidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onMouseEnter={() => router.prefetch(item.href)}
+                    onFocus={() => router.prefetch(item.href)}
                     className={`
                       relative
                       flex
@@ -166,14 +159,9 @@ export default function Sidebar() {
                       <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-green-400" />
                     )}
 
-                    <Icon
-                      size={20}
-                      strokeWidth={2}
-                    />
+                    <Icon size={20} strokeWidth={2} />
 
-                    <span className="text-[16px] font-medium">
-                      {item.nome}
-                    </span>
+                    <span className="text-[16px] font-medium">{item.nome}</span>
                   </Link>
                 );
               })}
@@ -185,41 +173,21 @@ export default function Sidebar() {
       {/* RODAPÉ */}
       <div className="border-t border-zinc-900 p-5">
         <div className="flex items-center gap-3">
-          <div
-            className="
-              w-10
-              h-10
-              rounded-full
-              bg-green-500
-              flex
-              items-center
-              justify-center
-              font-bold
-              text-black
-            "
-          >
+          <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center font-bold text-black">
             R
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-white">
-              Rodrigo
-            </p>
+            <p className="text-sm font-semibold text-white">Rodrigo</p>
 
-            <p className="text-xs text-zinc-500">
-              Administrador
-            </p>
+            <p className="text-xs text-zinc-500">Administrador</p>
           </div>
         </div>
 
         <div className="mt-4 pt-4 border-t border-zinc-900">
-          <p className="text-xs text-zinc-600">
-            Altuza ERP
-          </p>
+          <p className="text-xs text-zinc-600">Altuza ERP</p>
 
-          <p className="text-xs text-zinc-700">
-            Versão 1.0.0
-          </p>
+          <p className="text-xs text-zinc-700">Versão 1.0.0</p>
         </div>
       </div>
     </aside>

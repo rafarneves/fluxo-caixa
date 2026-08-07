@@ -13,15 +13,13 @@ export default function NovaContaPage() {
   const [vencimento, setVencimento] = useState("");
 
   async function salvarConta() {
-    const { error } = await supabase
-      .from("contas_pagar")
-      .insert({
-        descricao,
-        categoria,
-        valor: Number(valor),
-        vencimento: Number(vencimento),
-        status: "Pendente",
-      });
+    const { error } = await supabase.from("contas_pagar").insert({
+      descricao,
+      categoria,
+      valor: Number(valor),
+      vencimento: Number(vencimento),
+      status: "Pendente",
+    });
 
     if (error) {
       alert(error.message);
@@ -34,20 +32,12 @@ export default function NovaContaPage() {
 
   return (
     <div>
+      <h1 className="text-5xl font-bold text-green-400">Nova Conta</h1>
 
-      <h1 className="text-5xl font-bold text-green-400">
-        Nova Conta
-      </h1>
-
-      <p className="text-zinc-400 mt-2 mb-10">
-        Cadastre uma nova despesa.
-      </p>
+      <p className="text-zinc-400 mt-2 mb-10">Cadastre uma nova despesa.</p>
 
       <div className="max-w-2xl bg-[#161B22] rounded-2xl p-8">
-
-        <label className="block mb-2">
-          Descrição
-        </label>
+        <label className="block mb-2">Descrição</label>
 
         <input
           value={descricao}
@@ -55,9 +45,7 @@ export default function NovaContaPage() {
           className="w-full bg-zinc-900 rounded-xl p-4 mb-6"
         />
 
-        <label className="block mb-2">
-          Categoria
-        </label>
+        <label className="block mb-2">Categoria</label>
 
         <input
           value={categoria}
@@ -65,9 +53,7 @@ export default function NovaContaPage() {
           className="w-full bg-zinc-900 rounded-xl p-4 mb-6"
         />
 
-        <label className="block mb-2">
-          Valor
-        </label>
+        <label className="block mb-2">Valor</label>
 
         <input
           type="number"
@@ -76,9 +62,7 @@ export default function NovaContaPage() {
           className="w-full bg-zinc-900 rounded-xl p-4 mb-6"
         />
 
-        <label className="block mb-2">
-          Dia do vencimento
-        </label>
+        <label className="block mb-2">Dia do vencimento</label>
 
         <input
           type="number"
@@ -95,9 +79,7 @@ export default function NovaContaPage() {
         >
           Salvar Conta
         </button>
-
       </div>
-
     </div>
   );
 }

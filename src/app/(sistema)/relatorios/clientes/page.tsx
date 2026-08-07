@@ -1,9 +1,4 @@
-import {
-  Users,
-  UserPlus,
-  FileText,
-  TrendingUp,
-} from "lucide-react";
+import { Users, UserPlus, FileText, TrendingUp } from "lucide-react";
 
 import ReportHeader from "@/components/relatorios/ReportHeader";
 import ReportKPICard from "@/components/relatorios/ReportKPICard";
@@ -23,12 +18,7 @@ export default async function RelatorioClientesPage() {
       <ReportHeader
         title="Clientes"
         description="Relatório completo dos clientes cadastrados."
-        actions={
-          <ReportExport
-            disabledPDF
-            disabledExcel
-          />
-        }
+        actions={<ReportExport disabledPDF disabledExcel />}
       />
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -83,10 +73,7 @@ export default async function RelatorioClientesPage() {
           {
             key: "created_at",
             title: "Cadastro",
-            render: (item: any) =>
-              new Date(item.created_at).toLocaleDateString(
-                "pt-BR"
-              ),
+            render: (item: any) => new Date(item.created_at).toLocaleDateString("pt-BR"),
           },
         ]}
         data={clientes}

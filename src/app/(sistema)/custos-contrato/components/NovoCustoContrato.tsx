@@ -8,11 +8,7 @@ type Contrato = {
   cliente: string;
 };
 
-export default function NovoCustoContrato({
-  contratos,
-}: {
-  contratos: Contrato[];
-}) {
+export default function NovoCustoContrato({ contratos }: { contratos: Contrato[] }) {
   const [pending, setPending] = useState(false);
 
   return (
@@ -30,37 +26,20 @@ export default function NovoCustoContrato({
       }}
       className="bg-[#161B22] rounded-2xl p-6 space-y-5"
     >
-      <h2 className="text-2xl font-bold">
-        Novo Custo do Contrato
-      </h2>
+      <h2 className="text-2xl font-bold">Novo Custo do Contrato</h2>
 
-      <select
-        name="contrato_id"
-        required
-        className="w-full bg-zinc-900 rounded-xl p-4"
-      >
-        <option value="">
-          Selecione o contrato
-        </option>
+      <select name="contrato_id" required className="w-full bg-zinc-900 rounded-xl p-4">
+        <option value="">Selecione o contrato</option>
 
         {contratos.map((c) => (
-          <option
-            key={c.id}
-            value={c.id}
-          >
+          <option key={c.id} value={c.id}>
             {c.cliente}
           </option>
         ))}
       </select>
 
-      <select
-        name="categoria"
-        required
-        className="w-full bg-zinc-900 rounded-xl p-4"
-      >
-        <option value="">
-          Categoria
-        </option>
+      <select name="categoria" required className="w-full bg-zinc-900 rounded-xl p-4">
+        <option value="">Categoria</option>
 
         <option>Editor</option>
         <option>Designer</option>
@@ -91,21 +70,12 @@ export default function NovoCustoContrato({
         className="w-full bg-zinc-900 rounded-xl p-4"
       />
 
-      <input
-        name="competencia"
-        type="month"
-        className="w-full bg-zinc-900 rounded-xl p-4"
-      />
+      <input name="competencia" type="month" className="w-full bg-zinc-900 rounded-xl p-4" />
 
       <label className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          name="recorrente"
-        />
+        <input type="checkbox" name="recorrente" />
 
-        <span>
-          Custo recorrente
-        </span>
+        <span>Custo recorrente</span>
       </label>
 
       <textarea
@@ -117,19 +87,9 @@ export default function NovoCustoContrato({
 
       <button
         disabled={pending}
-        className="
-          bg-green-500
-          text-black
-          px-8
-          py-4
-          rounded-xl
-          font-bold
-          w-full
-        "
+        className="bg-green-500 text-black px-8 py-4 rounded-xl font-bold w-full"
       >
-        {pending
-          ? "Salvando..."
-          : "Salvar Custo"}
+        {pending ? "Salvando..." : "Salvar Custo"}
       </button>
     </form>
   );

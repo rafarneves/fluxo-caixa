@@ -26,29 +26,17 @@ export function calcularIndicadores({
     0
   );
 
-  const despesasTotal = despesas.reduce(
-    (total, despesa) => total + Number(despesa.valor),
-    0
-  );
+  const despesasTotal = despesas.reduce((total, despesa) => total + Number(despesa.valor), 0);
 
-  const custosTotal = custosContrato.reduce(
-    (total, custo) => total + Number(custo.valor),
-    0
-  );
+  const custosTotal = custosContrato.reduce((total, custo) => total + Number(custo.valor), 0);
 
   const totalSaidas = despesasTotal + custosTotal;
 
   const lucro = financeiro.recebido - totalSaidas;
 
-  const ticketMedio =
-    contratosAtivos === 0
-      ? 0
-      : faturamentoMensal / contratosAtivos;
+  const ticketMedio = contratosAtivos === 0 ? 0 : faturamentoMensal / contratosAtivos;
 
-  const margem =
-    financeiro.recebido === 0
-      ? 0
-      : (lucro / financeiro.recebido) * 100;
+  const margem = financeiro.recebido === 0 ? 0 : (lucro / financeiro.recebido) * 100;
 
   const atividades = [
     ...clientes.slice(0, 3).map((cliente: any) => ({
@@ -81,8 +69,7 @@ export function calcularIndicadores({
     emAberto: financeiro.emAberto,
     atrasados: financeiro.atrasadosValor,
 
-    percentualRecebimento:
-      financeiro.percentualRecebimento,
+    percentualRecebimento: financeiro.percentualRecebimento,
 
     despesasTotal,
 

@@ -3,35 +3,17 @@
 import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 
-
-export async function marcarComoPago(
-  id:string
-){
-
-
+export async function marcarComoPago(id: string) {
   await supabase
     .from("recebimentos")
     .update({
+      status: "Pago",
 
-      status:"Pago",
+      data_pagamento: new Date().toISOString().split("T")[0],
 
-      data_pagamento:
-        new Date()
-        .toISOString()
-        .split("T")[0],
-
-      valor_recebido:
-        null
-
+      valor_recebido: null,
     })
-    .eq(
-      "id",
-      id
-    );
-
-
+    .eq("id", id);
 
   revalidatePath("/recebimentos");
-
-
 }

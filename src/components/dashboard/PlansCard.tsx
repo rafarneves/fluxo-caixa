@@ -7,12 +7,7 @@ type Props = {
   personalizado: number;
 };
 
-export default function PlansCard({
-  performance,
-  altaPerformance,
-  pro,
-  personalizado,
-}: Props) {
+export default function PlansCard({ performance, altaPerformance, pro, personalizado }: Props) {
   const planos = [
     {
       nome: "Plano Performance",
@@ -40,116 +35,72 @@ export default function PlansCard({
     },
   ];
 
-  const total = planos.reduce(
-    (acc, plano) => acc + plano.valor,
-    0
-  );
+  const total = planos.reduce((acc, plano) => acc + plano.valor, 0);
 
   return (
     <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
-
       <div className="flex items-center justify-between mb-8">
-
         <div>
-
           <p className="text-xs uppercase tracking-[0.22em] text-zinc-500 font-semibold">
             CONTRATOS
           </p>
 
-          <h2 className="mt-3 text-2xl font-bold">
-            Distribuição dos Planos
-          </h2>
+          <h2 className="mt-3 text-2xl font-bold">Distribuição dos Planos</h2>
 
-          <p className="mt-2 text-zinc-500">
-            Participação dos contratos ativos
-          </p>
-
+          <p className="mt-2 text-zinc-500">Participação dos contratos ativos</p>
         </div>
 
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-green-500/20 bg-green-500/10 text-green-400">
-
           <PieChart size={24} />
-
         </div>
-
       </div>
 
       <div className="space-y-7">
-
         {planos.map((plano) => {
-          const porcentagem =
-            total === 0
-              ? 0
-              : (plano.valor / total) * 100;
+          const porcentagem = total === 0 ? 0 : (plano.valor / total) * 100;
 
           return (
             <div key={plano.nome}>
-
               <div className="mb-3 flex items-center justify-between">
-
                 <div>
-
-                  <p className="font-medium text-white">
-                    {plano.nome}
-                  </p>
+                  <p className="font-medium text-white">{plano.nome}</p>
 
                   <p className="text-sm text-zinc-500">
                     {plano.valor} contrato{plano.valor !== 1 ? "s" : ""}
                   </p>
-
                 </div>
 
                 <div className="text-right">
-
-                  <p className={`text-lg font-bold ${plano.texto}`}>
-                    {porcentagem.toFixed(0)}%
-                  </p>
-
+                  <p className={`text-lg font-bold ${plano.texto}`}>{porcentagem.toFixed(0)}%</p>
                 </div>
-
               </div>
 
               <div className="h-3 overflow-hidden rounded-full bg-black/30">
-
                 <div
                   className={`${plano.cor} h-full rounded-full transition-all duration-500`}
                   style={{
                     width: `${porcentagem}%`,
                   }}
                 />
-
               </div>
-
             </div>
           );
         })}
-
       </div>
 
       <div className="mt-8 border-t border-zinc-800 pt-6">
-
         <div className="flex items-center justify-between">
-
           <div>
+            <p className="text-sm text-zinc-500">Total de Contratos</p>
 
-            <p className="text-sm text-zinc-500">
-              Total de Contratos
-            </p>
-
-            <h2 className="mt-2 text-4xl font-bold text-green-400">
-              {total}
-            </h2>
-
+            <h2 className="mt-2 text-4xl font-bold text-green-400">{total}</h2>
           </div>
 
           <div className="rounded-2xl bg-green-500/10 px-5 py-3 text-green-400 font-semibold">
             Carteira Ativa
           </div>
-
         </div>
-
       </div>
-
     </section>
   );
 }

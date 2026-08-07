@@ -8,36 +8,29 @@ export async function buscarDadosFinanceiros() {
     { data: despesas, error: despesasError },
     { data: custosContrato, error: custosError },
   ] = await Promise.all([
-    supabase
-      .from("clientes")
-      .select("*")
-      .order("created_at", { ascending: false }),
+    supabase.from("clientes").select("*").order("created_at", { ascending: false }),
 
-    supabase
-      .from("contratos")
-      .select(`
+    supabase.from("contratos").select(`
         *,
         clientes(nome)
       `),
 
     supabase
       .from("recebimentos")
-      .select(`
+      .select(
+        `
         *,
         contratos(
           nome,
           clientes(nome)
         )
-      `)
+      `
+      )
       .order("vencimento", { ascending: true }),
 
-    supabase
-      .from("despesas")
-      .select("*"),
+    supabase.from("despesas").select("*"),
 
-    supabase
-      .from("custos_contrato")
-      .select(`
+    supabase.from("custos_contrato").select(`
         *,
         contratos(
           id,
@@ -47,16 +40,8 @@ export async function buscarDadosFinanceiros() {
       `),
   ]);
 
-  if (
-    clientesError ||
-    contratosError ||
-    recebimentosError ||
-    despesasError ||
-    custosError
-  ) {
-    throw new Error(
-      "Erro ao buscar informações financeiras do sistema."
-    );
+  if (clientesError || contratosError || recebimentosError || despesasError || custosError) {
+    throw new Error("Erro ao buscar informações financeiras do sistema.");
   }
 
   return {

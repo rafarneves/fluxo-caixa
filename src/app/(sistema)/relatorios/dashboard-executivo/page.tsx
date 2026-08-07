@@ -1,11 +1,4 @@
-import {
-  BarChart3,
-  DollarSign,
-  Receipt,
-  TrendingUp,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { BarChart3, DollarSign, Receipt, TrendingUp, Users, Wallet } from "lucide-react";
 
 import ReportHeader from "@/components/relatorios/ReportHeader";
 import ReportKPICard from "@/components/relatorios/ReportKPICard";
@@ -24,12 +17,7 @@ export default async function DashboardExecutivoPage() {
       <ReportHeader
         title="Dashboard Executivo"
         description="Resumo executivo dos principais indicadores financeiros da empresa."
-        actions={
-          <ReportExport
-            disabledPDF
-            disabledExcel
-          />
-        }
+        actions={<ReportExport disabledPDF disabledExcel />}
       />
 
       <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -40,12 +28,7 @@ export default async function DashboardExecutivoPage() {
           color="green"
         />
 
-        <ReportKPICard
-          title="Em Aberto"
-          value={dados.kpis.emAberto}
-          icon={Wallet}
-          color="yellow"
-        />
+        <ReportKPICard title="Em Aberto" value={dados.kpis.emAberto} icon={Wallet} color="yellow" />
 
         <ReportKPICard
           title="Lucro"
@@ -54,12 +37,7 @@ export default async function DashboardExecutivoPage() {
           color={dados.kpis.lucro >= 0 ? "green" : "red"}
         />
 
-        <ReportKPICard
-          title="Despesas"
-          value={dados.kpis.despesas}
-          icon={Receipt}
-          color="red"
-        />
+        <ReportKPICard title="Despesas" value={dados.kpis.despesas} icon={Receipt} color="red" />
 
         <ReportKPICard
           title="Clientes"
@@ -78,10 +56,7 @@ export default async function DashboardExecutivoPage() {
         />
       </section>
 
-      <ReportChart
-        title="Receitas x Despesas"
-        description="Comparativo financeiro por período."
-      >
+      <ReportChart title="Receitas x Despesas" description="Comparativo financeiro por período.">
         <ExecutiveChart data={dados.grafico} />
       </ReportChart>
 

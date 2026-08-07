@@ -3,13 +3,8 @@
 import { useState } from "react";
 import { criarDespesa } from "./actions";
 
-
 export default function FormDespesa() {
-
-
   const [tipo, setTipo] = useState("Fixa");
-
-
 
   const inputClass = `
     w-full
@@ -27,51 +22,23 @@ export default function FormDespesa() {
     transition
   `;
 
-
-
   const labelClass = `
     text-sm
     font-semibold
     text-zinc-400
   `;
 
-
-
   return (
-
-
     <form
-
       action={criarDespesa}
 
-      className="
-        space-y-8
-      "
-
+      className="space-y-8"
     >
-
-
-
-      <div className="
-        grid
-        grid-cols-1
-        md:grid-cols-2
-        gap-6
-      ">
-
-
-
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="md:col-span-2">
-
-
-          <label className={labelClass}>
-            Descrição
-          </label>
-
+          <label className={labelClass}>Descrição</label>
 
           <input
-
             name="descricao"
 
             placeholder="Ex: Assinatura ChatGPT"
@@ -79,34 +46,19 @@ export default function FormDespesa() {
             className={inputClass}
 
             required
-
           />
-
-
         </div>
 
-
-
-
-
         <div>
-
-
-          <label className={labelClass}>
-            Categoria
-          </label>
-
+          <label className={labelClass}>Categoria</label>
 
           <select
-
             name="categoria"
 
             defaultValue="Softwares"
 
             className={inputClass}
-
           >
-
             <option>Pró-labore</option>
             <option>Salários</option>
             <option>Estrutura</option>
@@ -125,141 +77,65 @@ export default function FormDespesa() {
             <option>Benefícios</option>
             <option>Eventos</option>
             <option>Outros</option>
-
           </select>
-
-
         </div>
 
-
-
-
-
         <div>
-
-
-          <label className={labelClass}>
-            Tipo da despesa
-          </label>
-
+          <label className={labelClass}>Tipo da despesa</label>
 
           <select
-
             name="tipo"
 
             value={tipo}
 
-            onChange={(e)=>setTipo(e.target.value)}
+            onChange={(e) => setTipo(e.target.value)}
 
             className={inputClass}
-
           >
+            <option value="Fixa">Fixa</option>
 
-            <option value="Fixa">
-              Fixa
-            </option>
-
-
-            <option value="Variável">
-              Variável
-            </option>
-
-
+            <option value="Variável">Variável</option>
           </select>
-
-
         </div>
 
+        {tipo === "Fixa" && (
+          <div>
+            <label className={labelClass}>Dia do vencimento</label>
 
+            <input
+              name="dia_vencimento"
 
+              type="number"
 
+              min="1"
 
+              max="31"
 
-        {
-          tipo === "Fixa" && (
+              placeholder="Ex: 5"
 
+              className={inputClass}
+            />
+          </div>
+        )}
 
-            <div>
+        {tipo === "Variável" && (
+          <div>
+            <label className={labelClass}>Data</label>
 
+            <input
+              name="data"
 
-              <label className={labelClass}>
-                Dia do vencimento
-              </label>
+              type="date"
 
-
-              <input
-
-                name="dia_vencimento"
-
-                type="number"
-
-                min="1"
-
-                max="31"
-
-                placeholder="Ex: 5"
-
-                className={inputClass}
-
-              />
-
-
-            </div>
-
-
-          )
-        }
-
-
-
-
-
-
-        {
-          tipo === "Variável" && (
-
-
-            <div>
-
-
-              <label className={labelClass}>
-                Data
-              </label>
-
-
-              <input
-
-                name="data"
-
-                type="date"
-
-                className={inputClass}
-
-              />
-
-
-            </div>
-
-
-          )
-        }
-
-
-
-
-
-
+              className={inputClass}
+            />
+          </div>
+        )}
 
         <div>
-
-
-          <label className={labelClass}>
-            Valor
-          </label>
-
+          <label className={labelClass}>Valor</label>
 
           <input
-
             name="valor"
 
             type="number"
@@ -273,60 +149,15 @@ export default function FormDespesa() {
             className={inputClass}
 
             required
-
           />
-
-
         </div>
-
-
-
       </div>
 
-
-
-
-
-
-      <div className="
-        flex
-        justify-end
-        pt-4
-        border-t
-        border-zinc-800
-      ">
-
-
-        <button
-
-          className="
-            bg-green-500
-            hover:bg-green-400
-            transition
-            text-black
-            font-bold
-            px-10
-            py-4
-            rounded-xl
-            shadow-lg
-          "
-
-        >
-
+      <div className="flex justify-end pt-4 border-t border-zinc-800">
+        <button className="bg-green-500 hover:bg-green-400 transition text-black font-bold px-10 py-4 rounded-xl shadow-lg">
           Salvar Despesa
-
         </button>
-
-
       </div>
-
-
-
-
-
     </form>
-
-
   );
-
 }

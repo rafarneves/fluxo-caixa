@@ -1,9 +1,4 @@
-import {
-  BriefcaseBusiness,
-  Wallet,
-  TrendingDown,
-  BarChart3,
-} from "lucide-react";
+import { BriefcaseBusiness, Wallet, TrendingDown, BarChart3 } from "lucide-react";
 
 import ReportHeader from "@/components/relatorios/ReportHeader";
 import ReportKPICard from "@/components/relatorios/ReportKPICard";
@@ -17,43 +12,24 @@ export default async function RelatorioCustosPage() {
 
   const custos = dados.custosContrato;
 
-  const totalCustos = custos.reduce(
-    (total: number, custo: any) => total + Number(custo.valor),
-    0
-  );
+  const totalCustos = custos.reduce((total: number, custo: any) => total + Number(custo.valor), 0);
 
   const quantidade = custos.length;
 
-  const ticketMedio =
-    quantidade === 0
-      ? 0
-      : totalCustos / quantidade;
+  const ticketMedio = quantidade === 0 ? 0 : totalCustos / quantidade;
 
-  const participacao =
-    dados.recebido > 0
-      ? (totalCustos / dados.recebido) * 100
-      : 0;
+  const participacao = dados.recebido > 0 ? (totalCustos / dados.recebido) * 100 : 0;
 
   return (
     <main className="space-y-8">
       <ReportHeader
         title="Custos"
         description="Relatório completo dos custos registrados no ERP."
-        actions={
-          <ReportExport
-            disabledPDF
-            disabledExcel
-          />
-        }
+        actions={<ReportExport disabledPDF disabledExcel />}
       />
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <ReportKPICard
-          title="Total de Custos"
-          value={totalCustos}
-          icon={Wallet}
-          color="red"
-        />
+        <ReportKPICard title="Total de Custos" value={totalCustos} icon={Wallet} color="red" />
 
         <ReportKPICard
           title="Lançamentos"
@@ -63,12 +39,7 @@ export default async function RelatorioCustosPage() {
           isCurrency={false}
         />
 
-        <ReportKPICard
-          title="Custo Médio"
-          value={ticketMedio}
-          icon={TrendingDown}
-          color="yellow"
-        />
+        <ReportKPICard title="Custo Médio" value={ticketMedio} icon={TrendingDown} color="yellow" />
 
         <ReportKPICard
           title="Participação"
@@ -97,9 +68,7 @@ export default async function RelatorioCustosPage() {
             key: "data",
             title: "Data",
             render: (item: any) =>
-              item.data
-                ? new Date(item.data).toLocaleDateString("pt-BR")
-                : "-",
+              item.data ? new Date(item.data).toLocaleDateString("pt-BR") : "-",
           },
           {
             key: "valor",

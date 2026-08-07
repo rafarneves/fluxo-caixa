@@ -33,13 +33,10 @@ export default function PeriodFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const periodo =
-    searchParams.get("periodo") ?? "mes";
+  const periodo = searchParams.get("periodo") ?? "mes";
 
   function alterarPeriodo(novoPeriodo: string) {
-    const params = new URLSearchParams(
-      searchParams.toString()
-    );
+    const params = new URLSearchParams(searchParams.toString());
 
     params.set("periodo", novoPeriodo);
 
@@ -47,18 +44,7 @@ export default function PeriodFilter() {
   }
 
   return (
-    <div
-      className="
-        flex
-        flex-wrap
-        gap-2
-        p-1
-        rounded-2xl
-        bg-[#161B22]
-        border
-        border-zinc-800
-      "
-    >
+    <div className="flex flex-wrap gap-2 p-1 rounded-2xl bg-[#161B22] border border-zinc-800">
       {periodos.map((item) => {
         const ativo = periodo === item.value;
 

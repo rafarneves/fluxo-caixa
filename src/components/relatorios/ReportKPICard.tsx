@@ -1,8 +1,4 @@
-import {
-  LucideIcon,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { LucideIcon, TrendingDown, TrendingUp } from "lucide-react";
 
 import { formatMoneyCompact } from "@/lib/formatMoneyCompact";
 
@@ -23,32 +19,28 @@ const colors = {
     bg: "bg-green-500/10",
     text: "text-green-400",
     border: "border-green-500/20",
-    hover:
-      "hover:border-green-500/40 hover:shadow-green-500/10",
+    hover: "hover:border-green-500/40 hover:shadow-green-500/10",
   },
 
   blue: {
     bg: "bg-cyan-500/10",
     text: "text-cyan-400",
     border: "border-cyan-500/20",
-    hover:
-      "hover:border-cyan-500/40 hover:shadow-cyan-500/10",
+    hover: "hover:border-cyan-500/40 hover:shadow-cyan-500/10",
   },
 
   red: {
     bg: "bg-red-500/10",
     text: "text-red-400",
     border: "border-red-500/20",
-    hover:
-      "hover:border-red-500/40 hover:shadow-red-500/10",
+    hover: "hover:border-red-500/40 hover:shadow-red-500/10",
   },
 
   yellow: {
     bg: "bg-yellow-500/10",
     text: "text-yellow-400",
     border: "border-yellow-500/20",
-    hover:
-      "hover:border-yellow-500/40 hover:shadow-yellow-500/10",
+    hover: "hover:border-yellow-500/40 hover:shadow-yellow-500/10",
   },
 };
 
@@ -89,44 +81,11 @@ export default function ReportKPICard({
         ${style.hover}
       `}
     >
-      <div
-        className="
-          absolute
-          -right-10
-          -top-10
-          h-32
-          w-32
-          rounded-full
-          bg-white/5
-          blur-3xl
-        "
-      />
+      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/5 blur-3xl" />
 
-      <div
-        className="
-          relative
-          flex
-          items-start
-          justify-between
-        "
-      >
-        <div
-          className="
-            flex-1
-            min-w-0
-          "
-        >
-          <p
-            className="
-              text-xs
-              font-semibold
-              uppercase
-              tracking-[0.18em]
-              text-zinc-500
-            "
-          >
-            {title}
-          </p>
+      <div className="relative flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{title}</p>
 
           <h2
             className={`
@@ -141,11 +100,7 @@ export default function ReportKPICard({
             {displayValue}
           </h2>
 
-          {description && (
-            <p className="mt-2 text-sm text-zinc-500">
-              {description}
-            </p>
-          )}
+          {description && <p className="mt-2 text-sm text-zinc-500">{description}</p>}
         </div>
 
         <div
@@ -178,19 +133,10 @@ export default function ReportKPICard({
               py-1
               text-xs
               font-semibold
-              ${
-                trend >= 0
-                  ? "bg-green-500/10 text-green-400"
-                  : "bg-red-500/10 text-red-400"
-              }
+              ${trend >= 0 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}
             `}
           >
-            {trend >= 0 ? (
-              <TrendingUp size={14} />
-            ) : (
-              <TrendingDown size={14} />
-            )}
-
+            {trend >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
             {Math.abs(trend).toFixed(1)}%
           </div>
         </div>

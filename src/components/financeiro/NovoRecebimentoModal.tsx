@@ -7,9 +7,7 @@ interface Props {
   contratoId: string;
 }
 
-export default function NovoRecebimentoModal({
-  contratoId,
-}: Props) {
+export default function NovoRecebimentoModal({ contratoId }: Props) {
   const [aberto, setAberto] = useState(false);
 
   return (
@@ -24,12 +22,8 @@ export default function NovoRecebimentoModal({
       {aberto && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#161B22] rounded-2xl w-[650px] p-8">
-
             <div className="flex justify-between items-center mb-8">
-
-              <h2 className="text-2xl font-bold">
-                Novo Recebimento
-              </h2>
+              <h2 className="text-2xl font-bold">Novo Recebimento</h2>
 
               <button
                 onClick={() => setAberto(false)}
@@ -37,7 +31,6 @@ export default function NovoRecebimentoModal({
               >
                 ✕
               </button>
-
             </div>
 
             <form
@@ -52,13 +45,9 @@ export default function NovoRecebimentoModal({
                 setAberto(false);
               }}
             >
-
               <div className="grid grid-cols-2 gap-5">
-
                 <div>
-                  <label className="text-sm text-zinc-400">
-                    Competência
-                  </label>
+                  <label className="text-sm text-zinc-400">Competência</label>
 
                   <input
                     name="competencia"
@@ -68,9 +57,7 @@ export default function NovoRecebimentoModal({
                 </div>
 
                 <div>
-                  <label className="text-sm text-zinc-400">
-                    Valor
-                  </label>
+                  <label className="text-sm text-zinc-400">Valor</label>
 
                   <input
                     name="valor"
@@ -81,9 +68,7 @@ export default function NovoRecebimentoModal({
                 </div>
 
                 <div className="col-span-2">
-                  <label className="text-sm text-zinc-400">
-                    Vencimento
-                  </label>
+                  <label className="text-sm text-zinc-400">Vencimento</label>
 
                   <input
                     name="vencimento"
@@ -92,11 +77,9 @@ export default function NovoRecebimentoModal({
                     className="w-full mt-2 bg-[#0D1117] border border-zinc-700 rounded-xl px-4 py-3"
                   />
                 </div>
-
               </div>
 
               <div className="flex justify-end gap-3 mt-8">
-
                 <button
                   type="button"
                   onClick={() => setAberto(false)}
@@ -111,11 +94,8 @@ export default function NovoRecebimentoModal({
                 >
                   Salvar
                 </button>
-
               </div>
-
             </form>
-
           </div>
         </div>
       )}

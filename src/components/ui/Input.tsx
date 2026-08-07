@@ -11,11 +11,7 @@ const Input = forwardRef<HTMLInputElement, Props>(
   ({ label, error, className = "", ...props }, ref) => {
     return (
       <div className="w-full">
-        {label && (
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
-            {label}
-          </label>
-        )}
+        {label && <label className="mb-2 block text-sm font-medium text-zinc-300">{label}</label>}
 
         <input
           ref={ref}
@@ -40,11 +36,7 @@ const Input = forwardRef<HTMLInputElement, Props>(
           `}
         />
 
-        {error && (
-          <p className="mt-2 text-sm text-red-400">
-            {error}
-          </p>
-        )}
+        {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
       </div>
     );
   }

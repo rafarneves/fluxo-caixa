@@ -1,11 +1,4 @@
-import {
-  DollarSign,
-  TrendingDown,
-  TrendingUp,
-  Percent,
-  Wallet,
-  Landmark,
-} from "lucide-react";
+import { DollarSign, TrendingDown, TrendingUp, Percent, Wallet, Landmark } from "lucide-react";
 
 import ReportHeader from "@/components/relatorios/ReportHeader";
 import ReportKPICard from "@/components/relatorios/ReportKPICard";
@@ -15,12 +8,8 @@ import ReportTable from "@/components/relatorios/ReportTable";
 import { getDashboardExecutivo } from "@/lib/relatorios/dashboard";
 import { formatMoneyCompact } from "@/lib/formatMoneyCompact";
 
-
 export default async function DRECompletoPage() {
-
-
   const dados = await getDashboardExecutivo();
-
 
   const receitaBruta = dados.recebido;
 
@@ -28,269 +17,156 @@ export default async function DRECompletoPage() {
 
   const despesas = dados.despesasTotal;
 
-
-
   const lucroBruto = receitaBruta - custos;
 
   const lucroLiquido = lucroBruto - despesas;
 
-
-
-  const margem =
-    receitaBruta === 0
-      ? 0
-      : (lucroLiquido / receitaBruta) * 100;
-
-
+  const margem = receitaBruta === 0 ? 0 : (lucroLiquido / receitaBruta) * 100;
 
   const linhas = [
-
     {
-      conta:"Receita Bruta",
-      grupo:"Receitas",
-      valor:receitaBruta,
+      conta: "Receita Bruta",
+      grupo: "Receitas",
+      valor: receitaBruta,
     },
 
-
     {
-      conta:"(-) Custos",
-      grupo:"Custos",
-      valor:-custos,
+      conta: "(-) Custos",
+      grupo: "Custos",
+      valor: -custos,
     },
 
-
     {
-      conta:"Lucro Bruto",
-      grupo:"Resultado",
-      valor:lucroBruto,
+      conta: "Lucro Bruto",
+      grupo: "Resultado",
+      valor: lucroBruto,
     },
 
-
     {
-      conta:"(-) Despesas Operacionais",
-      grupo:"Despesas",
-      valor:-despesas,
+      conta: "(-) Despesas Operacionais",
+      grupo: "Despesas",
+      valor: -despesas,
     },
 
-
     {
-      conta:"Lucro Líquido",
-      grupo:"Resultado Final",
-      valor:lucroLiquido,
+      conta: "Lucro Líquido",
+      grupo: "Resultado Final",
+      valor: lucroLiquido,
     },
-
   ];
 
-
-
   return (
-
     <main className="space-y-8">
-
-
       <ReportHeader
-
         title="DRE Completo"
 
         description="Demonstrativo completo do resultado do exercício."
 
-        actions={
-          <ReportExport
-            disabledPDF
-            disabledExcel
-          />
-        }
-
+        actions={<ReportExport disabledPDF disabledExcel />}
       />
 
-
-
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-
-
         <ReportKPICard
-
           title="Receita"
 
-          value={
-            formatMoneyCompact(
-              receitaBruta
-            )
-          }
+          value={formatMoneyCompact(receitaBruta)}
 
           icon={DollarSign}
 
           color="green"
-
         />
 
-
-
         <ReportKPICard
-
           title="Custos"
 
-          value={
-            formatMoneyCompact(
-              custos
-            )
-          }
+          value={formatMoneyCompact(custos)}
 
           icon={Wallet}
 
           color="yellow"
-
         />
 
-
-
         <ReportKPICard
-
           title="Lucro Bruto"
 
-          value={
-            formatMoneyCompact(
-              lucroBruto
-            )
-          }
+          value={formatMoneyCompact(lucroBruto)}
 
           icon={TrendingUp}
 
-          color={
-            lucroBruto >= 0
-              ? "green"
-              : "red"
-          }
-
+          color={lucroBruto >= 0 ? "green" : "red"}
         />
 
-
-
         <ReportKPICard
-
           title="Despesas"
 
-          value={
-            formatMoneyCompact(
-              despesas
-            )
-          }
+          value={formatMoneyCompact(despesas)}
 
           icon={TrendingDown}
 
           color="red"
-
         />
 
-
-
         <ReportKPICard
-
           title="Lucro Líquido"
 
-          value={
-            formatMoneyCompact(
-              lucroLiquido
-            )
-          }
+          value={formatMoneyCompact(lucroLiquido)}
 
           icon={Landmark}
 
-          color={
-            lucroLiquido >= 0
-              ? "green"
-              : "red"
-          }
-
+          color={lucroLiquido >= 0 ? "green" : "red"}
         />
 
-
-
         <ReportKPICard
-
           title="Margem"
 
-          value={
-            `${margem.toFixed(2)}%`
-          }
+          value={`${margem.toFixed(2)}%`}
 
           icon={Percent}
 
           color="blue"
-
         />
-
-
       </section>
 
-
-
-
-
       <ReportTable
-
         title="Demonstrativo"
 
         description="Composição completa do DRE."
 
         columns={[
-
           {
+            key: "grupo",
 
-            key:"grupo",
-
-            title:"Grupo",
-
+            title: "Grupo",
           },
 
-
           {
+            key: "conta",
 
-            key:"conta",
-
-            title:"Conta",
-
+            title: "Conta",
           },
 
-
           {
+            key: "valor",
 
-            key:"valor",
+            title: "Valor",
 
-            title:"Valor",
+            align: "right",
 
-            align:"right",
-
-            render:(item:any)=>
-
+            render: (item: any) =>
               item.valor.toLocaleString(
-
                 "pt-BR",
 
                 {
+                  style: "currency",
 
-                  style:"currency",
-
-                  currency:"BRL",
-
+                  currency: "BRL",
                 }
-
               ),
-
           },
-
-
         ]}
 
-
         data={linhas}
-
-
       />
-
-
     </main>
-
   );
-
 }

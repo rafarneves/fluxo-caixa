@@ -1,2 +1,1 @@
-export async function exportPDF() {
-  }
+export async function exportPDF() {}

@@ -18,32 +18,17 @@ function calcularContrato(
   const receita = recebimentos
     .filter(
       (recebimento: any) =>
-        String(recebimento.contrato_id) === String(contrato.id) &&
-        recebimento.status === "Pago"
+        String(recebimento.contrato_id) === String(contrato.id) && recebimento.status === "Pago"
     )
-    .reduce(
-      (total: number, recebimento: any) =>
-        total + Number(recebimento.valor),
-      0
-    );
+    .reduce((total: number, recebimento: any) => total + Number(recebimento.valor), 0);
 
   const custos = custosContrato
-    .filter(
-      (custo: any) =>
-        String(custo.contrato_id) === String(contrato.id)
-    )
-    .reduce(
-      (total: number, custo: any) =>
-        total + Number(custo.valor),
-      0
-    );
+    .filter((custo: any) => String(custo.contrato_id) === String(contrato.id))
+    .reduce((total: number, custo: any) => total + Number(custo.valor), 0);
 
   const lucro = receita - custos;
 
-  const margem =
-    receita > 0
-      ? (lucro / receita) * 100
-      : 0;
+  const margem = receita > 0 ? (lucro / receita) * 100 : 0;
 
   return {
     id: contrato.id,
@@ -67,14 +52,9 @@ export async function getRentabilidadeContratos(): Promise<{
 }> {
   const dados = await buscarDadosFinanceiros();
 
-  const contratos: RentabilidadeContrato[] =
-    dados.contratos.map((contrato: any) =>
-      calcularContrato(
-        contrato,
-        dados.recebimentos,
-        dados.custosContrato
-      )
-    );
+  const contratos: RentabilidadeContrato[] = dados.contratos.map((contrato: any) =>
+    calcularContrato(contrato, dados.recebimentos, dados.custosContrato)
+  );
 
   contratos.sort((a, b) => b.lucro - a.lucro);
 
@@ -94,10 +74,7 @@ export async function getRentabilidadeContratos(): Promise<{
     }
   );
 
-  totais.margem =
-    totais.receita > 0
-      ? (totais.lucro / totais.receita) * 100
-      : 0;
+  totais.margem = totais.receita > 0 ? (totais.lucro / totais.receita) * 100 : 0;
 
   return {
     contratos,
@@ -105,23 +82,16 @@ export async function getRentabilidadeContratos(): Promise<{
   };
 }
 
-export async function getRentabilidadeContrato(
-  id: string
-): Promise<RentabilidadeContrato | null> {
+export async function getRentabilidadeContrato(id: string): Promise<RentabilidadeContrato | null> {
   const dados = await buscarDadosFinanceiros();
 
   const contrato = dados.contratos.find(
-    (item: any) =>
-      String(item.id).trim() === String(id).trim()
+    (item: any) => String(item.id).trim() === String(id).trim()
   );
 
   if (!contrato) {
     return null;
   }
 
-  return calcularContrato(
-    contrato,
-    dados.recebimentos,
-    dados.custosContrato
-  );
+  return calcularContrato(contrato, dados.recebimentos, dados.custosContrato);
 }

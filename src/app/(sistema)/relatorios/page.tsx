@@ -79,13 +79,9 @@ export default function RelatoriosPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white">
-          Relatórios
-        </h1>
+        <h1 className="text-3xl font-bold text-white">Relatórios</h1>
 
-        <p className="mt-2 text-zinc-400">
-          Central de relatórios e exportações do ERP.
-        </p>
+        <p className="mt-2 text-zinc-400">Central de relatórios e exportações do ERP.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -95,53 +91,19 @@ export default function RelatoriosPage() {
           return (
             <div
               key={relatorio.titulo}
-              className="
-                rounded-2xl
-                border
-                border-zinc-800
-                bg-[#111315]
-                p-6
-                transition-all
-                duration-300
-                hover:-translate-y-1
-                hover:border-green-500/40
-                hover:shadow-xl
-                hover:shadow-green-500/10
-              "
+              className="rounded-2xl border border-zinc-800 bg-[#111315] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-green-500/40 hover:shadow-xl hover:shadow-green-500/10"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-green-500/10">
-                <Icon
-                  className="text-green-400"
-                  size={28}
-                />
+                <Icon className="text-green-400" size={28} />
               </div>
 
-              <h2 className="mt-6 text-xl font-semibold text-white">
-                {relatorio.titulo}
-              </h2>
+              <h2 className="mt-6 text-xl font-semibold text-white">{relatorio.titulo}</h2>
 
-              <p className="mt-3 text-sm leading-6 text-zinc-400">
-                {relatorio.descricao}
-              </p>
+              <p className="mt-3 text-sm leading-6 text-zinc-400">{relatorio.descricao}</p>
 
               <Link
                 href={relatorio.href}
-                className="
-                  mt-6
-                  inline-flex
-                  items-center
-                  gap-2
-                  rounded-xl
-                  bg-green-500
-                  px-5
-                  py-3
-                  text-sm
-                  font-semibold
-                  text-black
-                  transition-all
-                  duration-300
-                  hover:scale-105
-                "
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-green-500 px-5 py-3 text-sm font-semibold text-black transition-all duration-300 hover:scale-105"
               >
                 Abrir
                 <ArrowRight size={18} />

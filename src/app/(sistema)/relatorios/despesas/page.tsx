@@ -1,9 +1,4 @@
-import {
-  Receipt,
-  TrendingDown,
-  Wallet,
-  CalendarDays,
-} from "lucide-react";
+import { Receipt, TrendingDown, Wallet, CalendarDays } from "lucide-react";
 
 import ReportHeader from "@/components/relatorios/ReportHeader";
 import ReportKPICard from "@/components/relatorios/ReportKPICard";
@@ -17,40 +12,24 @@ export default async function RelatorioDespesasPage() {
 
   const despesas = dados.despesas;
 
-  const totalDespesas = despesas.reduce(
-    (acc: number, item: any) => acc + Number(item.valor),
-    0
-  );
+  const totalDespesas = despesas.reduce((acc: number, item: any) => acc + Number(item.valor), 0);
 
   const quantidade = despesas.length;
 
-  const ticketMedio =
-    quantidade === 0 ? 0 : totalDespesas / quantidade;
+  const ticketMedio = quantidade === 0 ? 0 : totalDespesas / quantidade;
 
-  const categorias = new Set(
-    despesas.map((d: any) => d.categoria)
-  ).size;
+  const categorias = new Set(despesas.map((d: any) => d.categoria)).size;
 
   return (
     <main className="space-y-8">
       <ReportHeader
         title="Despesas"
         description="Relatório completo das despesas cadastradas no ERP."
-        actions={
-          <ReportExport
-            disabledPDF
-            disabledExcel
-          />
-        }
+        actions={<ReportExport disabledPDF disabledExcel />}
       />
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <ReportKPICard
-          title="Total"
-          value={totalDespesas}
-          icon={Wallet}
-          color="red"
-        />
+        <ReportKPICard title="Total" value={totalDespesas} icon={Wallet} color="red" />
 
         <ReportKPICard
           title="Lançamentos"
@@ -91,23 +70,17 @@ export default async function RelatorioDespesasPage() {
           {
             key: "data",
             title: "Data",
-            render: (item: any) =>
-              new Date(item.data).toLocaleDateString(
-                "pt-BR"
-              ),
+            render: (item: any) => new Date(item.data).toLocaleDateString("pt-BR"),
           },
           {
             key: "valor",
             title: "Valor",
             align: "right",
             render: (item: any) =>
-              Number(item.valor).toLocaleString(
-                "pt-BR",
-                {
-                  style: "currency",
-                  currency: "BRL",
-                }
-              ),
+              Number(item.valor).toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }),
           },
         ]}
         data={despesas}

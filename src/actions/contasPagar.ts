@@ -3,11 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 
-export async function pagarConta(
-  id: string,
-  descricao: string,
-  valor: number
-) {
+export async function pagarConta(id: string, descricao: string, valor: number) {
   // Marca a conta como paga
   const { error } = await supabase
     .from("contas_pagar")
@@ -21,13 +17,11 @@ export async function pagarConta(
   }
 
   // Lança uma saída no fluxo de caixa
-  const { error: erroFluxo } = await supabase
-    .from("fluxo_caixa")
-    .insert({
-      descricao: `Pagamento - ${descricao}`,
-      tipo: "Saída",
-      valor: valor,
-    });
+  const { error: erroFluxo } = await supabase.from("fluxo_caixa").insert({
+    descricao: `Pagamento - ${descricao}`,
+    tipo: "Saída",
+    valor: valor,
+  });
 
   if (erroFluxo) {
     return;

@@ -6,43 +6,22 @@ type ReportHeaderProps = {
   actions?: ReactNode;
 };
 
-export default function ReportHeader({
-  title,
-  description,
-  actions,
-}: ReportHeaderProps) {
+export default function ReportHeader({ title, description, actions }: ReportHeaderProps) {
   return (
-    <div
-      className="
-        flex
-        flex-col
-        gap-6
-        lg:flex-row
-        lg:items-center
-        lg:justify-between
-      "
-    >
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-green-400">
           RELATÓRIOS
         </p>
 
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-white">
-          {title}
-        </h1>
+        <h1 className="mt-3 text-4xl font-bold tracking-tight text-white">{title}</h1>
 
         {description && (
-          <p className="mt-3 max-w-3xl text-zinc-400 leading-relaxed">
-            {description}
-          </p>
+          <p className="mt-3 max-w-3xl text-zinc-400 leading-relaxed">{description}</p>
         )}
       </div>
 
-      {actions && (
-        <div className="flex flex-wrap items-center gap-3">
-          {actions}
-        </div>
-      )}
+      {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
     </div>
   );
 }

@@ -39,16 +39,12 @@ export default function RevenueChart({
   title = "Evolução do Faturamento",
   description = "Receita mensal dos últimos meses",
 }: RevenueChartProps) {
-  const ultimoValor =
-    data.length > 0 ? data[data.length - 1].valor : 0;
+  const ultimoValor = data.length > 0 ? data[data.length - 1].valor : 0;
 
-  const primeiroValor =
-    data.length > 0 ? data[0].valor : 0;
+  const primeiroValor = data.length > 0 ? data[0].valor : 0;
 
   const crescimento =
-    primeiroValor === 0
-      ? 0
-      : ((ultimoValor - primeiroValor) / primeiroValor) * 100;
+    primeiroValor === 0 ? 0 : ((ultimoValor - primeiroValor) / primeiroValor) * 100;
 
   return (
     <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
@@ -58,13 +54,9 @@ export default function RevenueChart({
             PERFORMANCE
           </p>
 
-          <h2 className="mt-3 text-3xl font-bold text-white">
-            {title}
-          </h2>
+          <h2 className="mt-3 text-3xl font-bold text-white">{title}</h2>
 
-          <p className="mt-2 text-zinc-500">
-            {description}
-          </p>
+          <p className="mt-2 text-zinc-500">{description}</p>
         </div>
 
         <div className="text-right">
@@ -77,13 +69,9 @@ export default function RevenueChart({
             </span>
           </div>
 
-          <p className="mt-2 text-3xl font-bold text-green-400">
-            {moeda(ultimoValor)}
-          </p>
+          <p className="mt-2 text-3xl font-bold text-green-400">{moeda(ultimoValor)}</p>
 
-          <p className="text-xs text-zinc-500">
-            Último período
-          </p>
+          <p className="text-xs text-zinc-500">Último período</p>
         </div>
       </div>
 
@@ -96,32 +84,14 @@ export default function RevenueChart({
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
-                <linearGradient
-                  id="receitaGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop
-                    offset="0%"
-                    stopColor="#22C55E"
-                    stopOpacity={0.45}
-                  />
+                <linearGradient id="receitaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#22C55E" stopOpacity={0.45} />
 
-                  <stop
-                    offset="100%"
-                    stopColor="#22C55E"
-                    stopOpacity={0}
-                  />
+                  <stop offset="100%" stopColor="#22C55E" stopOpacity={0} />
                 </linearGradient>
               </defs>
 
-              <CartesianGrid
-                stroke="#222831"
-                strokeDasharray="4 4"
-                vertical={false}
-              />
+              <CartesianGrid stroke="#222831" strokeDasharray="4 4" vertical={false} />
 
               <XAxis
                 dataKey="mes"
@@ -144,10 +114,7 @@ export default function RevenueChart({
               />
 
               <Tooltip
-                formatter={(value: any) => [
-                  moeda(Number(value)),
-                  "Receita",
-                ]}
+                formatter={(value: any) => [moeda(Number(value)), "Receita"]}
                 cursor={{
                   stroke: "#22C55E",
                   strokeDasharray: "4 4",

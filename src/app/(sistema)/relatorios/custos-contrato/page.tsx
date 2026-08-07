@@ -1,10 +1,4 @@
-import {
-  DollarSign,
-  Wallet,
-  TrendingUp,
-  Percent,
-  Eye,
-} from "lucide-react";
+import { DollarSign, Wallet, TrendingUp, Percent, Eye } from "lucide-react";
 
 import Link from "next/link";
 
@@ -15,47 +9,23 @@ import ReportTable from "@/components/relatorios/ReportTable";
 
 import { getRentabilidadeContratos } from "@/lib/relatorios/rentabilidade";
 
-import {
-  formatMoneyCompact,
-  formatMoney,
-} from "@/lib/formatters";
-
+import { formatMoneyCompact, formatMoney } from "@/lib/formatters";
 
 export default async function RelatorioRentabilidadeContratosPage() {
-
-  const {
-    contratos,
-    totais
-  } = await getRentabilidadeContratos();
-
+  const { contratos, totais } = await getRentabilidadeContratos();
 
   return (
-
     <main className="space-y-8">
-
-
       <ReportHeader
-
         title="Rentabilidade dos Contratos"
 
         description="Visualize a rentabilidade de todos os contratos da empresa."
 
-        actions={
-          <ReportExport
-            disabledPDF
-            disabledExcel
-          />
-        }
-
+        actions={<ReportExport disabledPDF disabledExcel />}
       />
 
-
-
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-
         <ReportKPICard
-
           title="Receita Total"
 
           value={totais.receita}
@@ -63,13 +33,9 @@ export default async function RelatorioRentabilidadeContratosPage() {
           icon={DollarSign}
 
           color="green"
-
         />
 
-
-
         <ReportKPICard
-
           title="Custos Totais"
 
           value={totais.custos}
@@ -77,13 +43,9 @@ export default async function RelatorioRentabilidadeContratosPage() {
           icon={Wallet}
 
           color="red"
-
         />
 
-
-
         <ReportKPICard
-
           title="Lucro Total"
 
           value={totais.lucro}
@@ -91,13 +53,9 @@ export default async function RelatorioRentabilidadeContratosPage() {
           icon={TrendingUp}
 
           color="blue"
-
         />
 
-
-
         <ReportKPICard
-
           title="Margem Geral"
 
           value={`${totais.margem.toFixed(1)}%`}
@@ -105,160 +63,87 @@ export default async function RelatorioRentabilidadeContratosPage() {
           icon={Percent}
 
           color="yellow"
-
         />
-
-
       </section>
 
-
-
-
-
       <ReportTable
-
         title="Rentabilidade dos Contratos"
 
         description="Resultado financeiro consolidado por contrato."
 
-
         columns={[
-
-
           {
-            key:"cliente",
-            title:"Cliente",
+            key: "cliente",
+            title: "Cliente",
           },
 
-
           {
-            key:"contrato",
-            title:"Contrato",
+            key: "contrato",
+            title: "Contrato",
           },
 
-
           {
-            key:"receita",
+            key: "receita",
 
-            title:"Receita",
+            title: "Receita",
 
-            align:"right",
+            align: "right",
 
-            render:(item:any)=>
-
-              formatMoney(
-                item.receita
-              ),
-
+            render: (item: any) => formatMoney(item.receita),
           },
 
-
-
           {
-            key:"custos",
+            key: "custos",
 
-            title:"Custos",
+            title: "Custos",
 
-            align:"right",
+            align: "right",
 
-            render:(item:any)=>
-
-              formatMoney(
-                item.custos
-              ),
-
+            render: (item: any) => formatMoney(item.custos),
           },
 
-
-
           {
-            key:"lucro",
+            key: "lucro",
 
-            title:"Lucro",
+            title: "Lucro",
 
-            align:"right",
+            align: "right",
 
-            render:(item:any)=>
-
-              formatMoney(
-                item.lucro
-              ),
-
+            render: (item: any) => formatMoney(item.lucro),
           },
 
-
-
           {
-            key:"margem",
+            key: "margem",
 
-            title:"Margem",
+            title: "Margem",
 
-            align:"right",
+            align: "right",
 
-            render:(item:any)=>
-
-              `${item.margem.toFixed(1)}%`,
-
+            render: (item: any) => `${item.margem.toFixed(1)}%`,
           },
 
-
-
           {
-            key:"acoes",
+            key: "acoes",
 
-            title:"Ações",
+            title: "Ações",
 
-            align:"center",
+            align: "center",
 
-            render:(item:any)=>(
-
+            render: (item: any) => (
               <Link
+                href={`/relatorios/rentabilidade/${item.id}`}
 
-                href={
-                  `/relatorios/rentabilidade/${item.id}`
-                }
-
-                className="
-                  inline-flex
-                  items-center
-                  gap-2
-                  rounded-lg
-                  border
-                  border-zinc-700
-                  px-3
-                  py-2
-                  text-sm
-                  text-zinc-300
-                  transition
-                  hover:border-emerald-500
-                  hover:text-emerald-400
-                "
-
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:border-emerald-500 hover:text-emerald-400"
               >
-
-                <Eye size={16}/>
-
+                <Eye size={16} />
                 Ver detalhes
-
-
               </Link>
-
             ),
-
           },
-
-
         ]}
 
-
         data={contratos}
-
-
       />
-
-
     </main>
-
   );
-
 }

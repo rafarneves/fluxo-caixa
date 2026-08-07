@@ -1,11 +1,6 @@
 "use client";
 
-type Periodo =
-  | "hoje"
-  | "semana"
-  | "mes"
-  | "ano"
-  | "personalizado";
+type Periodo = "hoje" | "semana" | "mes" | "ano" | "personalizado";
 
 type ReportFilterProps = {
   value: Periodo;
@@ -38,10 +33,7 @@ const filtros: {
   },
 ];
 
-export default function ReportFilter({
-  value,
-  onChange,
-}: ReportFilterProps) {
+export default function ReportFilter({ value, onChange }: ReportFilterProps) {
   return (
     <div className="flex flex-wrap gap-3">
       {filtros.map((filtro) => {

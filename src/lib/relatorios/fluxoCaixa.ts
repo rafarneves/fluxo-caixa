@@ -22,13 +22,7 @@ export async function gerarPDFFluxoCaixa(
 
   pdf.setFillColor(...PDF_THEME.colors.background);
 
-  pdf.rect(
-    0,
-    0,
-    pdf.internal.pageSize.getWidth(),
-    pdf.internal.pageSize.getHeight(),
-    "F"
-  );
+  pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), "F");
 
   // ==========================
   // Logo
@@ -39,8 +33,7 @@ export async function gerarPDFFluxoCaixa(
   try {
     logo = new Image();
 
-    logo.src =
-      "/logo/LOGO ALTUZA - HORIZONTAL.png";
+    logo.src = "/logo/LOGO ALTUZA - HORIZONTAL.png";
 
     await new Promise((resolve, reject) => {
       logo!.onload = () => resolve(null);
@@ -98,10 +91,7 @@ export async function gerarPDFFluxoCaixa(
         style: "currency",
         currency: "BRL",
       }),
-      color:
-        saldo >= 0
-          ? PDF_THEME.colors.success
-          : PDF_THEME.colors.danger,
+      color: saldo >= 0 ? PDF_THEME.colors.success : PDF_THEME.colors.danger,
     },
   ]);
 
@@ -113,13 +103,10 @@ export async function gerarPDFFluxoCaixa(
     tipo: item.tipo,
     descricao: item.descricao,
 
-    valor: Number(item.valor).toLocaleString(
-      "pt-BR",
-      {
-        style: "currency",
-        currency: "BRL",
-      }
-    ),
+    valor: Number(item.valor).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }),
   }));
   drawTable(
     pdf,

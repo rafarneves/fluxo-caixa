@@ -41,15 +41,8 @@ export async function generatePDF({
   }
 
   if (columns.length && rows.length) {
-    drawTable(
-      pdf,
-      columns,
-      rows,
-      82
-    );
+    drawTable(pdf, columns, rows, 82);
   }
 
-  pdf.save(
-    fileName ?? `${title}.pdf`
-  );
+  pdf.save(fileName ?? `${title}.pdf`);
 }

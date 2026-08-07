@@ -3,88 +3,37 @@
 import { supabase } from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 
+export async function receberRecebimento(recebimentoId: string) {
+  const hoje = new Date().toISOString().split("T")[0];
 
-export async function receberRecebimento(
-  recebimentoId:string
-){
-
-
-  const hoje =
-    new Date()
-    .toISOString()
-    .split("T")[0];
-
-
-
-  const { data: recebimento, error } =
-    await supabase
+  const { data: recebimento, error } = await supabase
     .from("recebimentos")
     .select("valor")
-    .eq(
-      "id",
-      recebimentoId
-    )
+    .eq("id", recebimentoId)
     .single();
 
-
-
-  if(error || !recebimento){
-
-    throw new Error(
-      "Erro ao buscar recebimento"
-    );
-
+  if (error || !recebimento) {
+    throw new Error("Erro ao buscar recebimento");
   }
 
-
-
-
-  const { error:updateError } =
-    await supabase
+  const { error: updateError } = await supabase
     .from("recebimentos")
     .update({
+      status: "Pago",
 
-      status:"Pago",
+      data_pagamento: hoje,
 
-      data_pagamento:
-        hoje,
-
-      valor_recebido:
-        Number(recebimento.valor)
-
+      valor_recebido: Number(recebimento.valor),
     })
-    .eq(
-      "id",
-      recebimentoId
-    );
+    .eq("id", recebimentoId);
 
-
-
-
-  if(updateError){
-
-    throw new Error(
-      "Erro ao atualizar recebimento"
-    );
-
+  if (updateError) {
+    throw new Error("Erro ao atualizar recebimento");
   }
 
+  revalidatePath("/contas-receber");
 
+  revalidatePath("/recebimentos");
 
-
-  revalidatePath(
-    "/contas-receber"
-  );
-
-
-  revalidatePath(
-    "/recebimentos"
-  );
-
-
-  revalidatePath(
-    "/fluxo-caixa"
-  );
-
-
+  revalidatePath("/fluxo-caixa");
 }

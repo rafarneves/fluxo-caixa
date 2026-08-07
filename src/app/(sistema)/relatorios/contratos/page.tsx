@@ -1,9 +1,4 @@
-import {
-  FileText,
-  Wallet,
-  TrendingUp,
-  Users,
-} from "lucide-react";
+import { FileText, Wallet, TrendingUp, Users } from "lucide-react";
 
 import ReportHeader from "@/components/relatorios/ReportHeader";
 import ReportKPICard from "@/components/relatorios/ReportKPICard";
@@ -18,8 +13,7 @@ export default async function RelatorioContratosPage() {
   const contratos = dados.contratos;
 
   const faturamento = contratos.reduce(
-    (acc: number, contrato: any) =>
-      acc + Number(contrato.valor),
+    (acc: number, contrato: any) => acc + Number(contrato.valor),
     0
   );
 
@@ -28,12 +22,7 @@ export default async function RelatorioContratosPage() {
       <ReportHeader
         title="Contratos"
         description="Relatório completo dos contratos cadastrados no ERP."
-        actions={
-          <ReportExport
-            disabledPDF
-            disabledExcel
-          />
-        }
+        actions={<ReportExport disabledPDF disabledExcel />}
       />
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -45,12 +34,7 @@ export default async function RelatorioContratosPage() {
           isCurrency={false}
         />
 
-        <ReportKPICard
-          title="Faturamento"
-          value={faturamento}
-          icon={Wallet}
-          color="blue"
-        />
+        <ReportKPICard title="Faturamento" value={faturamento} icon={Wallet} color="blue" />
 
         <ReportKPICard
           title="Ticket Médio"
@@ -75,27 +59,22 @@ export default async function RelatorioContratosPage() {
           {
             key: "cliente",
             title: "Cliente",
-            render: (item: any) =>
-              item.clientes?.nome ?? "-",
+            render: (item: any) => item.clientes?.nome ?? "-",
           },
           {
             key: "nome",
             title: "Plano",
-            render: (item: any) =>
-              item.nome ?? "-",
+            render: (item: any) => item.nome ?? "-",
           },
           {
             key: "valor",
             title: "Valor",
             align: "right",
             render: (item: any) =>
-              Number(item.valor).toLocaleString(
-                "pt-BR",
-                {
-                  style: "currency",
-                  currency: "BRL",
-                }
-              ),
+              Number(item.valor).toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }),
           },
           {
             key: "status",

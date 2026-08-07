@@ -1,9 +1,4 @@
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  Wallet,
-  Landmark,
-} from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Wallet, Landmark } from "lucide-react";
 
 import ReportHeader from "@/components/relatorios/ReportHeader";
 import ReportKPICard from "@/components/relatorios/ReportKPICard";
@@ -46,10 +41,7 @@ export default async function FluxoCaixaRelatorioPage() {
   ];
 
   return (
-    <main
-      id="report-content"
-      className="space-y-8"
-    >
+    <main id="report-content" className="space-y-8">
       <ReportHeader
         title="Fluxo de Caixa"
         description="Relatório consolidado de entradas, saídas e saldo financeiro."
@@ -64,34 +56,12 @@ export default async function FluxoCaixaRelatorioPage() {
         }
       />
 
-      <section
-        className="
-          grid
-          gap-6
-          md:grid-cols-2
-          xl:grid-cols-4
-        "
-      >
-        <ReportKPICard
-          title="Entradas"
-          value={entradas}
-          icon={ArrowDownCircle}
-          color="green"
-        />
+      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <ReportKPICard title="Entradas" value={entradas} icon={ArrowDownCircle} color="green" />
 
-        <ReportKPICard
-          title="Saídas"
-          value={saidas}
-          icon={ArrowUpCircle}
-          color="red"
-        />
+        <ReportKPICard title="Saídas" value={saidas} icon={ArrowUpCircle} color="red" />
 
-        <ReportKPICard
-          title="Custos"
-          value={custos}
-          icon={Wallet}
-          color="yellow"
-        />
+        <ReportKPICard title="Custos" value={custos} icon={Wallet} color="yellow" />
 
         <ReportKPICard
           title="Saldo"

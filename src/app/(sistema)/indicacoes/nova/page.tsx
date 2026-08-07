@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import {
-  Handshake,
-  UserRound,
-  Gift,
-  ArrowLeft,
-  Save,
-} from "lucide-react";
+import { Handshake, UserRound, Gift, ArrowLeft, Save } from "lucide-react";
 
 export default function NovaIndicacaoPage() {
   const router = useRouter();
@@ -73,9 +67,7 @@ export default function NovaIndicacaoPage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white">
-            Nova Indicação
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white">Nova Indicação</h1>
 
           <p className="text-zinc-400 mt-2 text-lg">
             Cadastre uma nova indicação e configure o benefício mensal.
@@ -98,13 +90,9 @@ export default function NovaIndicacaoPage() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-white">
-              Cadastro da Indicação
-            </h2>
+            <h2 className="text-2xl font-bold text-white">Cadastro da Indicação</h2>
 
-            <p className="text-zinc-400">
-              Informe os clientes participantes da indicação.
-            </p>
+            <p className="text-zinc-400">Informe os clientes participantes da indicação.</p>
           </div>
         </div>
 

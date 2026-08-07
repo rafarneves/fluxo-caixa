@@ -9,7 +9,8 @@ export const dynamic = "force-dynamic";
 export default async function RecebimentosPage() {
   const { data: recebimentos } = await supabase
     .from("recebimentos")
-    .select(`
+    .select(
+      `
       *,
       contratos (
         nome,
@@ -17,7 +18,8 @@ export default async function RecebimentosPage() {
           nome
         )
       )
-    `)
+    `
+    )
     .order("vencimento", {
       ascending: true,
     });
@@ -26,47 +28,26 @@ export default async function RecebimentosPage() {
 
   const recebido = dados
     .filter((r: any) => r.status === "Pago")
-    .reduce(
-      (total: number, r: any) =>
-        total + Number(r.valor_recebido ?? r.valor),
-      0
-    );
+    .reduce((total: number, r: any) => total + Number(r.valor_recebido ?? r.valor), 0);
 
   const emAberto = dados
     .filter((r: any) => r.status !== "Pago")
-    .reduce(
-      (total: number, r: any) =>
-        total + Number(r.valor),
-      0
-    );
+    .reduce((total: number, r: any) => total + Number(r.valor), 0);
 
   const receberHoje = dados
     .filter((r: any) => {
-      const hoje = new Date()
-        .toISOString()
-        .split("T")[0];
+      const hoje = new Date().toISOString().split("T")[0];
 
-      return (
-        r.vencimento === hoje &&
-        r.status !== "Pago"
-      );
+      return r.vencimento === hoje && r.status !== "Pago";
     })
-    .reduce(
-      (total: number, r: any) =>
-        total + Number(r.valor),
-      0
-    );
+    .reduce((total: number, r: any) => total + Number(r.valor), 0);
 
   const atrasados = dados.filter((r: any) => {
-    return (
-      r.status !== "Pago" &&
-      new Date(r.vencimento) < new Date()
-    );
+    return r.status !== "Pago" && new Date(r.vencimento) < new Date();
   }).length;
 
   return (
     <main className="space-y-8">
-
       <RecebimentosHeader />
 
       <RecebimentosSummary
@@ -76,10 +57,7 @@ export default async function RecebimentosPage() {
         atrasados={atrasados}
       />
 
-      <RecebimentosTable
-        recebimentos={dados}
-      />
-
+      <RecebimentosTable recebimentos={dados} />
     </main>
   );
 }

@@ -19,15 +19,11 @@ function formatMoney(valor: number) {
   });
 }
 
-export default function HistoricoCustos({
-  custos,
-}: Props) {
+export default function HistoricoCustos({ custos }: Props) {
   return (
     <div className="rounded-3xl border border-zinc-800 bg-[#161B22] p-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">
-          Custos do Contrato
-        </h2>
+        <h2 className="text-2xl font-bold">Custos do Contrato</h2>
 
         <span className="text-zinc-500">
           {custos.length} lançamento{custos.length !== 1 ? "s" : ""}
@@ -42,29 +38,18 @@ export default function HistoricoCustos({
         <table className="w-full">
           <thead>
             <tr className="border-b border-zinc-800 text-left text-zinc-400">
-              <th className="pb-4">
-                Descrição
-              </th>
+              <th className="pb-4">Descrição</th>
 
-              <th className="text-right">
-                Valor
-              </th>
+              <th className="text-right">Valor</th>
 
-              <th className="text-center">
-                Ações
-              </th>
+              <th className="text-center">Ações</th>
             </tr>
           </thead>
 
           <tbody>
             {custos.map((custo) => (
-              <tr
-                key={custo.id}
-                className="border-b border-zinc-800"
-              >
-                <td className="py-5">
-                  {custo.descricao}
-                </td>
+              <tr key={custo.id} className="border-b border-zinc-800">
+                <td className="py-5">{custo.descricao}</td>
 
                 <td className="text-right font-bold text-red-400">
                   {formatMoney(Number(custo.valor))}

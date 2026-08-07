@@ -1,9 +1,4 @@
-import {
-  TrendingUp,
-  Wallet,
-  Receipt,
-  Percent,
-} from "lucide-react";
+import { TrendingUp, Wallet, Receipt, Percent } from "lucide-react";
 
 import StatCard from "@/components/ui/StatCard";
 
@@ -31,15 +26,9 @@ function moeda(valor: number) {
   });
 }
 
-export default function DRESummaryCards({
-  receitaBruta,
-  custos,
-  lucroLiquido,
-  margem,
-}: Props) {
+export default function DRESummaryCards({ receitaBruta, custos, lucroLiquido, margem }: Props) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
       <StatCard
         titulo="Receita Bruta"
         valor={moeda(receitaBruta)}
@@ -50,7 +39,6 @@ export default function DRESummaryCards({
         progresso={100}
         cor="green"
       />
-
 
       <StatCard
         titulo="Custos dos Contratos"
@@ -63,60 +51,27 @@ export default function DRESummaryCards({
         cor="red"
       />
 
-
       <StatCard
         titulo="Lucro Líquido"
         valor={moeda(lucroLiquido)}
         subtitulo="Resultado final"
         icone={<TrendingUp size={22} />}
-        status={
-          lucroLiquido >= 0
-            ? "Lucro"
-            : "Prejuízo"
-        }
-        tendencia={
-          lucroLiquido >= 0
-            ? "Empresa saudável"
-            : "Resultado negativo"
-        }
-        progresso={Math.min(
-          Math.abs(lucroLiquido) / 100,
-          100
-        )}
-        cor={
-          lucroLiquido >= 0
-            ? "green"
-            : "red"
-        }
+        status={lucroLiquido >= 0 ? "Lucro" : "Prejuízo"}
+        tendencia={lucroLiquido >= 0 ? "Empresa saudável" : "Resultado negativo"}
+        progresso={Math.min(Math.abs(lucroLiquido) / 100, 100)}
+        cor={lucroLiquido >= 0 ? "green" : "red"}
       />
-
 
       <StatCard
         titulo="Margem Líquida"
         valor={`${margem.toFixed(1)}%`}
         subtitulo="Rentabilidade da empresa"
         icone={<Percent size={22} />}
-        status={
-          margem >= 30
-            ? "Saudável"
-            : "Atenção"
-        }
-        tendencia={
-          margem >= 30
-            ? "Boa margem"
-            : "Revisar custos"
-        }
-        progresso={Math.min(
-          margem,
-          100
-        )}
-        cor={
-          margem >= 30
-            ? "green"
-            : "yellow"
-        }
+        status={margem >= 30 ? "Saudável" : "Atenção"}
+        tendencia={margem >= 30 ? "Boa margem" : "Revisar custos"}
+        progresso={Math.min(margem, 100)}
+        cor={margem >= 30 ? "green" : "yellow"}
       />
-
     </section>
   );
 }

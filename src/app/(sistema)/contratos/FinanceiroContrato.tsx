@@ -7,17 +7,16 @@ type Props = {
   receita: number;
 };
 
-export default async function FinanceiroContrato({
-  contratoId,
-  receita,
-}: Props) {
+export default async function FinanceiroContrato({ contratoId, receita }: Props) {
   const { data: custos } = await supabase
     .from("custos_contrato")
-    .select(`
+    .select(
+      `
       id,
       descricao,
       valor
-    `)
+    `
+    )
     .eq("contrato_id", contratoId)
     .order("created_at", {
       ascending: false,
@@ -26,21 +25,15 @@ export default async function FinanceiroContrato({
   const custosData = custos ?? [];
 
   const totalCustos = custosData.reduce(
-    (total: number, custo: any) =>
-      total + Number(custo.valor),
+    (total: number, custo: any) => total + Number(custo.valor),
     0
   );
 
   return (
     <section className="space-y-8">
-      <CardsFinanceiros
-        receita={receita}
-        custos={totalCustos}
-      />
+      <CardsFinanceiros receita={receita} custos={totalCustos} />
 
-      <HistoricoCustos
-        custos={custosData}
-      />
+      <HistoricoCustos custos={custosData} />
     </section>
   );
 }

@@ -11,33 +11,33 @@ export async function calcularFinanceiroEmpresa() {
   // Contratos
   const { data: contratos } = await supabase
     .from("contratos")
-    .select(`
+    .select(
+      `
       *,
       clientes(nome)
-    `)
+    `
+    )
     .eq("status", "Ativo");
 
   // Recebimentos
   const { data: recebimentos } = await supabase
     .from("recebimentos")
-    .select(`
+    .select(
+      `
       *,
       contratos(
         nome,
         clientes(nome)
       )
-    `)
+    `
+    )
     .order("vencimento", { ascending: true });
 
   // Despesas
-  const { data: despesas } = await supabase
-    .from("despesas")
-    .select("*");
+  const { data: despesas } = await supabase.from("despesas").select("*");
 
   // Custos dos contratos
-  const { data: custosContrato } = await supabase
-    .from("custos_contrato")
-    .select("*");
+  const { data: custosContrato } = await supabase.from("custos_contrato").select("*");
 
   const clientesData = clientes ?? [];
   const contratosData = contratos ?? [];
@@ -71,15 +71,9 @@ export async function calcularFinanceiroEmpresa() {
 
   const lucro = financeiro.recebido - totalSaidas;
 
-  const ticketMedio =
-    contratosAtivos === 0
-      ? 0
-      : faturamentoMensal / contratosAtivos;
+  const ticketMedio = contratosAtivos === 0 ? 0 : faturamentoMensal / contratosAtivos;
 
-  const margem =
-    financeiro.recebido === 0
-      ? 0
-      : (lucro / financeiro.recebido) * 100;
+  const margem = financeiro.recebido === 0 ? 0 : (lucro / financeiro.recebido) * 100;
 
   // Atividades recentes
   const atividades = [

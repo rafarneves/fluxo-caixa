@@ -1,9 +1,4 @@
-import {
-  DollarSign,
-  Wallet,
-  TrendingUp,
-  Percent,
-} from "lucide-react";
+import { DollarSign, Wallet, TrendingUp, Percent } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import ReportHeader from "@/components/relatorios/ReportHeader";
@@ -19,9 +14,7 @@ type Props = {
   }>;
 };
 
-export default async function RentabilidadeContratoPage({
-  params,
-}: Props) {
+export default async function RentabilidadeContratoPage({ params }: Props) {
   const { id } = await params;
 
   const contrato = await getRentabilidadeContrato(id);
@@ -32,10 +25,7 @@ export default async function RentabilidadeContratoPage({
 
   return (
     <main className="space-y-8">
-      <ReportHeader
-        title={contrato.contrato}
-        description={contrato.cliente}
-      />
+      <ReportHeader title={contrato.contrato} description={contrato.cliente} />
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <ReportKPICard

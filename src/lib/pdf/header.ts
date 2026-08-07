@@ -6,10 +6,7 @@ type HeaderOptions = {
   logo?: HTMLImageElement;
 };
 
-export async function drawHeader(
-  pdf: jsPDF,
-  options: HeaderOptions
-) {
+export async function drawHeader(pdf: jsPDF, options: HeaderOptions) {
   const pageWidth = pdf.internal.pageSize.getWidth();
 
   const headerHeight = 38;
@@ -20,30 +17,18 @@ export async function drawHeader(
 
   pdf.setFillColor(...PDF_THEME.colors.primary);
 
-  pdf.rect(
-    0,
-    0,
-    pageWidth,
-    headerHeight,
-    "F"
-  );
-
+  pdf.rect(0, 0, pageWidth, headerHeight, "F");
 
   // ==========================
   // LOGO
   // ==========================
 
   if (options.logo) {
-
     const larguraLogo = 58;
 
-    const proporcao =
-      options.logo.height /
-      options.logo.width;
+    const proporcao = options.logo.height / options.logo.width;
 
-    const alturaLogo =
-      larguraLogo * proporcao;
-
+    const alturaLogo = larguraLogo * proporcao;
 
     pdf.addImage(
       options.logo,
@@ -55,90 +40,47 @@ export async function drawHeader(
     );
   }
 
-
   // ==========================
   // TEXTO DIREITO
   // ==========================
 
-  const direita =
-    pageWidth - PDF_THEME.page.margin;
+  const direita = pageWidth - PDF_THEME.page.margin;
 
+  pdf.setTextColor(255, 255, 255);
 
-  pdf.setTextColor(
-    255,
-    255,
-    255
-  );
-
-
-  pdf.setFont(
-    "helvetica",
-    "bold"
-  );
+  pdf.setFont("helvetica", "bold");
 
   pdf.setFontSize(20);
 
-
-  pdf.text(
-    options.title.toUpperCase(),
-    direita,
-    15,
-    {
-      align: "right",
-    }
-  );
-
+  pdf.text(options.title.toUpperCase(), direita, 15, {
+    align: "right",
+  });
 
   // Subtítulo
 
-  pdf.setFont(
-    "helvetica",
-    "normal"
-  );
+  pdf.setFont("helvetica", "normal");
 
   pdf.setFontSize(9);
 
-
-  pdf.text(
-    "ERP Financeiro Altuza Automotivo",
-    direita,
-    21,
-    {
-      align: "right",
-    }
-  );
-
+  pdf.text("ERP Financeiro Altuza Automotivo", direita, 21, {
+    align: "right",
+  });
 
   // Data
 
   pdf.setFontSize(8);
 
-
-  pdf.text(
-    `Emitido em ${new Date().toLocaleString("pt-BR")}`,
-    direita,
-    28,
-    {
-      align: "right",
-    }
-  );
-
+  pdf.text(`Emitido em ${new Date().toLocaleString("pt-BR")}`, direita, 28, {
+    align: "right",
+  });
 
   // ==========================
   // LINHA VERDE
   // ==========================
 
-  pdf.setDrawColor(
-    ...PDF_THEME.colors.secondary
-  );
+  pdf.setDrawColor(...PDF_THEME.colors.secondary);
 
   pdf.setLineWidth(1.2);
 
-
-  pdf.line(
-    0,
-    headerHeight,
-    pageWidth,
-    headerHeight
-  );
+  pdf.line(0, headerHeight, pageWidth, headerHeight);
 }

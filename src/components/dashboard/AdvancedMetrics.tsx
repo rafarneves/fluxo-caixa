@@ -1,9 +1,4 @@
-import {
-  TrendingUp,
-  DollarSign,
-  Percent,
-  AlertTriangle,
-} from "lucide-react";
+import { TrendingUp, DollarSign, Percent, AlertTriangle } from "lucide-react";
 
 import StatCard from "@/components/ui/StatCard";
 
@@ -67,18 +62,12 @@ export default function AdvancedMetrics({
           percentualRecebimento >= 90
             ? "Excelente"
             : percentualRecebimento >= 75
-            ? "Boa"
-            : "Atenção"
+              ? "Boa"
+              : "Atenção"
         }
         tendencia="Eficiência financeira"
         progresso={percentualRecebimento}
-        cor={
-          percentualRecebimento >= 90
-            ? "green"
-            : percentualRecebimento >= 75
-            ? "yellow"
-            : "red"
-        }
+        cor={percentualRecebimento >= 90 ? "green" : percentualRecebimento >= 75 ? "yellow" : "red"}
         icone={<Percent size={22} />}
       />
 
@@ -86,18 +75,10 @@ export default function AdvancedMetrics({
         titulo="Inadimplência"
         valor={formatCompact(inadimplencia)}
         subtitulo="Valores pendentes"
-        status={
-          inadimplencia === 0
-            ? "Controlada"
-            : "Monitorar"
-        }
+        status={inadimplencia === 0 ? "Controlada" : "Monitorar"}
         tendencia="Cobranças em aberto"
         progresso={Math.min(inadimplencia / 1000, 100)}
-        cor={
-          inadimplencia === 0
-            ? "green"
-            : "red"
-        }
+        cor={inadimplencia === 0 ? "green" : "red"}
         icone={<AlertTriangle size={22} />}
       />
     </section>
