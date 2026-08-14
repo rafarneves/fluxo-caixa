@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { formatarDataServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
 import { calcularFinanceiro } from '@/lib/financeiro';
+import { contarContratosPorPlano } from '@/lib/planos';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
@@ -22,6 +23,12 @@ type Contrato = {
     clientes: { nome: string } | null;
 };
 
+type Cliente = {
+    id: string;
+    nome: string;
+    created_at: string;
+};
+
 type Recebimento = {
     id: string;
     valor: number;
@@ -36,6 +43,10 @@ type Recebimento = {
 
 type CustoContrato = {
     id: string;
+    valor: number;
+};
+
+type Despesa = {
     valor: number;
 };
 
@@ -75,20 +86,21 @@ export default async function Dashboard() {
         supabase.from('custos_contrato').select('id, valor'),
     ]);
 
-    const clientesData = clientes ?? [];
+    const clientesData = (clientes ?? []) as Cliente[];
     const contratosData = (contratos ?? []) as Contrato[];
     const recebimentosData = (recebimentos ?? []) as Recebimento[];
-    const despesasData = despesas ?? [];
+    const despesasData = (despesas ?? []) as Despesa[];
     const custosData = (custosContrato ?? []) as CustoContrato[];
 
     const financeiro = calcularFinanceiro(recebimentosData);
 
     const totalClientes = clientesData.length;
     const contratosAtivos = contratosData.length;
+    const contagemPlanos = contarContratosPorPlano(contratosData);
 
     const faturamentoMensal = contratosData.reduce((total, contrato) => total + Number(contrato.valor), 0);
 
-    const despesasTotal = despesasData.reduce((total, despesa: any) => total + Number(despesa.valor), 0);
+    const despesasTotal = despesasData.reduce((total, despesa) => total + Number(despesa.valor), 0);
 
     const custosTotal = custosData.reduce((total, custo) => total + Number(custo.valor), 0);
 
@@ -99,7 +111,7 @@ export default async function Dashboard() {
     const ticketMedio = contratosAtivos === 0 ? 0 : faturamentoMensal / contratosAtivos;
 
     const atividades = [
-        ...clientesData.slice(0, 3).map((cliente: any) => ({
+        ...clientesData.slice(0, 3).map((cliente) => ({
             id: cliente.id,
             titulo: 'Novo cliente cadastrado',
             descricao: cliente.nome,
@@ -148,10 +160,11 @@ export default async function Dashboard() {
                 />
 
                 <PlansCard
-                    performance={contratosData.filter((c) => c.nome === 'Plano Performance').length}
-                    altaPerformance={contratosData.filter((c) => c.nome === 'Plano Alta Performance').length}
-                    pro={contratosData.filter((c) => c.nome === 'Plano PRO').length}
-                    personalizado={contratosData.filter((c) => c.nome === 'Plano Personalizado').length}
+                    performance={contagemPlanos.performance}
+                    altaPerformance={contagemPlanos.altaPerformance}
+                    pro={contagemPlanos.pro}
+                    personalizado={contagemPlanos.personalizado}
+                    outros={contagemPlanos.outros}
                 />
             </div>
 

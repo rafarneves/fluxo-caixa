@@ -5,9 +5,10 @@ type Props = {
     altaPerformance: number;
     pro: number;
     personalizado: number;
+    outros: number;
 };
 
-export default function PlansCard({ performance, altaPerformance, pro, personalizado }: Props) {
+export default function PlansCard({ performance, altaPerformance, pro, personalizado, outros }: Props) {
     const planos = [
         {
             nome: 'Plano Performance',
@@ -32,6 +33,12 @@ export default function PlansCard({ performance, altaPerformance, pro, personali
             valor: personalizado,
             cor: 'bg-purple-500',
             texto: 'text-purple-400',
+        },
+        {
+            nome: 'Outros',
+            valor: outros,
+            cor: 'bg-zinc-500',
+            texto: 'text-zinc-300',
         },
     ];
 
