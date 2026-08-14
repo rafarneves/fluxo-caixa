@@ -9,48 +9,71 @@ import Link from 'next/link';
 import { FilePlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+type Cliente = {
+    id: string;
+    nome: string;
+};
+
+type Plano = {
+    id: string;
+    nome: string;
+};
+
 export default function NovoContratoPage() {
     const router = useRouter();
 
-    const [clientes, setClientes] = useState<any[]>([]);
+    const [clientes, setClientes] = useState<Cliente[]>([]);
+
+    const [planos, setPlanos] = useState<Plano[]>([]);
+
+    const [carregandoOpcoes, setCarregandoOpcoes] = useState(true);
 
     const [mensagem, setMensagem] = useState('');
 
     const [criando, setCriando] = useState(false);
 
     useEffect(() => {
-        async function carregarClientes() {
-            const { data } = await supabase
-                .from('clientes')
-                .select(
-                    `
-            id,
-            nome
-          `
-                )
-                .order('nome', {
-                    ascending: true,
-                });
+        async function carregarOpcoes() {
+            const [resultadoClientes, resultadoPlanos] = await Promise.all([
+                supabase.from('clientes').select('id, nome').order('nome', { ascending: true }),
+                supabase
+                    .from('planos')
+                    .select('id, nome')
+                    .eq('ativo', true)
+                    .order('ordem', { ascending: true }),
+            ]);
 
-            setClientes(data ?? []);
+            if (resultadoClientes.error || resultadoPlanos.error) {
+                setMensagem('Não foi possível carregar os clientes e planos. Atualize a página e tente novamente.');
+            } else {
+                setClientes(resultadoClientes.data ?? []);
+                setPlanos(resultadoPlanos.data ?? []);
+            }
+
+            setCarregandoOpcoes(false);
         }
 
-        carregarClientes();
+        carregarOpcoes();
     }, []);
 
     async function enviarContrato(formData: FormData) {
         setCriando(true);
 
-        const resultado = await criarContrato(formData);
+        try {
+            const resultado = await criarContrato(formData);
 
-        if (resultado?.success) {
-            setMensagem('Contrato criado com sucesso! Recebimento gerado.');
+            if (resultado?.success) {
+                setMensagem('Contrato criado com sucesso! Recebimento gerado.');
 
-            setTimeout(() => {
-                router.push(`/contratos/${resultado.contratoId}`);
+                setTimeout(() => {
+                    router.push(`/contratos/${resultado.contratoId}`);
 
-                router.refresh();
-            }, 2000);
+                    router.refresh();
+                }, 2000);
+            }
+        } catch {
+            setMensagem('Não foi possível criar o contrato. Confira os dados e tente novamente.');
+            setCriando(false);
         }
     }
 
@@ -115,17 +138,29 @@ export default function NovoContratoPage() {
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <div>
-                        <label className="text-sm text-zinc-400">Nome do contrato</label>
+                        <label className="text-sm text-zinc-400">Plano</label>
 
-                        <input
-                            name="nome"
+                        <select
+                            name="plano_id"
 
                             required
 
-                            placeholder="Plano Performance"
-
                             className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4"
-                        />
+                        >
+                            <option value="">
+                                {carregandoOpcoes ? 'Carregando planos...' : 'Selecione o plano'}
+                            </option>
+
+                            {planos.map((plano) => (
+                                <option
+                                    key={plano.id}
+
+                                    value={plano.id}
+                                >
+                                    {plano.nome}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div>
@@ -215,7 +250,7 @@ export default function NovoContratoPage() {
 
                 <div className="flex gap-4">
                     <button
-                        disabled={criando}
+                        disabled={criando || carregandoOpcoes}
 
                         className="rounded-xl bg-green-500 px-8 py-4 font-bold text-black transition hover:bg-green-400 disabled:opacity-50"
                     >

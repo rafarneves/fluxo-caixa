@@ -7,7 +7,18 @@ export async function criarContrato(formData: FormData) {
     const supabase = await createClient();
     const cliente_id = String(formData.get('cliente_id'));
 
-    const nome = String(formData.get('nome'));
+    const plano_id = String(formData.get('plano_id'));
+
+    const { data: plano, error: erroPlano } = await supabase
+        .from('planos')
+        .select('nome')
+        .eq('id', plano_id)
+        .eq('ativo', true)
+        .single();
+
+    if (erroPlano || !plano) {
+        throw new Error('Plano inválido ou inativo');
+    }
 
     const descricao = String(formData.get('descricao') ?? '');
 
@@ -26,7 +37,9 @@ export async function criarContrato(formData: FormData) {
         .insert({
             cliente_id,
 
-            nome,
+            plano_id,
+
+            nome: plano.nome,
 
             descricao,
 
@@ -49,7 +62,14 @@ export async function criarContrato(formData: FormData) {
         throw new Error('Erro ao criar contrato');
     }
 
-    const recebimentos: any[] = [];
+    const recebimentos: Array<{
+        contrato_id: string;
+        competencia: string;
+        valor: number;
+        valor_original: number;
+        vencimento: string;
+        status: string;
+    }> = [];
 
     const inicio = new Date(data_inicio);
 
@@ -63,7 +83,7 @@ export async function criarContrato(formData: FormData) {
         fim.setMonth(fim.getMonth() + 11);
     }
 
-    let atual = new Date(inicio.getFullYear(), inicio.getMonth(), vencimento);
+    const atual = new Date(inicio.getFullYear(), inicio.getMonth(), vencimento);
 
     while (atual <= fim) {
         recebimentos.push({

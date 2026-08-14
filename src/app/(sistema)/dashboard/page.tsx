@@ -1,13 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { formatarDataServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
 import { calcularEvolucaoFaturamento, calcularFinanceiro } from '@/lib/financeiro';
-import { contarContratosPorPlano } from '@/lib/planos';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
 import AdvancedMetrics from '@/components/dashboard/AdvancedMetrics';
 import FinanceCard from '@/components/dashboard/FinanceCard';
-import PlansCard from '@/components/dashboard/PlansCard';
+import PlansCard, { type PlanoDistribuicao } from '@/components/dashboard/PlansCard';
 import ContractsTable from '@/components/dashboard/ContractsTable';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import UpcomingReceivables from '@/components/dashboard/UpcomingReceivables';
@@ -51,6 +50,13 @@ type Despesa = {
     valor: number;
 };
 
+type DistribuicaoPlanoRpc = {
+    plano_id: string;
+    slug: string;
+    nome: string;
+    total: number | string;
+};
+
 export default async function Dashboard() {
     const supabase = await createClient();
     const { configuracoes } = await getContextoConfiguracoes();
@@ -60,6 +66,7 @@ export default async function Dashboard() {
         { data: recebimentos },
         { data: despesas },
         { data: custosContrato },
+        { data: distribuicaoPlanos, error: erroDistribuicaoPlanos },
     ] = await Promise.all([
         supabase.from('clientes').select('*').order('created_at', { ascending: false }),
         supabase
@@ -85,20 +92,30 @@ export default async function Dashboard() {
             .order('vencimento', { ascending: true }),
         supabase.from('despesas').select('*'),
         supabase.from('custos_contrato').select('id, valor'),
+        supabase.rpc('dashboard_distribuicao_planos'),
     ]);
+
+    if (erroDistribuicaoPlanos) {
+        throw new Error(`Erro ao carregar a distribuição dos planos: ${erroDistribuicaoPlanos.message}`);
+    }
 
     const clientesData = (clientes ?? []) as Cliente[];
     const contratosData = (contratos ?? []) as Contrato[];
     const recebimentosData = (recebimentos ?? []) as Recebimento[];
     const despesasData = (despesas ?? []) as Despesa[];
     const custosData = (custosContrato ?? []) as CustoContrato[];
+    const planosData = ((distribuicaoPlanos ?? []) as DistribuicaoPlanoRpc[]).map<PlanoDistribuicao>((plano) => ({
+        planoId: plano.plano_id,
+        slug: plano.slug,
+        nome: plano.nome,
+        total: Number(plano.total),
+    }));
 
     const financeiro = calcularFinanceiro(recebimentosData);
     const evolucaoFaturamento = calcularEvolucaoFaturamento(recebimentosData);
 
     const totalClientes = clientesData.length;
-    const contratosAtivos = contratosData.length;
-    const contagemPlanos = contarContratosPorPlano(contratosData);
+    const contratosAtivos = planosData.reduce((total, plano) => total + plano.total, 0);
 
     const faturamentoMensal = contratosData.reduce((total, contrato) => total + Number(contrato.valor), 0);
 
@@ -161,13 +178,7 @@ export default async function Dashboard() {
                     resultado={resultadoEmpresa}
                 />
 
-                <PlansCard
-                    performance={contagemPlanos.performance}
-                    altaPerformance={contagemPlanos.altaPerformance}
-                    pro={contagemPlanos.pro}
-                    personalizado={contagemPlanos.personalizado}
-                    outros={contagemPlanos.outros}
-                />
+                <PlansCard planos={planosData} />
             </div>
 
             <UpcomingReceivables recebimentos={recebimentosData} />

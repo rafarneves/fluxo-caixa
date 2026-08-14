@@ -1,48 +1,42 @@
 import { PieChart } from 'lucide-react';
 
-type Props = {
-    performance: number;
-    altaPerformance: number;
-    pro: number;
-    personalizado: number;
-    outros: number;
+export type PlanoDistribuicao = {
+    planoId: string;
+    slug: string;
+    nome: string;
+    total: number;
 };
 
-export default function PlansCard({ performance, altaPerformance, pro, personalizado, outros }: Props) {
-    const planos = [
-        {
-            nome: 'Plano Performance',
-            valor: performance,
-            cor: 'bg-green-500',
-            texto: 'text-green-400',
-        },
-        {
-            nome: 'Alta Performance',
-            valor: altaPerformance,
-            cor: 'bg-cyan-500',
-            texto: 'text-cyan-400',
-        },
-        {
-            nome: 'Plano PRO',
-            valor: pro,
-            cor: 'bg-yellow-500',
-            texto: 'text-yellow-400',
-        },
-        {
-            nome: 'Personalizado',
-            valor: personalizado,
-            cor: 'bg-purple-500',
-            texto: 'text-purple-400',
-        },
-        {
-            nome: 'Outros',
-            valor: outros,
-            cor: 'bg-zinc-500',
-            texto: 'text-zinc-300',
-        },
-    ];
+type Props = {
+    planos: PlanoDistribuicao[];
+};
 
-    const total = planos.reduce((acc, plano) => acc + plano.valor, 0);
+const estiloPadrao = {
+    cor: 'bg-zinc-500',
+    texto: 'text-zinc-300',
+};
+
+const estilosPorPlano: Record<string, typeof estiloPadrao> = {
+    performance: {
+        cor: 'bg-green-500',
+        texto: 'text-green-400',
+    },
+    'alta-performance': {
+        cor: 'bg-cyan-500',
+        texto: 'text-cyan-400',
+    },
+    pro: {
+        cor: 'bg-yellow-500',
+        texto: 'text-yellow-400',
+    },
+    personalizado: {
+        cor: 'bg-purple-500',
+        texto: 'text-purple-400',
+    },
+};
+
+export default function PlansCard({ planos }: Props) {
+    const total = planos.reduce((acc, plano) => acc + plano.total, 0);
 
     return (
         <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
@@ -62,27 +56,28 @@ export default function PlansCard({ performance, altaPerformance, pro, personali
 
             <div className="space-y-7">
                 {planos.map((plano) => {
-                    const porcentagem = total === 0 ? 0 : (plano.valor / total) * 100;
+                    const porcentagem = total === 0 ? 0 : (plano.total / total) * 100;
+                    const estilo = estilosPorPlano[plano.slug] ?? estiloPadrao;
 
                     return (
-                        <div key={plano.nome}>
+                        <div key={plano.planoId}>
                             <div className="mb-3 flex items-center justify-between">
                                 <div>
                                     <p className="font-medium text-white">{plano.nome}</p>
 
                                     <p className="text-sm text-zinc-500">
-                                        {plano.valor} contrato{plano.valor !== 1 ? 's' : ''}
+                                        {plano.total} contrato{plano.total !== 1 ? 's' : ''}
                                     </p>
                                 </div>
 
                                 <div className="text-right">
-                                    <p className={`text-lg font-bold ${plano.texto}`}>{porcentagem.toFixed(0)}%</p>
+                                    <p className={`text-lg font-bold ${estilo.texto}`}>{porcentagem.toFixed(0)}%</p>
                                 </div>
                             </div>
 
                             <div className="h-3 overflow-hidden rounded-full bg-black/30">
                                 <div
-                                    className={`${plano.cor} h-full rounded-full transition-all duration-500`}
+                                    className={`${estilo.cor} h-full rounded-full transition-all duration-500`}
                                     style={{
                                         width: `${porcentagem}%`,
                                     }}

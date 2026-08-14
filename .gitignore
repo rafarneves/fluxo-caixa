@@ -23,6 +23,9 @@
 !.env.example
 !.env.*.example
 
+# Supabase local CLI state
+/supabase/.temp/
+
 # TypeScript
 *.tsbuildinfo
 
@@ -48,4 +51,3 @@ Desktop.ini
 
 # Certificates and private keys
 *.pem
-
