@@ -61,22 +61,26 @@ export default function StatCard({
 
     return (
         <div
-            className={`relative overflow-hidden rounded-3xl border ${cores[cor].borda} bg-gradient-to-b from-[#171F2B] to-[#111827] p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${cores[cor].glow} `}
+            className={`relative min-w-0 overflow-hidden rounded-3xl border ${cores[cor].borda} bg-gradient-to-b from-[#171F2B] to-[#111827] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl sm:p-5 ${cores[cor].glow} `}
         >
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/5 blur-3xl" />
 
-            <div className="relative flex items-start justify-between">
-                <div>
+            <div className="relative flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold tracking-[0.18em] text-zinc-500 uppercase">{titulo}</p>
 
-                    <h2 className={`mt-3 text-3xl font-bold tracking-tight ${cores[cor].texto} `}>{valor}</h2>
+                    <h2
+                        className={`mt-3 text-2xl leading-tight font-bold tracking-tight [overflow-wrap:anywhere] sm:text-3xl ${cores[cor].texto} `}
+                    >
+                        {valor}
+                    </h2>
 
                     {subtitulo && <p className="mt-2 text-sm text-zinc-500">{subtitulo}</p>}
                 </div>
 
                 {icone && (
                     <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${cores[cor].borda} ${cores[cor].fundo} ${cores[cor].texto} transition-transform duration-300 hover:scale-110`}
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border sm:h-12 sm:w-12 ${cores[cor].borda} ${cores[cor].fundo} ${cores[cor].texto} transition-transform duration-300 hover:scale-110`}
                     >
                         {icone}
                     </div>
@@ -84,7 +88,7 @@ export default function StatCard({
             </div>
 
             {(status || tendencia) && (
-                <div className="relative mt-3 flex items-center justify-between gap-3">
+                <div className="relative mt-3 flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2">
                     {status && (
                         <span
                             className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${cores[cor].borda} ${cores[cor].texto} ${cores[cor].fundo} `}
@@ -93,7 +97,11 @@ export default function StatCard({
                         </span>
                     )}
 
-                    {tendencia && <span className={`text-[10px] font-medium ${cores[cor].texto} `}>{tendencia}</span>}
+                    {tendencia && (
+                        <span className={`min-w-0 text-[10px] font-medium [overflow-wrap:anywhere] ${cores[cor].texto} `}>
+                            {tendencia}
+                        </span>
+                    )}
                 </div>
             )}
 

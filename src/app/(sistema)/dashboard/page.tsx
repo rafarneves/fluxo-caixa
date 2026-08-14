@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { formatarDataServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
-import { calcularFinanceiro } from '@/lib/financeiro';
+import { calcularEvolucaoFaturamento, calcularFinanceiro } from '@/lib/financeiro';
 import { contarContratosPorPlano } from '@/lib/planos';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -33,6 +33,7 @@ type Recebimento = {
     id: string;
     valor: number;
     valor_recebido: number | null;
+    competencia: string | null;
     vencimento: string;
     status: string | null;
     contratos: {
@@ -93,6 +94,7 @@ export default async function Dashboard() {
     const custosData = (custosContrato ?? []) as CustoContrato[];
 
     const financeiro = calcularFinanceiro(recebimentosData);
+    const evolucaoFaturamento = calcularEvolucaoFaturamento(recebimentosData);
 
     const totalClientes = clientesData.length;
     const contratosAtivos = contratosData.length;
@@ -148,9 +150,9 @@ export default async function Dashboard() {
                 inadimplencia={financeiro.atrasadosValor}
             />
 
-            <RevenueChart />
+            <RevenueChart data={evolucaoFaturamento} />
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 min-[1440px]:grid-cols-2">
                 <FinanceCard
                     recebido={financeiro.recebido}
                     emAberto={financeiro.emAberto}

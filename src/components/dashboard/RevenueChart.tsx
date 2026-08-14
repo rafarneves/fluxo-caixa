@@ -16,6 +16,19 @@ type RevenueChartProps = {
     description?: string;
 };
 
+function formatarMes(valor: string) {
+    const [ano, mes] = valor.split('-');
+    const data = new Date(Number(ano), Number(mes) - 1, 1);
+
+    if (Number.isNaN(data.getTime())) {
+        return valor;
+    }
+
+    const nomeMes = new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(data).replace('.', '');
+
+    return `${nomeMes.charAt(0).toUpperCase()}${nomeMes.slice(1)}/${ano.slice(2)}`;
+}
+
 export default function RevenueChart({
     data = [],
     title = 'Evolução do Faturamento',
@@ -75,6 +88,7 @@ export default function RevenueChart({
 
                             <XAxis
                                 dataKey="mes"
+                                tickFormatter={formatarMes}
                                 axisLine={false}
                                 tickLine={false}
                                 tick={{
@@ -94,7 +108,8 @@ export default function RevenueChart({
                             />
 
                             <Tooltip
-                                formatter={(value: any) => [formatarMoedaCompacta(Number(value)), 'Receita']}
+                                formatter={(value: unknown) => [formatarMoedaCompacta(Number(value)), 'Receita']}
+                                labelFormatter={(label) => formatarMes(String(label))}
                                 cursor={{
                                     stroke: '#22C55E',
                                     strokeDasharray: '4 4',

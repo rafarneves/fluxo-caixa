@@ -16,7 +16,7 @@ export default function AdvancedMetrics({ mrr, ticketMedio, percentualRecebiment
     const { formatarMoedaCompacta } = useConfiguracoes();
 
     return (
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <section className="grid grid-cols-1 gap-6 min-[900px]:grid-cols-2 min-[1440px]:grid-cols-4">
             <StatCard
                 titulo="Receita Recorrente"
                 valor={formatarMoedaCompacta(mrr)}
