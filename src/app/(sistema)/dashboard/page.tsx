@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { formatarDataServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
-import { calcularEvolucaoFaturamento, calcularFinanceiro } from '@/lib/financeiro';
+import { calcularFinanceiro } from '@/lib/financeiro';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
@@ -11,6 +11,7 @@ import ContractsTable from '@/components/dashboard/ContractsTable';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import UpcomingReceivables from '@/components/dashboard/UpcomingReceivables';
 import RecentActivity from '@/components/dashboard/RecentActivity';
+import FinalizingContractsTable from '@/components/dashboard/FinalizingContractsTable';
 
 type Contrato = {
     id: string;
@@ -20,6 +21,7 @@ type Contrato = {
     nome: string | null;
     cliente_id: string;
     clientes: { nome: string } | null;
+    data_fim: string | null;
 };
 
 type Cliente = {
@@ -101,6 +103,29 @@ export default async function Dashboard() {
 
     const clientesData = (clientes ?? []) as Cliente[];
     const contratosData = (contratos ?? []) as Contrato[];
+    const contratosAtivosData = contratosData;
+    const partesHoje = new Intl.DateTimeFormat('pt-BR', {
+        timeZone: configuracoes.fusoHorario,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    })
+        .formatToParts(new Date())
+        .reduce<Record<string, string>>((partes, parte) => {
+            partes[parte.type] = parte.value;
+            return partes;
+        }, {});
+    const hojeISO = `${partesHoje.year}-${partesHoje.month}-${partesHoje.day}`;
+    const dataLimite = new Date(`${hojeISO}T00:00:00Z`);
+    dataLimite.setUTCDate(dataLimite.getUTCDate() + 30);
+    const limiteISO = dataLimite.toISOString().slice(0, 10);
+    const contratosFinalizacaoData = contratosData
+        .filter((contrato) => {
+            const dataFim = contrato.data_fim?.slice(0, 10);
+
+            return Boolean(dataFim && dataFim >= hojeISO && dataFim <= limiteISO);
+        })
+        .sort((a, b) => String(a.data_fim).localeCompare(String(b.data_fim)));
     const recebimentosData = (recebimentos ?? []) as Recebimento[];
     const despesasData = (despesas ?? []) as Despesa[];
     const custosData = (custosContrato ?? []) as CustoContrato[];
@@ -112,12 +137,10 @@ export default async function Dashboard() {
     }));
 
     const financeiro = calcularFinanceiro(recebimentosData);
-    const evolucaoFaturamento = calcularEvolucaoFaturamento(recebimentosData);
-
     const totalClientes = clientesData.length;
     const contratosAtivos = planosData.reduce((total, plano) => total + plano.total, 0);
 
-    const faturamentoMensal = contratosData.reduce((total, contrato) => total + Number(contrato.valor), 0);
+    const faturamentoMensal = contratosAtivosData.reduce((total, contrato) => total + Number(contrato.valor), 0);
 
     const despesasTotal = despesasData.reduce((total, despesa) => total + Number(despesa.valor), 0);
 
@@ -167,7 +190,7 @@ export default async function Dashboard() {
                 inadimplencia={financeiro.atrasadosValor}
             />
 
-            <RevenueChart data={evolucaoFaturamento} />
+            <RevenueChart recebimentos={recebimentosData} />
 
             <div className="grid grid-cols-1 gap-6 min-[1440px]:grid-cols-2">
                 <FinanceCard
@@ -185,7 +208,9 @@ export default async function Dashboard() {
 
             <RecentActivity atividades={atividades} />
 
-            <ContractsTable contratos={contratosData} />
+            <ContractsTable contratos={contratosAtivosData} />
+
+            <FinalizingContractsTable contratos={contratosFinalizacaoData} />
         </main>
     );
 }

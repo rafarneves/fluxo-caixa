@@ -17,6 +17,11 @@ export type FaturamentoMensal = {
     valor: number;
 };
 
+export type FaturamentoPeriodo = {
+    periodo: string;
+    valor: number;
+};
+
 function obterCompetencia(recebimento: RecebimentoFaturamento) {
     const competencia = recebimento.competencia?.trim() ?? '';
 
@@ -70,6 +75,76 @@ export function calcularEvolucaoFaturamento(
     return competencias.map((mes) => ({
         mes,
         valor: totais.get(mes) ?? 0,
+    }));
+}
+
+function dataValida(valor: string) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+        return false;
+    }
+
+    const [ano, mes, dia] = valor.split('-').map(Number);
+    const data = new Date(Date.UTC(ano, mes - 1, dia));
+
+    return data.getUTCFullYear() === ano && data.getUTCMonth() === mes - 1 && data.getUTCDate() === dia;
+}
+
+function adicionarDias(valor: string, quantidade: number) {
+    const [ano, mes, dia] = valor.split('-').map(Number);
+    const data = new Date(Date.UTC(ano, mes - 1, dia + quantidade));
+
+    return data.toISOString().slice(0, 10);
+}
+
+function adicionarMeses(valor: string, quantidade: number) {
+    const [ano, mes] = valor.split('-').map(Number);
+    const data = new Date(Date.UTC(ano, mes - 1 + quantidade, 1));
+
+    return data.toISOString().slice(0, 7);
+}
+
+export function calcularEvolucaoFaturamentoPorPeriodo(
+    recebimentos: RecebimentoFaturamento[],
+    inicio: string,
+    fim: string
+): FaturamentoPeriodo[] {
+    if (!dataValida(inicio) || !dataValida(fim) || inicio > fim) {
+        return [];
+    }
+
+    const diferencaDias = Math.floor(
+        (Date.parse(`${fim}T00:00:00Z`) - Date.parse(`${inicio}T00:00:00Z`)) / (24 * 60 * 60 * 1000)
+    );
+    const agruparPorMes = diferencaDias > 45;
+    const inicioPeriodo = agruparPorMes ? inicio.slice(0, 7) : inicio;
+    const fimPeriodo = agruparPorMes ? fim.slice(0, 7) : fim;
+    const periodos: string[] = [];
+
+    for (let periodo = inicioPeriodo; periodo <= fimPeriodo;) {
+        periodos.push(periodo);
+        periodo = agruparPorMes ? adicionarMeses(periodo, 1) : adicionarDias(periodo, 1);
+    }
+
+    const totais = new Map(periodos.map((periodo) => [periodo, 0]));
+
+    recebimentos.forEach((recebimento) => {
+        if (recebimento.status?.toLowerCase() === 'cancelado') {
+            return;
+        }
+
+        const vencimento = recebimento.vencimento?.slice(0, 10) ?? '';
+
+        if (!dataValida(vencimento) || vencimento < inicio || vencimento > fim) {
+            return;
+        }
+
+        const periodo = agruparPorMes ? vencimento.slice(0, 7) : vencimento;
+        totais.set(periodo, (totais.get(periodo) ?? 0) + Number(recebimento.valor || 0));
+    });
+
+    return periodos.map((periodo) => ({
+        periodo,
+        valor: totais.get(periodo) ?? 0,
     }));
 }
 
