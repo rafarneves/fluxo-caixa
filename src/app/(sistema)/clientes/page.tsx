@@ -1,8 +1,45 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { inativarCliente } from '@/actions/clientes';
-import { Users, Wallet, TrendingUp } from 'lucide-react';
+import { BadgeDollarSign, TrendingUp, Users, Wallet } from 'lucide-react';
 import { formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
+import ClientsTable from '@/components/clientes/ClientsTable';
+
+type ContratoCliente = {
+    id: string;
+    valor: number;
+    status: string;
+    data_inicio: string | null;
+};
+
+type Cliente = {
+    id: string;
+    nome: string;
+    cidade: string | null;
+    estado: string | null;
+    bairro: string | null;
+    status: string;
+    contratos: ContratoCliente[] | null;
+};
+
+const DIAS_POR_MES = 365.25 / 12;
+
+function calcularPermanenciaMeses(dataInicio: string, referencia: Date) {
+    const inicio = Date.parse(`${dataInicio.slice(0, 10)}T00:00:00Z`);
+
+    if (Number.isNaN(inicio) || inicio > referencia.getTime()) {
+        return null;
+    }
+
+    const dias = (referencia.getTime() - inicio) / (24 * 60 * 60 * 1000);
+
+    return Math.max(1, dias / DIAS_POR_MES);
+}
+
+function formatarMeses(valor: number) {
+    const meses = Number.isInteger(valor) ? String(valor) : valor.toFixed(1).replace('.', ',');
+
+    return `${meses} ${Math.abs(valor - 1) < 0.05 ? 'mês' : 'meses'}`;
+}
 
 export default async function ClientesPage() {
     const supabase = await createClient();
@@ -16,16 +53,17 @@ export default async function ClientesPage() {
       contratos (
         id,
         valor,
-        status
+        status,
+        data_inicio
       )
     `
         )
-        .eq('status', 'Ativo')
         .order('created_at', {
             ascending: false,
         });
 
-    const clientesData = clientes ?? [];
+    const todosClientes = (clientes ?? []) as Cliente[];
+    const clientesData = todosClientes.filter((cliente) => cliente.status?.toLowerCase() === 'ativo');
 
     const totalClientes = clientesData.length;
 
@@ -35,12 +73,38 @@ export default async function ClientesPage() {
         return (
             total +
             contratos
-                .filter((c: any) => c.status === 'Ativo')
-                .reduce((acc: number, contrato: any) => acc + Number(contrato.valor), 0)
+                .filter((contrato) => contrato.status === 'Ativo')
+                .reduce((subtotal, contrato) => subtotal + Number(contrato.valor), 0)
         );
     }, 0);
 
     const ticketMedio = totalClientes === 0 ? 0 : receita / totalClientes;
+    const hoje = new Date();
+    const permanencias = clientesData.flatMap((cliente) => {
+        const contratosCliente = cliente.contratos ?? [];
+
+        if (!contratosCliente.some((contrato) => contrato.status === 'Ativo')) {
+            return [];
+        }
+
+        const datasInicio = contratosCliente
+            .filter((contrato) => contrato.data_inicio)
+            .map((contrato) => contrato.data_inicio as string)
+            .sort();
+
+        if (datasInicio.length === 0) {
+            return [];
+        }
+
+        const permanencia = calcularPermanenciaMeses(datasInicio[0], hoje);
+
+        return permanencia === null ? [] : [permanencia];
+    });
+    const permanenciaMedia =
+        permanencias.length === 0
+            ? 0
+            : permanencias.reduce((total, permanencia) => total + permanencia, 0) / permanencias.length;
+    const ltvMedio = ticketMedio * permanenciaMedia;
 
     return (
         <div className="space-y-10">
@@ -64,7 +128,7 @@ export default async function ClientesPage() {
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
                 <CardResumo
                     titulo="Clientes Ativos"
                     valor={String(totalClientes)}
@@ -82,94 +146,31 @@ export default async function ClientesPage() {
                     valor={formatMoney(ticketMedio)}
                     icone={<TrendingUp size={22} />}
                 ></CardResumo>
+
+                <CardResumo
+                    titulo="LTV Médio"
+                    valor={formatMoney(ltvMedio)}
+                    subtitulo={`Permanência média: ${formatarMeses(permanenciaMedia)}`}
+                    icone={<BadgeDollarSign size={22} />}
+                />
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827]">
-                <table className="w-full">
-                    <thead className="bg-black/20">
-                        <tr>
-                            <th className="p-5 text-left text-zinc-400">Cliente</th>
-
-                            <th className="p-5 text-left text-zinc-400">Localização</th>
-
-                            <th className="p-5 text-left text-zinc-400">Contratos</th>
-
-                            <th className="p-5 text-left text-zinc-400">Receita Mensal</th>
-
-                            <th className="p-5 text-left text-zinc-400">Status</th>
-
-                            <th className="p-5 text-right text-zinc-400">Ações</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {clientesData.map((cliente) => {
-                            const receitaCliente = (cliente.contratos ?? [])
-                                .filter((c: any) => c.status === 'Ativo')
-                                .reduce((acc: number, c: any) => acc + Number(c.valor), 0);
-
-                            return (
-                                <tr key={cliente.id} className="border-t border-zinc-800 transition hover:bg-black/20">
-                                    <td className="p-5">
-                                        <Link
-                                            href={`/clientes/${cliente.id}`}
-                                            className="font-semibold text-white hover:text-green-400"
-                                        >
-                                            {cliente.nome}
-                                        </Link>
-                                    </td>
-
-                                    <td className="p-5 text-zinc-400">{cliente.cidade ?? 'Sem cidade'}</td>
-
-                                    <td className="p-5 text-zinc-300">{cliente.contratos?.length ?? 0}</td>
-
-                                    <td className="p-5 font-semibold text-green-400">{formatMoney(receitaCliente)}</td>
-
-                                    <td className="p-5">
-                                        <span className="rounded-full bg-green-500/10 px-3 py-1 text-sm text-green-400">
-                                            Ativo
-                                        </span>
-                                    </td>
-
-                                    <td className="p-5 text-right">
-                                        <Link
-                                            href={`/clientes/${cliente.id}`}
-                                            className="mr-2 rounded-xl bg-green-500/10 px-4 py-2 text-sm text-green-400"
-                                        >
-                                            Ver
-                                        </Link>
-
-                                        <Link
-                                            href={`/clientes/editar/${cliente.id}`}
-                                            className="rounded-xl bg-zinc-700 px-4 py-2 text-sm"
-                                        >
-                                            Editar
-                                        </Link>
-
-                                        <form
-                                            action={async () => {
-                                                'use server';
-
-                                                await inativarCliente(cliente.id);
-                                            }}
-                                            className="inline"
-                                        >
-                                            <button className="ml-2 rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-400">
-                                                Inativar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+            <ClientsTable clientes={todosClientes} />
         </div>
     );
 }
 
-function CardResumo({ titulo, valor, icone }: { titulo: string; valor: string; icone: React.ReactNode }) {
+function CardResumo({
+    titulo,
+    valor,
+    subtitulo,
+    icone,
+}: {
+    titulo: string;
+    valor: string;
+    subtitulo?: string;
+    icone: React.ReactNode;
+}) {
     return (
         <div className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-6">
             <div className="flex items-center justify-between">
@@ -177,6 +178,8 @@ function CardResumo({ titulo, valor, icone }: { titulo: string; valor: string; i
                     <p className="text-zinc-500">{titulo}</p>
 
                     <h2 className="mt-4 text-4xl font-bold text-green-400">{valor}</h2>
+
+                    {subtitulo && <p className="mt-2 text-sm text-zinc-500">{subtitulo}</p>}
                 </div>
 
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-500/10 text-green-400">
