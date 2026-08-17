@@ -26,6 +26,8 @@ export default function NovoClientePage() {
 
     const [nome, setNome] = useState('');
 
+    const [loja, setLoja] = useState('');
+
     const [telefone, setTelefone] = useState('');
 
     const [cep, setCep] = useState('');
@@ -102,6 +104,8 @@ export default function NovoClientePage() {
         const { error } = await supabase.from('clientes').insert({
             nome,
 
+            loja,
+
             telefone: telefoneLimpo,
 
             cep: cepLimpo,
@@ -161,6 +165,17 @@ export default function NovoClientePage() {
                             value={nome}
                             onChange={(e) => setNome(e.target.value)}
                             placeholder="Nome do cliente"
+                            className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4 outline-none focus:border-green-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="text-sm text-zinc-400">Nome da loja</label>
+
+                        <input
+                            value={loja}
+                            onChange={(e) => setLoja(e.target.value)}
+                            placeholder="Nome da loja"
                             className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4 outline-none focus:border-green-500"
                         />
                     </div>

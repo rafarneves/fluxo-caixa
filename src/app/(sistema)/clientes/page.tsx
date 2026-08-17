@@ -14,6 +14,7 @@ type ContratoCliente = {
 type Cliente = {
     id: string;
     nome: string;
+    loja: string | null;
     cidade: string | null;
     estado: string | null;
     bairro: string | null;

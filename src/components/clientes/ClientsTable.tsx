@@ -16,6 +16,7 @@ type ContratoCliente = {
 type Cliente = {
     id: string;
     nome: string;
+    loja: string | null;
     cidade: string | null;
     estado: string | null;
     bairro: string | null;
@@ -51,7 +52,9 @@ export default function ClientsTable({ clientes }: Props) {
 
         return clientes.filter((cliente) => {
             const statusCliente = normalizar(cliente.status ?? '');
-            const correspondeNome = !nome || normalizar(cliente.nome).includes(nome);
+            const nomeCliente = normalizar(cliente.nome);
+            const lojaCliente = normalizar(cliente.loja ?? '');
+            const correspondeNome = !nome || nomeCliente.includes(nome) || lojaCliente.includes(nome);
             const localizacaoCliente = normalizar(
                 [cliente.bairro, cliente.cidade, cliente.estado].filter(Boolean).join(' ')
             );
@@ -79,7 +82,7 @@ export default function ClientsTable({ clientes }: Props) {
         <section className="overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827]">
             <div className="grid gap-3 border-b border-zinc-800 p-5 md:grid-cols-2 xl:grid-cols-[1fr_1fr_220px_auto]">
                 <label className="relative">
-                    <span className="sr-only">Buscar por nome do cliente</span>
+                    <span className="sr-only">Buscar por nome do cliente ou loja</span>
                     <Search
                         size={18}
                         className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-zinc-500"
@@ -91,7 +94,7 @@ export default function ClientsTable({ clientes }: Props) {
                             setBuscaNome(event.target.value);
                             setPagina(1);
                         }}
-                        placeholder="Buscar por nome do cliente"
+                        placeholder="Buscar por nome ou loja"
                         className="w-full rounded-xl border border-zinc-800 bg-black/20 py-3 pr-4 pl-11 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10"
                     />
                 </label>
@@ -147,6 +150,7 @@ export default function ClientsTable({ clientes }: Props) {
                     <thead className="bg-black/20">
                         <tr>
                             <th className="p-5 text-left text-zinc-400">Cliente</th>
+                            <th className="p-5 text-left text-zinc-400">Loja</th>
                             <th className="p-5 text-left text-zinc-400">Localização</th>
                             <th className="p-5 text-left text-zinc-400">Contratos</th>
                             <th className="p-5 text-left text-zinc-400">Receita Mensal</th>
@@ -173,6 +177,8 @@ export default function ClientsTable({ clientes }: Props) {
                                             {cliente.nome}
                                         </Link>
                                     </td>
+
+                                    <td className="p-5 text-zinc-400">{cliente.loja || '-'}</td>
 
                                     <td className="p-5 text-zinc-400">{localizacao || 'Sem localização'}</td>
 
@@ -223,7 +229,7 @@ export default function ClientsTable({ clientes }: Props) {
 
                         {clientesPagina.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="p-12 text-center text-zinc-500">
+                                <td colSpan={7} className="p-12 text-center text-zinc-500">
                                     Nenhum cliente encontrado com os filtros selecionados.
                                 </td>
                             </tr>
