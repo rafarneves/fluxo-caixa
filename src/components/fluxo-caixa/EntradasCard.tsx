@@ -10,6 +10,7 @@ type Recebimento = {
         nome: string | null;
         clientes: {
             nome: string;
+            loja: string | null;
         } | null;
     } | null;
 };
@@ -52,7 +53,14 @@ export default function EntradasCard({ recebimentos }: Props) {
                             </div>
 
                             <div>
-                                <p className="font-semibold">{item.contratos?.clientes?.nome ?? '-'}</p>
+                                <p className="font-semibold">
+                                    {item.contratos?.clientes?.nome ?? '-'}
+                                    {item.contratos?.clientes?.loja && (
+                                        <span className="text-zinc-400 font-normal ml-2 text-sm">
+                                            ({item.contratos.clientes.loja})
+                                        </span>
+                                    )}
+                                </p>
 
                                 <p className="text-sm text-zinc-500">{item.contratos?.nome ?? '-'}</p>
                             </div>
