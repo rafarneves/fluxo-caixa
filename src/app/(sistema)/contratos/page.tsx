@@ -1,16 +1,13 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import StatusBadge from '@/components/financeiro/StatusBadge';
-import { cancelarContrato } from '@/actions/contratos';
 import { FileText, Wallet, XCircle, TrendingUp } from 'lucide-react';
-import { formatarDataServidor, formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
+import { formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
+import ContratosClient from '@/components/contratos/ContratosClient';
 
 export default async function ContratosPage() {
     const supabase = await createClient();
     const { configuracoes } = await getContextoConfiguracoes();
-    const formatMoney = (value: number) => formatarMoedaServidor(value, configuracoes);
     const formatCompactMoney = (value: number) => formatarMoedaServidor(value, configuracoes, true);
-    const formatDate = (date: string) => formatarDataServidor(date, configuracoes);
     const { data: contratos } = await supabase
         .from('contratos')
         .select(
@@ -18,7 +15,8 @@ export default async function ContratosPage() {
       *,
       clientes (
         id,
-        nome
+        nome,
+        loja
       )
     `
         )
@@ -40,168 +38,69 @@ export default async function ContratosPage() {
 
     return (
         <div className="space-y-10">
-            <div className="flex items-start justify-between">
-                <div>
+            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                <div className="min-w-0">
                     <p className="text-xs font-semibold tracking-[0.22em] text-zinc-500 uppercase">CONTRATOS</p>
 
-                    <h1 className="mt-3 text-5xl font-bold text-white">Contratos</h1>
+                    <h1 className="mt-3 text-3xl font-bold text-white sm:text-5xl">Contratos</h1>
 
-                    <p className="mt-3 text-lg text-zinc-400">
+                    <p className="mt-3 text-base text-zinc-400 sm:text-lg">
                         Gerencie contratos, valores e recorrências dos clientes.
                     </p>
                 </div>
 
                 <Link
                     href="/contratos/novo"
-
-                    className="rounded-2xl bg-green-500 px-6 py-4 font-bold text-black transition-all duration-300 hover:-translate-y-1 hover:bg-green-400 hover:shadow-xl hover:shadow-green-500/20"
+                    className="w-full shrink-0 rounded-2xl bg-green-500 px-6 py-4 text-center sm:w-auto font-bold text-black transition-all duration-300 hover:-translate-y-1 hover:bg-green-400 hover:shadow-xl hover:shadow-green-500/20"
                 >
                     + Novo Contrato
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
                 <CardResumo
                     titulo="Contratos Ativos"
-
                     valor={String(ativos)}
-
                     icone={<FileText size={22} />}
-
                     tipo="verde"
                 />
 
                 <CardResumo
                     titulo="Receita Contratada"
-
                     valor={formatCompactMoney(receita)}
-
                     icone={<Wallet size={22} />}
-
                     tipo="verde"
                 />
 
                 <CardResumo
                     titulo="Cancelados"
-
                     valor={String(cancelados)}
-
                     icone={<XCircle size={22} />}
-
                     tipo="vermelho"
                 />
 
                 <CardResumo
                     titulo="Ticket Médio"
-
                     valor={formatCompactMoney(ticket)}
-
                     icone={<TrendingUp size={22} />}
-
                     tipo="azul"
                 />
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827]">
-                <table className="w-full">
-                    <thead className="bg-black/20">
-                        <tr>
-                            <th className="p-5 text-left text-zinc-400">Cliente</th>
-
-                            <th className="p-5 text-left text-zinc-400">Plano</th>
-
-                            <th className="p-5 text-left text-zinc-400">Valor</th>
-
-                            <th className="p-5 text-left text-zinc-400">Início</th>
-
-                            <th className="p-5 text-left text-zinc-400">Vencimento</th>
-
-                            <th className="p-5 text-left text-zinc-400">Status</th>
-
-                            <th className="p-5 text-right text-zinc-400">Ações</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {contratosData.map((contrato: any) => (
-                            <tr
-                                key={contrato.id}
-
-                                className="border-t border-zinc-800 transition hover:bg-black/20"
-                            >
-                                <td className="p-5">
-                                    <Link
-                                        href={`/clientes/${contrato.clientes?.id}`}
-
-                                        className="font-semibold text-white hover:text-green-400"
-                                    >
-                                        {contrato.clientes?.nome}
-                                    </Link>
-                                </td>
-
-                                <td className="p-5">
-                                    <Link
-                                        href={`/contratos/${contrato.id}`}
-
-                                        className="font-semibold text-white hover:text-green-400"
-                                    >
-                                        {contrato.nome ?? '-'}
-                                    </Link>
-                                </td>
-
-                                <td className="p-5 font-semibold text-green-400">
-                                    {formatMoney(Number(contrato.valor))}
-                                </td>
-
-                                <td className="p-5 text-zinc-300">
-                                    {contrato.data_inicio ? formatDate(contrato.data_inicio) : '-'}
-                                </td>
-
-                                <td className="p-5">Dia {contrato.vencimento}</td>
-
-                                <td className="p-5">
-                                    <StatusBadge status={contrato.status} />
-                                </td>
-
-                                <td className="p-5 text-right">
-                                    {contrato.status !== 'Cancelado' && (
-                                        <form
-                                            action={async () => {
-                                                'use server';
-
-                                                await cancelarContrato(contrato.id);
-                                            }}
-                                        >
-                                            <button className="rounded-xl bg-red-500 px-5 py-2 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-red-400">
-                                                Cancelar
-                                            </button>
-                                        </form>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <ContratosClient contratos={contratosData} />
         </div>
     );
 }
 
 function CardResumo({
     titulo,
-
     valor,
-
     icone,
-
     tipo,
 }: {
     titulo: string;
-
     valor: string;
-
     icone: React.ReactNode;
-
     tipo: 'verde' | 'vermelho' | 'azul';
 }) {
     const estilos = {
@@ -231,15 +130,17 @@ function CardResumo({
         <div
             className={`group rounded-3xl border ${estilos.borda} bg-gradient-to-b from-[#171F2B] to-[#111827] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
         >
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-zinc-500">{titulo}</p>
+            <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                    <p className="truncate text-sm text-zinc-500 sm:text-base">{titulo}</p>
 
-                    <h2 className={`mt-4 text-4xl font-bold ${estilos.numero} `}>{valor}</h2>
+                    <h2 className={`mt-4 text-2xl font-bold xl:text-3xl 2xl:text-4xl ${estilos.numero} truncate`}>
+                        {valor}
+                    </h2>
                 </div>
 
                 <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${estilos.fundo} ${estilos.texto} transition-all duration-300 group-hover:scale-110`}
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${estilos.fundo} ${estilos.texto} transition-all duration-300 group-hover:scale-110`}
                 >
                     {icone}
                 </div>

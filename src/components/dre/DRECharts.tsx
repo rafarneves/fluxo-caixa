@@ -78,6 +78,11 @@ export default function DRECharts({ dados }: Props) {
             </div>
 
             <div className="h-[360px]">
+                {dados.length === 0 ? (
+                    <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-zinc-700 text-zinc-500">
+                        Nenhum dado disponível para o período selecionado.
+                    </div>
+                ) : (
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={dados}>
                         <defs>
@@ -169,6 +174,7 @@ export default function DRECharts({ dados }: Props) {
                         />
                     </AreaChart>
                 </ResponsiveContainer>
+                )}
             </div>
         </section>
     );

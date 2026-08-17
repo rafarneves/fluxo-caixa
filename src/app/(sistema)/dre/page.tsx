@@ -25,11 +25,19 @@ export default async function DREPage({ searchParams }: Props) {
     const { inicio, fim } = obterPeriodo(periodo);
 
     const inicioISO = inicio.toISOString().split('T')[0];
-
     const fimISO = fim.toISOString().split('T')[0];
 
+    // Mês de início e fim no formato YYYY-MM para comparar com campo "competencia"
+    const inicioMes = inicioISO.slice(0, 7);
+    const fimMes = fimISO.slice(0, 7);
+
     const [{ data: recebimentos }, { data: despesas }, { data: custosContrato }] = await Promise.all([
-        supabase.from('recebimentos').select('valor, competencia').eq('status', 'Pago'),
+        supabase
+            .from('recebimentos')
+            .select('valor, competencia')
+            .eq('status', 'Pago')
+            .gte('competencia', inicioMes)
+            .lte('competencia', fimMes),
 
         supabase.from('despesas').select('categoria, valor, data').gte('data', inicioISO).lte('data', fimISO),
 
@@ -107,9 +115,27 @@ export default async function DREPage({ searchParams }: Props) {
         }))
         .sort((a, b) => a.mes.localeCompare(b.mes));
 
+    // Agrupar despesas por categoria para o PDF
+    const despesasAgrupadas: Record<string, number> = {};
+    (despesas ?? []).forEach((d: any) => {
+        const cat = d.categoria || 'Outros';
+        despesasAgrupadas[cat] = (despesasAgrupadas[cat] || 0) + Number(d.valor);
+    });
+    const despesasPorCategoria = Object.entries(despesasAgrupadas)
+        .map(([categoria, valor]) => ({ categoria, valor }))
+        .sort((a, b) => b.valor - a.valor);
+
     return (
         <main className="space-y-8">
-            <DREHeader />
+            <DREHeader
+                receitaBruta={receitaBruta}
+                custos={custos}
+                despesasOperacionais={despesasOperacionais}
+                lucroLiquido={lucroLiquido}
+                margem={margem}
+                periodo={periodo}
+                despesasPorCategoria={despesasPorCategoria}
+            />
 
             <DRESummaryCards receitaBruta={receitaBruta} custos={custos} lucroLiquido={lucroLiquido} margem={margem} />
 

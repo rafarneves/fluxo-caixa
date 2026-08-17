@@ -81,15 +81,15 @@ export default function ExpenseSummary({ total, quantidade, fixas, variaveis }: 
 
                         className="group cursor-pointer rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-zinc-600 hover:shadow-xl"
                     >
-                        <div className="flex items-start justify-between">
-                            <div>
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
                                 <p className="text-sm text-zinc-500">{card.titulo}</p>
 
-                                <h2 className={`mt-3 text-3xl font-bold ${cor.texto} `}>{card.valor}</h2>
+                                <h2 className={`mt-3 text-2xl font-bold sm:text-3xl ${cor.texto} truncate`}>{card.valor}</h2>
                             </div>
 
                             <div
-                                className={`rounded-2xl p-3 ${cor.fundo} ${cor.texto} transition-transform duration-300 group-hover:scale-110`}
+                                className={`shrink-0 rounded-2xl p-3 ${cor.fundo} ${cor.texto} transition-transform duration-300 group-hover:scale-110`}
                             >
                                 <Icon size={22} />
                             </div>
