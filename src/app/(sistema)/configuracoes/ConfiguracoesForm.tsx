@@ -38,6 +38,11 @@ export default function ConfiguracoesForm({ configuracoesIniciais }: { configura
     const [erro, setErro] = useState<string | null>(null);
     function atualizar<K extends keyof Configuracoes>(campo: K, valor: Configuracoes[K]) {
         setConfiguracoes((atual) => ({ ...atual, [campo]: valor }));
+
+        if (campo === 'interfaceCompacta') {
+            document.documentElement.dataset.interfaceCompacta = String(valor);
+        }
+
         setSalvo(false);
     }
     async function salvar(event: FormEvent<HTMLFormElement>) {
@@ -80,7 +85,7 @@ export default function ConfiguracoesForm({ configuracoesIniciais }: { configura
             <Stack spacing={2} sx={{ mb: 3 }}>
                 {salvo && (
                     <Alert severity="success" variant="outlined" icon={<CheckCircleRounded />}>
-                        Preferências salvas no Supabase.
+                        Preferências salvas e aplicadas ao sistema.
                     </Alert>
                 )}
                 {erro && (
@@ -170,19 +175,19 @@ export default function ConfiguracoesForm({ configuracoesIniciais }: { configura
                                 <Divider sx={{ my: 2 }} />
                                 <Toggle
                                     label="Vencimentos próximos"
-                                    description="Alertas sobre contas e recebimentos."
+                                    description="Exibe contas e recebimentos dos próximos 7 dias."
                                     checked={configuracoes.notificacoesVencimento}
                                     onChange={(checked) => atualizar('notificacoesVencimento', checked)}
                                 />
                                 <Toggle
                                     label="Resumo semanal"
-                                    description="Visão consolidada da semana."
+                                    description="Mostra entradas, saídas e saldo da semana atual."
                                     checked={configuracoes.resumoSemanal}
                                     onChange={(checked) => atualizar('resumoSemanal', checked)}
                                 />
                                 <Toggle
                                     label="Alertas financeiros"
-                                    description="Avisos sobre indicadores críticos."
+                                    description="Destaca valores vencidos e riscos financeiros."
                                     checked={configuracoes.alertasFinanceiros}
                                     onChange={(checked) => atualizar('alertasFinanceiros', checked)}
                                 />
@@ -194,7 +199,7 @@ export default function ConfiguracoesForm({ configuracoesIniciais }: { configura
                                 <Divider sx={{ my: 2 }} />
                                 <Toggle
                                     label="Interface compacta"
-                                    description="Reduz o espaçamento entre os elementos."
+                                    description="Reduz cards, tabelas, campos e navegação de forma consistente."
                                     checked={configuracoes.interfaceCompacta}
                                     onChange={(checked) => atualizar('interfaceCompacta', checked)}
                                 />

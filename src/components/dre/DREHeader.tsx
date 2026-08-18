@@ -5,6 +5,7 @@ import { Button } from '@mui/material';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 import PeriodFilter from '@/components/filters/PeriodFilter';
 
 type Props = {
@@ -19,10 +20,6 @@ type Props = {
     despesasPorCategoria: { categoria: string; valor: number }[];
 };
 
-function moeda(valor: number) {
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
 export default function DREHeader({
     receitaBruta,
     custos,
@@ -34,6 +31,8 @@ export default function DREHeader({
     fim,
     despesasPorCategoria,
 }: Props) {
+    const { empresa, formatarMoeda: moeda, fusoHorario } = useConfiguracoes();
+
     function exportarDRE() {
         const labels: Record<string, string> = {
             hoje: 'Hoje',
@@ -52,7 +51,7 @@ export default function DREHeader({
             periodo === 'personalizado' && inicio && fim
                 ? `${formatarDataPeriodo(inicio)} a ${formatarDataPeriodo(fim)}`
                 : (labels[periodo] ?? periodo);
-        const dataExportacao = new Date().toLocaleDateString('pt-BR');
+        const dataExportacao = new Intl.DateTimeFormat('pt-BR', { timeZone: fusoHorario }).format(new Date());
         const lucroBruto = receitaBruta - custos;
 
         const doc = new jsPDF();
@@ -71,6 +70,7 @@ export default function DREHeader({
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.text(`Período: ${periodoLabel}  •  Exportado em: ${dataExportacao}`, 20, 38);
+        doc.text(empresa, pageWidth - 20, 38, { align: 'right' });
 
         // --- Linha divisória verde ---
         doc.setDrawColor(74, 222, 128);

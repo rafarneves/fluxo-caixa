@@ -41,6 +41,9 @@ import {
 } from '@mui/material';
 
 import { logout } from '@/app/login/actions';
+import CentralNotificacoes from '@/components/configuracoes/CentralNotificacoes';
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+import type { NotificacaoSistema } from '@/lib/notificacoes';
 
 const SIDEBAR_STORAGE_KEY = 'altuza-sidebar-recolhida';
 const DRAWER_WIDTH = 280;
@@ -88,13 +91,23 @@ function rotaAtiva(pathname: string, href: string) {
     return pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
 }
 
-export default function Sidebar({ children, userEmail }: { children: ReactNode; userEmail: string }) {
+export default function Sidebar({
+    children,
+    userEmail,
+    notificacoesIniciais,
+}: {
+    children: ReactNode;
+    userEmail: string;
+    notificacoesIniciais: NotificacaoSistema[];
+}) {
     const pathname = usePathname();
     const router = useRouter();
+    const { empresa } = useConfiguracoes();
     const [menuMobileAberto, setMenuMobileAberto] = useState(false);
     const [recolhida, setRecolhida] = useState(false);
     const userName = userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
     const userInitial = userName.charAt(0).toUpperCase();
+    const empresaInicial = empresa.trim().charAt(0).toUpperCase() || 'A';
 
     const paginaAtual = useMemo(() => {
         const itens = grupos.flatMap((grupo) => grupo.itens.map((item) => ({ ...item, grupo: grupo.titulo })));
@@ -154,12 +167,12 @@ export default function Sidebar({ children, userEmail }: { children: ReactNode; 
                                 fontWeight: 900,
                             }}
                         >
-                            A
+                            {empresaInicial}
                         </Avatar>
                     ) : (
                         <Image
                             src="/logo-altuza-horizontal.png"
-                            alt="Altuza"
+                            alt={empresa}
                             width={135}
                             height={48}
                             priority
@@ -392,7 +405,7 @@ export default function Sidebar({ children, userEmail }: { children: ReactNode; 
                             color="text.disabled"
                             sx={{ display: 'block', mt: 0.75, px: 1.25 }}
                         >
-                            Altuza ERP · v1.0.0
+                            {empresa} · v1.0.0
                         </Typography>
                     )}
                 </Box>
@@ -537,12 +550,14 @@ export default function Sidebar({ children, userEmail }: { children: ReactNode; 
 
                         <Box sx={{ flex: 1 }} />
 
+                        <CentralNotificacoes iniciais={notificacoesIniciais} />
+
                         <Typography
                             variant="caption"
                             color="text.secondary"
                             sx={{ display: { xs: 'none', lg: 'block' } }}
                         >
-                            Altuza ERP
+                            {empresa}
                         </Typography>
                     </Toolbar>
                 </AppBar>
