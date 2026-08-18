@@ -3,8 +3,8 @@ import { FileText, Wallet, TrendingUp, Users } from 'lucide-react';
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
@@ -22,7 +22,39 @@ export default async function RelatorioContratosPage() {
             <ReportHeader
                 title="Contratos"
                 description="Relatório completo dos contratos cadastrados no ERP."
-                actions={<ReportExport reportTitle="Contratos" />}
+                actions={
+                    <StructuredReportExport
+                        title="Contratos"
+                        cards={[
+                            {
+                                label: 'Contratos Ativos',
+                                value: contratosAtivos.length,
+                                format: 'number',
+                                tone: 'green',
+                            },
+                            { label: 'Faturamento', value: faturamento, format: 'currency', tone: 'blue' },
+                            { label: 'Ticket Médio', value: dados.ticketMedio, format: 'currency', tone: 'yellow' },
+                            { label: 'Clientes', value: dados.totalClientes, format: 'number', tone: 'green' },
+                        ]}
+                        sections={[
+                            {
+                                title: 'Lista de contratos',
+                                columns: [
+                                    { header: 'Cliente', dataKey: 'cliente' },
+                                    { header: 'Plano', dataKey: 'plano' },
+                                    { header: 'Valor', dataKey: 'valor', format: 'currency', align: 'right' },
+                                    { header: 'Status', dataKey: 'status' },
+                                ],
+                                rows: contratos.map((item) => ({
+                                    cliente: item.clientes?.nome ?? '-',
+                                    plano: item.nome ?? '-',
+                                    valor: Number(item.valor),
+                                    status: item.status ?? '-',
+                                })),
+                            },
+                        ]}
+                    />
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">

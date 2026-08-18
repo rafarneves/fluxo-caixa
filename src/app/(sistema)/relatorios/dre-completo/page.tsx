@@ -3,9 +3,9 @@ import { DollarSign, TrendingDown, TrendingUp, Percent, Wallet, Landmark } from 
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
 import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
@@ -70,7 +70,44 @@ export default async function DRECompletoPage({ searchParams }: Props) {
                 actions={
                     <>
                         <ReportPeriodFilter />
-                        <ReportExport reportTitle="DRE Completo" />
+                        <StructuredReportExport
+                            title="DRE Completo"
+                            periodo={periodo}
+                            cards={[
+                                { label: 'Receita', value: receitaBruta, format: 'currency', tone: 'green' },
+                                { label: 'Custos', value: custos, format: 'currency', tone: 'yellow' },
+                                {
+                                    label: 'Lucro Bruto',
+                                    value: lucroBruto,
+                                    format: 'currency',
+                                    tone: lucroBruto >= 0 ? 'green' : 'red',
+                                },
+                                { label: 'Despesas', value: despesas, format: 'currency', tone: 'red' },
+                                {
+                                    label: 'Lucro Líquido',
+                                    value: lucroLiquido,
+                                    format: 'currency',
+                                    tone: lucroLiquido >= 0 ? 'green' : 'red',
+                                },
+                                {
+                                    label: 'Margem',
+                                    value: margem,
+                                    format: 'percent',
+                                    tone: margem >= 0 ? 'green' : 'red',
+                                },
+                            ]}
+                            sections={[
+                                {
+                                    title: 'Demonstrativo',
+                                    columns: [
+                                        { header: 'Grupo', dataKey: 'grupo' },
+                                        { header: 'Conta', dataKey: 'conta' },
+                                        { header: 'Valor', dataKey: 'valor', format: 'currency', align: 'right' },
+                                    ],
+                                    rows: linhas,
+                                },
+                            ]}
+                        />
                     </>
                 }
             />

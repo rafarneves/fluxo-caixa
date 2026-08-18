@@ -4,8 +4,8 @@ import { ArrowDownCircle, ArrowUpCircle, Wallet, Landmark } from 'lucide-react';
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportTable from '@/components/relatorios/ReportTable';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
@@ -54,7 +54,32 @@ export default async function FluxoCaixaRelatorioPage({ searchParams }: Props) {
                 actions={
                     <>
                         <ReportPeriodFilter />
-                        <ReportExport reportTitle="Fluxo de Caixa" />
+                        <StructuredReportExport
+                            title="Fluxo de Caixa"
+                            periodo={periodo}
+                            cards={[
+                                { label: 'Entradas', value: entradas, format: 'currency', tone: 'green' },
+                                { label: 'Saídas', value: saidas, format: 'currency', tone: 'red' },
+                                { label: 'Custos', value: custos, format: 'currency', tone: 'yellow' },
+                                {
+                                    label: 'Saldo',
+                                    value: saldo,
+                                    format: 'currency',
+                                    tone: saldo >= 0 ? 'green' : 'red',
+                                },
+                            ]}
+                            sections={[
+                                {
+                                    title: 'Movimentação financeira',
+                                    columns: [
+                                        { header: 'Tipo', dataKey: 'tipo' },
+                                        { header: 'Descrição', dataKey: 'descricao' },
+                                        { header: 'Valor', dataKey: 'valor', format: 'currency', align: 'right' },
+                                    ],
+                                    rows: linhas,
+                                },
+                            ]}
+                        />
                     </>
                 }
             />

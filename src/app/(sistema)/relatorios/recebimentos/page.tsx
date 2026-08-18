@@ -3,9 +3,9 @@ import { BadgeDollarSign, Clock3, CheckCircle2, AlertTriangle } from 'lucide-rea
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
 import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 import { getStatusRecebimento } from '@/lib/relatorios/recebimentos';
@@ -50,7 +50,33 @@ export default async function RelatorioRecebimentosPage({ searchParams }: Props)
                 actions={
                     <>
                         <ReportPeriodFilter />
-                        <ReportExport reportTitle="Recebimentos" />
+                        <StructuredReportExport
+                            title="Recebimentos"
+                            periodo={periodo}
+                            cards={[
+                                { label: 'Total', value: totalValor, format: 'currency', tone: 'blue' },
+                                { label: 'Pagos', value: totalPago, format: 'currency', tone: 'green' },
+                                { label: 'Pendentes', value: totalPendente, format: 'currency', tone: 'yellow' },
+                                { label: 'Vencidos', value: totalVencido, format: 'currency', tone: 'red' },
+                            ]}
+                            sections={[
+                                {
+                                    title: 'Recebimentos',
+                                    columns: [
+                                        { header: 'Cliente', dataKey: 'cliente' },
+                                        { header: 'Vencimento', dataKey: 'vencimento' },
+                                        { header: 'Status', dataKey: 'status' },
+                                        { header: 'Valor', dataKey: 'valor', format: 'currency', align: 'right' },
+                                    ],
+                                    rows: recebimentosClassificados.map((item) => ({
+                                        cliente: item.contratos?.clientes?.nome ?? '-',
+                                        vencimento: formatarDataServidor(item.vencimento, configuracoes),
+                                        status: item.statusRelatorio,
+                                        valor: Number(item.valor),
+                                    })),
+                                },
+                            ]}
+                        />
                     </>
                 }
             />

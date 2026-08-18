@@ -1,8 +1,5 @@
 'use client';
 
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-
 import ReportExport from '@/components/relatorios/ReportExport';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 
@@ -61,6 +58,10 @@ export default function DashboardReportExport({
     const { formatarMoeda } = useConfiguracoes();
 
     async function exportarDashboardPDF() {
+        const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+            import('jspdf'),
+            import('jspdf-autotable'),
+        ]);
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -203,7 +204,8 @@ export default function DashboardReportExport({
             },
         });
 
-        const evolutionFinalY = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 170;
+        const evolutionFinalY =
+            (doc as typeof doc & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 170;
         let activitiesY = evolutionFinalY + 13;
 
         if (activitiesY > pageHeight - 58) {

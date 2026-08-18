@@ -13,6 +13,8 @@ type Props = {
     lucroLiquido: number;
     margem: number;
     periodo: string;
+    inicio?: string;
+    fim?: string;
     despesasPorCategoria: { categoria: string; valor: number }[];
 };
 
@@ -27,6 +29,8 @@ export default function DREHeader({
     lucroLiquido,
     margem,
     periodo,
+    inicio,
+    fim,
     despesasPorCategoria,
 }: Props) {
     function exportarDRE() {
@@ -38,7 +42,15 @@ export default function DREHeader({
             ano: 'Este Ano',
         };
 
-        const periodoLabel = labels[periodo] ?? periodo;
+        const formatarDataPeriodo = (value: string) => {
+            const [ano, mes, dia] = value.split('-');
+
+            return `${dia}/${mes}/${ano}`;
+        };
+        const periodoLabel =
+            periodo === 'personalizado' && inicio && fim
+                ? `${formatarDataPeriodo(inicio)} a ${formatarDataPeriodo(fim)}`
+                : (labels[periodo] ?? periodo);
         const dataExportacao = new Date().toLocaleDateString('pt-BR');
         const lucroBruto = receitaBruta - custos;
 
@@ -68,11 +80,40 @@ export default function DREHeader({
         let y = 62;
         const cardData = [
             { label: 'Receita Bruta', value: moeda(receitaBruta), color: [74, 222, 128] as [number, number, number] },
-            { label: 'Custos dos Contratos', value: `- ${moeda(custos)}`, color: [248, 113, 113] as [number, number, number] },
-            { label: 'Lucro Bruto', value: moeda(lucroBruto), color: lucroBruto >= 0 ? [74, 222, 128] as [number, number, number] : [248, 113, 113] as [number, number, number] },
-            { label: 'Despesas Operacionais', value: `- ${moeda(despesasOperacionais)}`, color: [248, 113, 113] as [number, number, number] },
-            { label: 'Lucro Líquido', value: moeda(lucroLiquido), color: lucroLiquido >= 0 ? [74, 222, 128] as [number, number, number] : [248, 113, 113] as [number, number, number] },
-            { label: 'Margem Líquida', value: `${margem.toFixed(1)}%`, color: margem >= 0 ? [74, 222, 128] as [number, number, number] : [248, 113, 113] as [number, number, number] },
+            {
+                label: 'Custos dos Contratos',
+                value: `- ${moeda(custos)}`,
+                color: [248, 113, 113] as [number, number, number],
+            },
+            {
+                label: 'Lucro Bruto',
+                value: moeda(lucroBruto),
+                color:
+                    lucroBruto >= 0
+                        ? ([74, 222, 128] as [number, number, number])
+                        : ([248, 113, 113] as [number, number, number]),
+            },
+            {
+                label: 'Despesas Operacionais',
+                value: `- ${moeda(despesasOperacionais)}`,
+                color: [248, 113, 113] as [number, number, number],
+            },
+            {
+                label: 'Lucro Líquido',
+                value: moeda(lucroLiquido),
+                color:
+                    lucroLiquido >= 0
+                        ? ([74, 222, 128] as [number, number, number])
+                        : ([248, 113, 113] as [number, number, number]),
+            },
+            {
+                label: 'Margem Líquida',
+                value: `${margem.toFixed(1)}%`,
+                color:
+                    margem >= 0
+                        ? ([74, 222, 128] as [number, number, number])
+                        : ([248, 113, 113] as [number, number, number]),
+            },
         ];
 
         doc.setFontSize(13);
@@ -85,7 +126,7 @@ export default function DREHeader({
         autoTable(doc, {
             startY: y,
             head: [['Descrição', 'Valor']],
-            body: cardData.map(item => [item.label, item.value]),
+            body: cardData.map((item) => [item.label, item.value]),
             theme: 'plain',
             styles: {
                 fontSize: 11,
@@ -125,7 +166,7 @@ export default function DREHeader({
         });
 
         // --- Detalhamento por categoria ---
-        const finalY = (doc as any).lastAutoTable?.finalY ?? y + 80;
+        const finalY = (doc as typeof doc & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y + 80;
         let catY = finalY + 16;
 
         if (despesasPorCategoria.length > 0) {
@@ -138,7 +179,7 @@ export default function DREHeader({
             autoTable(doc, {
                 startY: catY,
                 head: [['Categoria', 'Valor', '% da Receita']],
-                body: despesasPorCategoria.map(item => [
+                body: despesasPorCategoria.map((item) => [
                     item.categoria,
                     moeda(item.valor),
                     receitaBruta > 0 ? `${((item.valor / receitaBruta) * 100).toFixed(1)}%` : '0%',
@@ -175,7 +216,9 @@ export default function DREHeader({
         doc.rect(0, pageHeight - 18, pageWidth, 18, 'F');
         doc.setFontSize(8);
         doc.setTextColor(113, 113, 122);
-        doc.text('Documento gerado automaticamente pelo Sistema de Fluxo de Caixa', pageWidth / 2, pageHeight - 8, { align: 'center' });
+        doc.text('Documento gerado automaticamente pelo Sistema de Fluxo de Caixa', pageWidth / 2, pageHeight - 8, {
+            align: 'center',
+        });
 
         doc.save(`DRE_${periodo}_${new Date().toISOString().split('T')[0]}.pdf`);
     }
@@ -189,8 +232,8 @@ export default function DREHeader({
                     <h1 className="mt-3 text-5xl font-bold text-white">DRE Executivo</h1>
 
                     <p className="mt-3 max-w-3xl text-lg text-zinc-400">
-                        Análise completa da rentabilidade da empresa, acompanhando receitas, custos, despesas e resultado
-                        líquido.
+                        Análise completa da rentabilidade da empresa, acompanhando receitas, custos, despesas e
+                        resultado líquido.
                     </p>
                 </div>
 

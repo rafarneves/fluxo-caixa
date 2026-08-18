@@ -3,8 +3,8 @@ import { formatarDataServidor, getContextoConfiguracoes } from '@/lib/configurac
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
@@ -27,7 +27,44 @@ export default async function RelatorioClientesPage() {
             <ReportHeader
                 title="Clientes"
                 description="Relatório completo dos clientes cadastrados."
-                actions={<ReportExport reportTitle="Clientes" />}
+                actions={
+                    <StructuredReportExport
+                        title="Clientes"
+                        cards={[
+                            { label: 'Clientes', value: clientes.length, format: 'number', tone: 'blue' },
+                            {
+                                label: 'Contratos Ativos',
+                                value: contratosAtivos.length,
+                                format: 'number',
+                                tone: 'green',
+                            },
+                            {
+                                label: 'Novos Clientes',
+                                value: novosClientes,
+                                format: 'number',
+                                tone: 'yellow',
+                            },
+                            { label: 'Ticket Médio', value: dados.ticketMedio, format: 'currency', tone: 'green' },
+                        ]}
+                        sections={[
+                            {
+                                title: 'Clientes cadastrados',
+                                columns: [
+                                    { header: 'Nome', dataKey: 'nome' },
+                                    { header: 'Telefone', dataKey: 'telefone' },
+                                    { header: 'E-mail', dataKey: 'email' },
+                                    { header: 'Cadastro', dataKey: 'cadastro' },
+                                ],
+                                rows: clientes.map((item) => ({
+                                    nome: item.nome,
+                                    telefone: item.telefone ?? '-',
+                                    email: item.email ?? '-',
+                                    cadastro: formatarDataServidor(item.created_at, configuracoes),
+                                })),
+                            },
+                        ]}
+                    />
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">

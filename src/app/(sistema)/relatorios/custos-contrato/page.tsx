@@ -4,9 +4,9 @@ import Link from 'next/link';
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
 import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getRentabilidadeContratos } from '@/lib/relatorios/rentabilidade';
 import { formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
@@ -29,7 +29,47 @@ export default async function RelatorioRentabilidadeContratosPage({ searchParams
                 actions={
                     <>
                         <ReportPeriodFilter />
-                        <ReportExport reportTitle="Custos por Contrato" />
+                        <StructuredReportExport
+                            title="Custos por Contrato"
+                            periodo={periodo}
+                            cards={[
+                                { label: 'Receita Total', value: totais.receita, format: 'currency', tone: 'green' },
+                                { label: 'Custos Totais', value: totais.custos, format: 'currency', tone: 'red' },
+                                {
+                                    label: 'Lucro Total',
+                                    value: totais.lucro,
+                                    format: 'currency',
+                                    tone: totais.lucro >= 0 ? 'green' : 'red',
+                                },
+                                {
+                                    label: 'Margem Geral',
+                                    value: totais.margem,
+                                    format: 'percent',
+                                    tone: totais.margem >= 0 ? 'green' : 'red',
+                                },
+                            ]}
+                            sections={[
+                                {
+                                    title: 'Resultado por contrato',
+                                    columns: [
+                                        { header: 'Cliente', dataKey: 'cliente' },
+                                        { header: 'Contrato', dataKey: 'contrato' },
+                                        { header: 'Receita', dataKey: 'receita', format: 'currency', align: 'right' },
+                                        { header: 'Custos', dataKey: 'custos', format: 'currency', align: 'right' },
+                                        { header: 'Lucro', dataKey: 'lucro', format: 'currency', align: 'right' },
+                                        { header: 'Margem', dataKey: 'margem', format: 'percent', align: 'right' },
+                                    ],
+                                    rows: contratos.map((item) => ({
+                                        cliente: item.cliente,
+                                        contrato: item.contrato,
+                                        receita: item.receita,
+                                        custos: item.custos,
+                                        lucro: item.lucro,
+                                        margem: item.margem,
+                                    })),
+                                },
+                            ]}
+                        />
                     </>
                 }
             />

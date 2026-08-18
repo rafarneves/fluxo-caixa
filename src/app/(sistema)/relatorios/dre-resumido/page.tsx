@@ -3,9 +3,9 @@ import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
 import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
@@ -36,7 +36,43 @@ export default async function DREResumidoPage({ searchParams }: Props) {
                 actions={
                     <>
                         <ReportPeriodFilter />
-                        <ReportExport reportTitle="DRE Resumido" />
+                        <StructuredReportExport
+                            title="DRE Resumido"
+                            periodo={periodo}
+                            cards={[
+                                { label: 'Receita', value: receita, format: 'currency', tone: 'green' },
+                                { label: 'Custos', value: custos, format: 'currency', tone: 'yellow' },
+                                { label: 'Despesas', value: despesas, format: 'currency', tone: 'red' },
+                                {
+                                    label: 'Lucro',
+                                    value: lucro,
+                                    format: 'currency',
+                                    tone: lucro >= 0 ? 'green' : 'red',
+                                },
+                            ]}
+                            sections={[
+                                {
+                                    title: 'Resumo financeiro',
+                                    columns: [
+                                        { header: 'Conta', dataKey: 'conta' },
+                                        { header: 'Valor', dataKey: 'valor', align: 'right' },
+                                    ],
+                                    rows: [
+                                        {
+                                            conta: 'Receita Bruta',
+                                            valor: formatarMoedaServidor(receita, configuracoes),
+                                        },
+                                        { conta: '(-) Custos', valor: formatarMoedaServidor(-custos, configuracoes) },
+                                        {
+                                            conta: '(-) Despesas',
+                                            valor: formatarMoedaServidor(-despesas, configuracoes),
+                                        },
+                                        { conta: 'Lucro Líquido', valor: formatarMoedaServidor(lucro, configuracoes) },
+                                        { conta: 'Margem', valor: `${margem.toFixed(2)}%` },
+                                    ],
+                                },
+                            ]}
+                        />
                     </>
                 }
             />

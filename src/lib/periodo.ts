@@ -5,13 +5,52 @@ export type Periodo = {
     fim: Date;
 };
 
-export function obterPeriodo(periodo: string): Periodo {
+type PeriodoPersonalizado = {
+    inicio?: string;
+    fim?: string;
+};
+
+function criarDataLocal(value?: string) {
+    const match = value?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+    if (!match) return null;
+
+    const [, ano, mes, dia] = match;
+    const data = new Date(Number(ano), Number(mes) - 1, Number(dia));
+
+    if (data.getFullYear() !== Number(ano) || data.getMonth() !== Number(mes) - 1 || data.getDate() !== Number(dia)) {
+        return null;
+    }
+
+    return data;
+}
+
+export function obterPeriodo(periodo: string, personalizado: PeriodoPersonalizado = {}): Periodo {
     const hoje = new Date();
 
     let inicio = new Date(hoje);
     let fim = new Date(hoje);
 
     switch (periodo as TipoPeriodo) {
+        case 'personalizado': {
+            const inicioPersonalizado = criarDataLocal(personalizado.inicio);
+            const fimPersonalizado = criarDataLocal(personalizado.fim);
+
+            if (inicioPersonalizado && fimPersonalizado && inicioPersonalizado <= fimPersonalizado) {
+                inicio = inicioPersonalizado;
+                inicio.setHours(0, 0, 0, 0);
+                fim = fimPersonalizado;
+                fim.setHours(23, 59, 59, 999);
+                break;
+            }
+
+            inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            inicio.setHours(0, 0, 0, 0);
+            fim = new Date(hoje);
+            fim.setHours(23, 59, 59, 999);
+            break;
+        }
+
         case 'hoje':
             inicio.setHours(0, 0, 0, 0);
             fim.setHours(23, 59, 59, 999);

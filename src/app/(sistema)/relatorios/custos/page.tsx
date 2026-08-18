@@ -3,9 +3,9 @@ import { BriefcaseBusiness, Wallet, TrendingDown, BarChart3 } from 'lucide-react
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
 import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
@@ -34,7 +34,33 @@ export default async function RelatorioCustosPage({ searchParams }: Props) {
                 actions={
                     <>
                         <ReportPeriodFilter />
-                        <ReportExport reportTitle="Custos" />
+                        <StructuredReportExport
+                            title="Custos"
+                            periodo={periodo}
+                            cards={[
+                                { label: 'Total de Custos', value: totalCustos, format: 'currency', tone: 'red' },
+                                { label: 'Lançamentos', value: quantidade, format: 'number', tone: 'blue' },
+                                { label: 'Custo Médio', value: ticketMedio, format: 'currency', tone: 'yellow' },
+                                { label: 'Participação', value: participacao, format: 'percent', tone: 'green' },
+                            ]}
+                            sections={[
+                                {
+                                    title: 'Custos registrados',
+                                    columns: [
+                                        { header: 'Descrição', dataKey: 'descricao' },
+                                        { header: 'Categoria', dataKey: 'categoria' },
+                                        { header: 'Data', dataKey: 'data' },
+                                        { header: 'Valor', dataKey: 'valor', format: 'currency', align: 'right' },
+                                    ],
+                                    rows: custos.map((item) => ({
+                                        descricao: item.descricao ?? '-',
+                                        categoria: item.categoria ?? '-',
+                                        data: item.data ? formatarDataServidor(item.data, configuracoes) : '-',
+                                        valor: Number(item.valor),
+                                    })),
+                                },
+                            ]}
+                        />
                     </>
                 }
             />

@@ -4,9 +4,9 @@ import { notFound } from 'next/navigation';
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
 import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getRentabilidadeContrato } from '@/lib/relatorios/rentabilidade';
 
@@ -35,10 +35,48 @@ export default async function RentabilidadeContratoPage({ params, searchParams }
             <ReportHeader
                 title={contrato.contrato}
                 description={`Rentabilidade detalhada de ${contrato.cliente}.`}
+                backHref={`/relatorios/rentabilidade?periodo=${periodo}`}
                 actions={
                     <>
                         <ReportPeriodFilter />
-                        <ReportExport reportTitle={`Rentabilidade - ${contrato.contrato}`} />
+                        <StructuredReportExport
+                            title={`Rentabilidade - ${contrato.contrato}`}
+                            periodo={periodo}
+                            cards={[
+                                { label: 'Receita', value: contrato.receita, format: 'currency', tone: 'green' },
+                                { label: 'Custos', value: contrato.custos, format: 'currency', tone: 'red' },
+                                {
+                                    label: 'Lucro',
+                                    value: contrato.lucro,
+                                    format: 'currency',
+                                    tone: contrato.lucro >= 0 ? 'green' : 'red',
+                                },
+                                {
+                                    label: 'Margem',
+                                    value: contrato.margem,
+                                    format: 'percent',
+                                    tone: contrato.margem >= 0 ? 'green' : 'red',
+                                },
+                            ]}
+                            sections={[
+                                {
+                                    title: 'Movimentações do contrato',
+                                    columns: [
+                                        { header: 'Tipo', dataKey: 'tipo' },
+                                        { header: 'Descrição', dataKey: 'descricao' },
+                                        { header: 'Data', dataKey: 'data' },
+                                        { header: 'Valor', dataKey: 'valor', format: 'currency', align: 'right' },
+                                    ],
+                                    rows: contrato.movimentos.map((item) => ({
+                                        tipo: item.tipo,
+                                        descricao: item.descricao,
+                                        data: item.data ? formatarDataServidor(item.data, configuracoes) : '-',
+                                        valor: item.valor,
+                                    })),
+                                    emptyMessage: 'Nenhuma receita paga ou custo foi vinculado a este contrato.',
+                                },
+                            ]}
+                        />
                     </>
                 }
             />

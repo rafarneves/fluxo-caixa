@@ -15,29 +15,38 @@ export const dynamic = 'force-dynamic';
 type Props = {
     searchParams?: Promise<{
         periodo?: string;
+        inicio?: string;
+        fim?: string;
     }>;
 };
 
 export default async function DREPage({ searchParams }: Props) {
     const supabase = await createClient();
-    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const { periodo = 'mes', inicio: inicioPersonalizado, fim: fimPersonalizado } = (await searchParams) ?? {};
 
-    const { inicio, fim } = obterPeriodo(periodo);
+    const { inicio, fim } = obterPeriodo(periodo, {
+        inicio: inicioPersonalizado,
+        fim: fimPersonalizado,
+    });
 
-    const inicioISO = inicio.toISOString().split('T')[0];
-    const fimISO = fim.toISOString().split('T')[0];
+    const dataLocalISO = (data: Date) =>
+        `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
+    const inicioISO = dataLocalISO(inicio);
+    const fimISO = dataLocalISO(fim);
 
     // Mês de início e fim no formato YYYY-MM para comparar com campo "competencia"
     const inicioMes = inicioISO.slice(0, 7);
     const fimMes = fimISO.slice(0, 7);
 
+    let recebimentosQuery = supabase.from('recebimentos').select('valor, competencia, vencimento').eq('status', 'Pago');
+
+    recebimentosQuery =
+        periodo === 'personalizado'
+            ? recebimentosQuery.gte('vencimento', inicioISO).lte('vencimento', fimISO)
+            : recebimentosQuery.gte('competencia', inicioMes).lte('competencia', fimMes);
+
     const [{ data: recebimentos }, { data: despesas }, { data: custosContrato }] = await Promise.all([
-        supabase
-            .from('recebimentos')
-            .select('valor, competencia')
-            .eq('status', 'Pago')
-            .gte('competencia', inicioMes)
-            .lte('competencia', fimMes),
+        recebimentosQuery,
 
         supabase.from('despesas').select('categoria, valor, data').gte('data', inicioISO).lte('data', fimISO),
 
@@ -65,7 +74,7 @@ export default async function DREPage({ searchParams }: Props) {
         }
     > = {};
 
-    recebimentos?.forEach((item: any) => {
+    recebimentos?.forEach((item) => {
         const mes = item.competencia || 'Sem mês';
 
         if (!meses[mes]) {
@@ -79,7 +88,7 @@ export default async function DREPage({ searchParams }: Props) {
         meses[mes].receita += Number(item.valor || 0);
     });
 
-    despesas?.forEach((item: any) => {
+    despesas?.forEach((item) => {
         const mes = item.data?.slice(0, 7) || 'Sem mês';
 
         if (!meses[mes]) {
@@ -93,7 +102,7 @@ export default async function DREPage({ searchParams }: Props) {
         meses[mes].lucro -= Number(item.valor || 0);
     });
 
-    custosContrato?.forEach((item: any) => {
+    custosContrato?.forEach((item) => {
         const mes = item.data?.slice(0, 7) || 'Sem mês';
 
         if (!meses[mes]) {
@@ -117,7 +126,7 @@ export default async function DREPage({ searchParams }: Props) {
 
     // Agrupar despesas por categoria para o PDF
     const despesasAgrupadas: Record<string, number> = {};
-    (despesas ?? []).forEach((d: any) => {
+    (despesas ?? []).forEach((d) => {
         const cat = d.categoria || 'Outros';
         despesasAgrupadas[cat] = (despesasAgrupadas[cat] || 0) + Number(d.valor);
     });
@@ -134,6 +143,8 @@ export default async function DREPage({ searchParams }: Props) {
                 lucroLiquido={lucroLiquido}
                 margem={margem}
                 periodo={periodo}
+                inicio={inicioISO}
+                fim={fimISO}
                 despesasPorCategoria={despesasPorCategoria}
             />
 

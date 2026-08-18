@@ -3,9 +3,9 @@ import { Receipt, TrendingDown, Wallet, CalendarDays } from 'lucide-react';
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
 import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import StructuredReportExport from '@/components/relatorios/StructuredReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
@@ -34,7 +34,33 @@ export default async function RelatorioDespesasPage({ searchParams }: Props) {
                 actions={
                     <>
                         <ReportPeriodFilter />
-                        <ReportExport reportTitle="Despesas" />
+                        <StructuredReportExport
+                            title="Despesas"
+                            periodo={periodo}
+                            cards={[
+                                { label: 'Total', value: totalDespesas, format: 'currency', tone: 'red' },
+                                { label: 'Lançamentos', value: quantidade, format: 'number', tone: 'blue' },
+                                { label: 'Ticket Médio', value: ticketMedio, format: 'currency', tone: 'yellow' },
+                                { label: 'Categorias', value: categorias, format: 'number', tone: 'green' },
+                            ]}
+                            sections={[
+                                {
+                                    title: 'Despesas registradas',
+                                    columns: [
+                                        { header: 'Categoria', dataKey: 'categoria' },
+                                        { header: 'Descrição', dataKey: 'descricao' },
+                                        { header: 'Data', dataKey: 'data' },
+                                        { header: 'Valor', dataKey: 'valor', format: 'currency', align: 'right' },
+                                    ],
+                                    rows: despesas.map((item) => ({
+                                        categoria: item.categoria ?? '-',
+                                        descricao: item.descricao ?? '-',
+                                        data: item.data ? formatarDataServidor(item.data, configuracoes) : '-',
+                                        valor: Number(item.valor),
+                                    })),
+                                },
+                            ]}
+                        />
                     </>
                 }
             />
