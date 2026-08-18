@@ -1,18 +1,22 @@
+import type { ReactNode } from 'react';
+import { Avatar, Box, Card, CardContent, Chip, LinearProgress, Stack, Typography } from '@mui/material';
+
 type Props = {
     titulo: string;
     valor: string;
-
     subtitulo?: string;
-
-    icone?: React.ReactNode;
-
+    icone?: ReactNode;
     status?: string;
-
     tendencia?: string;
-
     progresso?: number;
-
     cor?: 'green' | 'red' | 'blue' | 'yellow';
+};
+
+const cores = {
+    green: { main: '#4ade80', base: '#22c55e', soft: 'rgba(34,197,94,.11)', border: 'rgba(34,197,94,.22)' },
+    red: { main: '#f87171', base: '#ef4444', soft: 'rgba(239,68,68,.11)', border: 'rgba(239,68,68,.22)' },
+    blue: { main: '#22d3ee', base: '#06b6d4', soft: 'rgba(6,182,212,.11)', border: 'rgba(6,182,212,.22)' },
+    yellow: { main: '#fbbf24', base: '#eab308', soft: 'rgba(234,179,8,.11)', border: 'rgba(234,179,8,.22)' },
 };
 
 export default function StatCard({
@@ -25,99 +29,111 @@ export default function StatCard({
     progresso,
     cor = 'green',
 }: Props) {
-    const cores = {
-        green: {
-            texto: 'text-green-400',
-            fundo: 'bg-green-500/10',
-            borda: 'border-green-500/20',
-            glow: 'hover:shadow-green-500/10',
-            barra: 'bg-green-500',
-        },
-
-        red: {
-            texto: 'text-red-400',
-            fundo: 'bg-red-500/10',
-            borda: 'border-red-500/20',
-            glow: 'hover:shadow-red-500/10',
-            barra: 'bg-red-500',
-        },
-
-        blue: {
-            texto: 'text-cyan-400',
-            fundo: 'bg-cyan-500/10',
-            borda: 'border-cyan-500/20',
-            glow: 'hover:shadow-cyan-500/10',
-            barra: 'bg-cyan-500',
-        },
-
-        yellow: {
-            texto: 'text-yellow-400',
-            fundo: 'bg-yellow-500/10',
-            borda: 'border-yellow-500/20',
-            glow: 'hover:shadow-yellow-500/10',
-            barra: 'bg-yellow-500',
-        },
-    };
+    const tom = cores[cor];
 
     return (
-        <div
-            className={`relative min-w-0 overflow-hidden rounded-3xl border ${cores[cor].borda} bg-gradient-to-b from-[#171F2B] to-[#111827] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl sm:p-5 ${cores[cor].glow} `}
+        <Card
+            sx={{
+                minWidth: 0,
+                height: '100%',
+                borderColor: tom.border,
+                '&:hover': { transform: 'translateY(-3px)', boxShadow: `0 20px 55px ${tom.soft}` },
+            }}
         >
-            <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/5 blur-3xl" />
-
-            <div className="relative flex min-w-0 items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold tracking-[0.18em] text-zinc-500 uppercase">{titulo}</p>
-
-                    <h2
-                        className={`mt-3 text-2xl leading-tight font-bold tracking-tight [overflow-wrap:anywhere] sm:text-3xl ${cores[cor].texto} `}
-                    >
-                        {valor}
-                    </h2>
-
-                    {subtitulo && <p className="mt-2 text-sm text-zinc-500">{subtitulo}</p>}
-                </div>
-
-                {icone && (
-                    <div
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border sm:h-12 sm:w-12 ${cores[cor].borda} ${cores[cor].fundo} ${cores[cor].texto} transition-transform duration-300 hover:scale-110`}
-                    >
-                        {icone}
-                    </div>
-                )}
-            </div>
-
-            {(status || tendencia) && (
-                <div className="relative mt-3 flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                    {status && (
-                        <span
-                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${cores[cor].borda} ${cores[cor].texto} ${cores[cor].fundo} `}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: -55,
+                    right: -40,
+                    width: 145,
+                    height: 145,
+                    borderRadius: '50%',
+                    bgcolor: tom.soft,
+                    filter: 'blur(24px)',
+                }}
+            />
+            <CardContent
+                sx={{ position: 'relative', p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}
+            >
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography
+                            variant="overline"
+                            color="text.secondary"
+                            sx={{ fontSize: 10, fontWeight: 800, letterSpacing: '.16em' }}
                         >
-                            {status}
-                        </span>
-                    )}
-
-                    {tendencia && (
-                        <span className={`min-w-0 text-[10px] font-medium [overflow-wrap:anywhere] ${cores[cor].texto} `}>
-                            {tendencia}
-                        </span>
-                    )}
-                </div>
-            )}
-
-            {progresso !== undefined && cor !== 'red' && (
-                <div className="relative mt-5">
-                    <div className="h-2 overflow-hidden rounded-full bg-black/30">
-                        <div
-                            className={`h-full rounded-full ${cores[cor].barra} transition-all duration-500`}
-
-                            style={{
-                                width: `${Math.min(Math.max(progresso, 0), 100)}%`,
+                            {titulo}
+                        </Typography>
+                        <Typography
+                            sx={{
+                                mt: 0.8,
+                                color: tom.main,
+                                fontSize: { xs: 25, sm: 29 },
+                                lineHeight: 1.18,
+                                fontWeight: 800,
+                                overflowWrap: 'anywhere',
                             }}
-                        />
-                    </div>
-                </div>
-            )}
-        </div>
+                        >
+                            {valor}
+                        </Typography>
+                        {subtitulo && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                {subtitulo}
+                            </Typography>
+                        )}
+                    </Box>
+                    {icone && (
+                        <Avatar
+                            variant="rounded"
+                            sx={{
+                                width: 46,
+                                height: 46,
+                                color: tom.main,
+                                bgcolor: tom.soft,
+                                border: `1px solid ${tom.border}`,
+                            }}
+                        >
+                            {icone}
+                        </Avatar>
+                    )}
+                </Stack>
+
+                {(status || tendencia) && (
+                    <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ mt: 2, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}
+                    >
+                        {status && (
+                            <Chip
+                                label={status}
+                                size="small"
+                                variant="outlined"
+                                sx={{ color: tom.main, bgcolor: tom.soft, borderColor: tom.border }}
+                            />
+                        )}
+                        {tendencia && (
+                            <Typography variant="caption" sx={{ color: tom.main, fontWeight: 700 }}>
+                                {tendencia}
+                            </Typography>
+                        )}
+                    </Stack>
+                )}
+
+                {progresso !== undefined && cor !== 'red' && (
+                    <LinearProgress
+                        variant="determinate"
+                        value={Math.min(Math.max(progresso, 0), 100)}
+                        sx={{
+                            mt: 2.5,
+                            height: 7,
+                            borderRadius: 99,
+                            bgcolor: 'rgba(0,0,0,.28)',
+                            '& .MuiLinearProgress-bar': { bgcolor: tom.base },
+                        }}
+                    />
+                )}
+            </CardContent>
+        </Card>
     );
 }

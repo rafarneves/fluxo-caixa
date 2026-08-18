@@ -2,86 +2,84 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import SaveRounded from '@mui/icons-material/SaveRounded';
+import { Alert, Button, Card, CardContent, Stack, TextField } from '@mui/material';
+import PageHeader from '@/components/ui/PageHeader';
 import { createClient } from '@/lib/supabase/client';
-
-const supabase = createClient();
 
 export default function NovaContaPage() {
     const router = useRouter();
-
     const [descricao, setDescricao] = useState('');
     const [categoria, setCategoria] = useState('');
     const [valor, setValor] = useState('');
     const [vencimento, setVencimento] = useState('');
-
+    const [erro, setErro] = useState<string | null>(null);
+    const [salvando, setSalvando] = useState(false);
     async function salvarConta() {
-        const { error } = await supabase.from('contas_pagar').insert({
-            descricao,
-            categoria,
-            valor: Number(valor),
-            vencimento: Number(vencimento),
-            status: 'Pendente',
-        });
-
+        setErro(null);
+        setSalvando(true);
+        const supabase = createClient();
+        const { error } = await supabase
+            .from('contas_pagar')
+            .insert({ descricao, categoria, valor: Number(valor), vencimento: Number(vencimento), status: 'Pendente' });
+        setSalvando(false);
         if (error) {
-            alert(error.message);
+            setErro(error.message);
             return;
         }
-
         router.push('/contas-pagar');
         router.refresh();
     }
-
     return (
-        <div>
-            <h1 className="text-5xl font-bold text-green-400">Nova Conta</h1>
-
-            <p className="mt-2 mb-10 text-zinc-400">Cadastre uma nova despesa.</p>
-
-            <div className="max-w-2xl rounded-2xl bg-[#161B22] p-8">
-                <label className="mb-2 block">Descrição</label>
-
-                <input
-                    value={descricao}
-                    onChange={(e) => setDescricao(e.target.value)}
-                    className="mb-6 w-full rounded-xl bg-zinc-900 p-4"
-                />
-
-                <label className="mb-2 block">Categoria</label>
-
-                <input
-                    value={categoria}
-                    onChange={(e) => setCategoria(e.target.value)}
-                    className="mb-6 w-full rounded-xl bg-zinc-900 p-4"
-                />
-
-                <label className="mb-2 block">Valor</label>
-
-                <input
-                    type="number"
-                    value={valor}
-                    onChange={(e) => setValor(e.target.value)}
-                    className="mb-6 w-full rounded-xl bg-zinc-900 p-4"
-                />
-
-                <label className="mb-2 block">Dia do vencimento</label>
-
-                <input
-                    type="number"
-                    min="1"
-                    max="31"
-                    value={vencimento}
-                    onChange={(e) => setVencimento(e.target.value)}
-                    className="mb-8 w-full rounded-xl bg-zinc-900 p-4"
-                />
-
-                <button
-                    onClick={salvarConta}
-                    className="rounded-xl bg-green-500 px-8 py-4 font-bold text-black hover:bg-green-400"
-                >
-                    Salvar Conta
-                </button>
-            </div>
-        </div>
+        <main>
+            <PageHeader title="Nova Conta" description="Cadastre uma nova despesa." />
+            <Card sx={{ maxWidth: 680 }}>
+                <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+                    <Stack spacing={2.25}>
+                        {erro && (
+                            <Alert severity="error" variant="outlined">
+                                {erro}
+                            </Alert>
+                        )}
+                        <TextField
+                            label="Descrição"
+                            value={descricao}
+                            onChange={(event) => setDescricao(event.target.value)}
+                            required
+                        />
+                        <TextField
+                            label="Categoria"
+                            value={categoria}
+                            onChange={(event) => setCategoria(event.target.value)}
+                            required
+                        />
+                        <TextField
+                            type="number"
+                            label="Valor"
+                            value={valor}
+                            onChange={(event) => setValor(event.target.value)}
+                            required
+                            slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                        />
+                        <TextField
+                            type="number"
+                            label="Dia do vencimento"
+                            value={vencimento}
+                            onChange={(event) => setVencimento(event.target.value)}
+                            required
+                            slotProps={{ htmlInput: { min: 1, max: 31 } }}
+                        />
+                        <Button
+                            onClick={salvarConta}
+                            disabled={salvando}
+                            startIcon={<SaveRounded />}
+                            sx={{ alignSelf: 'flex-start' }}
+                        >
+                            {salvando ? 'Salvando...' : 'Salvar Conta'}
+                        </Button>
+                    </Stack>
+                </CardContent>
+            </Card>
+        </main>
     );
 }

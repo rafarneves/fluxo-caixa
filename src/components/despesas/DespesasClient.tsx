@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import ExpenseSummary from '@/components/despesas/ExpenseSummary';
-import ExpenseBreakdown from '@/components/despesas/ExpenseBreakdown';
+import AddRounded from '@mui/icons-material/AddRounded';
+import { Box, Button, Card, CardContent, Chip, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
+
 import ExcluirDespesa from '@/app/(sistema)/despesas/ExcluirDespesa';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+import ExpenseBreakdown from '@/components/despesas/ExpenseBreakdown';
+import ExpenseSummary from '@/components/despesas/ExpenseSummary';
 
 type Despesa = {
     id: string;
@@ -18,140 +21,159 @@ type Despesa = {
     created_at?: string;
 };
 
-type Props = {
-    despesas: Despesa[];
-};
-
-export default function DespesasClient({ despesas }: Props) {
+export default function DespesasClient({ despesas }: { despesas: Despesa[] }) {
     const { formatarMoeda, formatarData } = useConfiguracoes();
-
     const [dataInicio, setDataInicio] = useState('');
     const [dataFim, setDataFim] = useState('');
-
     const dadosFiltrados = useMemo(() => {
-        let filtrados = despesas;
-
-        if (dataInicio && dataFim) {
-            const inicio = new Date(dataInicio + 'T00:00:00');
-            const fim = new Date(dataFim + 'T00:00:00');
-            inicio.setHours(0, 0, 0, 0);
-            fim.setHours(23, 59, 59, 999);
-
-            filtrados = filtrados.filter(item => {
-                if (item.data) {
-                    const d = new Date(item.data + 'T00:00:00');
-                    return d >= inicio && d <= fim;
-                }
-                // Despesas fixas passam por padrão se não tiverem data específica
-                return true; 
-            });
-        }
-
-        return filtrados;
-    }, [despesas, dataInicio, dataFim]);
-
-    const total = dadosFiltrados.reduce((acc, d) => acc + Number(d.valor), 0);
-    const fixas = dadosFiltrados.filter(d => d.tipo === 'Fixa').reduce((acc, d) => acc + Number(d.valor), 0);
-    const variaveis = dadosFiltrados.filter(d => d.tipo === 'Variável').reduce((acc, d) => acc + Number(d.valor), 0);
-
+        if (!dataInicio || !dataFim) return despesas;
+        const inicio = new Date(`${dataInicio}T00:00:00`);
+        const fim = new Date(`${dataFim}T00:00:00`);
+        fim.setHours(23, 59, 59, 999);
+        return despesas.filter(
+            (item) =>
+                !item.data || (new Date(`${item.data}T00:00:00`) >= inicio && new Date(`${item.data}T00:00:00`) <= fim)
+        );
+    }, [dataFim, dataInicio, despesas]);
+    const total = dadosFiltrados.reduce((acc, item) => acc + Number(item.valor), 0);
+    const fixas = dadosFiltrados
+        .filter((item) => item.tipo === 'Fixa')
+        .reduce((acc, item) => acc + Number(item.valor), 0);
+    const variaveis = dadosFiltrados
+        .filter((item) => item.tipo === 'Variável')
+        .reduce((acc, item) => acc + Number(item.valor), 0);
     return (
-        <div className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <label>
-                    <span className="mb-2 block text-sm text-zinc-400">Data Inicial</span>
-                    <input
+        <Stack spacing={4}>
+            <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <TextField
                         type="date"
+                        label="Data Inicial"
                         value={dataInicio}
-                        onChange={(e) => setDataInicio(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-800 bg-[#11161d] px-4 py-3 text-sm text-white outline-none focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10"
+                        onChange={(event) => setDataInicio(event.target.value)}
+                        fullWidth
+                        size="small"
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
-                </label>
-                
-                <label>
-                    <span className="mb-2 block text-sm text-zinc-400">Data Final</span>
-                    <input
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <TextField
                         type="date"
+                        label="Data Final"
                         value={dataFim}
-                        onChange={(e) => setDataFim(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-800 bg-[#11161d] px-4 py-3 text-sm text-white outline-none focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10"
+                        onChange={(event) => setDataFim(event.target.value)}
+                        fullWidth
+                        size="small"
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
-                </label>
-            </div>
-
+                </Grid>
+            </Grid>
             <ExpenseSummary total={total} quantidade={dadosFiltrados.length} fixas={fixas} variaveis={variaveis} />
-
-            <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-                <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8 xl:col-span-2">
-                    <div className="mb-8 flex items-center justify-between">
-                        <div>
-                            <h2 className="text-2xl font-bold">Lista de Despesas</h2>
-                            <p className="mt-1 text-zinc-500">{dadosFiltrados.length} lançamento(s)</p>
-                        </div>
-
-                        <Link
-                            href="/despesas/nova"
-                            prefetch={false}
-                            className="rounded-xl bg-green-500 px-6 py-3 font-bold text-black transition hover:bg-green-400"
-                        >
-                            + Nova Despesa
-                        </Link>
-                    </div>
-
-                    <div className="space-y-4">
-                        {dadosFiltrados.length === 0 && (
-                            <div className="rounded-2xl border border-dashed border-zinc-700 py-10 text-center text-zinc-500">
-                                Nenhuma despesa encontrada para este período.
-                            </div>
-                        )}
-
-                        {dadosFiltrados.map((d: any) => (
-                            <div
-                                key={d.id}
-                                className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-black/20 p-5 transition hover:border-zinc-700"
+            <Grid container spacing={3}>
+                <Grid size={{ xs: 12, xl: 8 }}>
+                    <Card component="section">
+                        <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+                            <Stack
+                                direction={{ xs: 'column', sm: 'row' }}
+                                spacing={2}
+                                sx={{ mb: 3, alignItems: { sm: 'center' }, justifyContent: 'space-between' }}
                             >
-                                <div>
-                                    <h3 className="font-semibold text-white">{d.descricao}</h3>
-
-                                    <p className="mt-1 text-zinc-500">{d.categoria}</p>
-
-                                    <span
-                                        className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                                            d.tipo === 'Fixa'
-                                                ? 'bg-yellow-500/10 text-yellow-400'
-                                                : 'bg-blue-500/10 text-blue-400'
-                                        } `}
-                                    >
-                                        {d.tipo === 'Fixa' ? `Fixa • Todo dia ${d.dia_vencimento}` : 'Variável'}
-                                    </span>
-                                </div>
-
-                                <div className="text-right">
-                                    <p className="text-2xl font-bold text-red-400">{formatarMoeda(Number(d.valor))}</p>
-
-                                    {d.tipo === 'Variável' && d.data && (
-                                        <p className="mt-2 text-sm text-zinc-500">{formatarData(d.data)}</p>
-                                    )}
-
-                                    <div className="mt-4 flex justify-end gap-3">
-                                        <Link
-                                            href={`/despesas/${d.id}`}
-                                            className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700"
-                                        >
-                                            Editar
-                                        </Link>
-
-                                        <ExcluirDespesa id={d.id} />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                <div>
+                                <Box>
+                                    <Typography component="h2" variant="h5" sx={{ fontWeight: 800 }}>
+                                        Lista de Despesas
+                                    </Typography>
+                                    <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                                        {dadosFiltrados.length} lançamento(s)
+                                    </Typography>
+                                </Box>
+                                <Button component={Link} href="/despesas/nova" startIcon={<AddRounded />}>
+                                    Nova Despesa
+                                </Button>
+                            </Stack>
+                            {dadosFiltrados.length === 0 ? (
+                                <Paper
+                                    variant="outlined"
+                                    sx={{ py: 5, borderStyle: 'dashed', color: 'text.secondary', textAlign: 'center' }}
+                                >
+                                    Nenhuma despesa encontrada para este período.
+                                </Paper>
+                            ) : (
+                                <Stack spacing={1.5}>
+                                    {dadosFiltrados.map((despesa) => (
+                                        <Paper key={despesa.id} variant="outlined" sx={{ p: 2.25 }}>
+                                            <Stack
+                                                direction={{ xs: 'column', sm: 'row' }}
+                                                spacing={2}
+                                                sx={{ justifyContent: 'space-between' }}
+                                            >
+                                                <Box>
+                                                    <Typography sx={{ fontWeight: 750 }}>
+                                                        {despesa.descricao}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                                        {despesa.categoria}
+                                                    </Typography>
+                                                    <Chip
+                                                        label={
+                                                            despesa.tipo === 'Fixa'
+                                                                ? `Fixa · Todo dia ${despesa.dia_vencimento}`
+                                                                : 'Variável'
+                                                        }
+                                                        size="small"
+                                                        sx={{
+                                                            mt: 1.5,
+                                                            color: despesa.tipo === 'Fixa' ? '#fbbf24' : '#22d3ee',
+                                                            bgcolor:
+                                                                despesa.tipo === 'Fixa'
+                                                                    ? 'rgba(234,179,8,.1)'
+                                                                    : 'rgba(6,182,212,.1)',
+                                                        }}
+                                                    />
+                                                </Box>
+                                                <Box sx={{ textAlign: { sm: 'right' } }}>
+                                                    <Typography
+                                                        sx={{ color: 'error.main', fontSize: 22, fontWeight: 800 }}
+                                                    >
+                                                        {formatarMoeda(Number(despesa.valor))}
+                                                    </Typography>
+                                                    {despesa.tipo === 'Variável' && despesa.data && (
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                            sx={{ mt: 0.5 }}
+                                                        >
+                                                            {formatarData(despesa.data)}
+                                                        </Typography>
+                                                    )}
+                                                    <Stack
+                                                        direction="row"
+                                                        spacing={1}
+                                                        sx={{ mt: 1.5, justifyContent: { sm: 'flex-end' } }}
+                                                    >
+                                                        <Button
+                                                            component={Link}
+                                                            href={`/despesas/${despesa.id}`}
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color="inherit"
+                                                        >
+                                                            Editar
+                                                        </Button>
+                                                        <ExcluirDespesa id={despesa.id} />
+                                                    </Stack>
+                                                </Box>
+                                            </Stack>
+                                        </Paper>
+                                    ))}
+                                </Stack>
+                            )}
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid size={{ xs: 12, xl: 4 }}>
                     <ExpenseBreakdown despesas={dadosFiltrados} />
-                </div>
-            </div>
-        </div>
+                </Grid>
+            </Grid>
+        </Stack>
     );
 }

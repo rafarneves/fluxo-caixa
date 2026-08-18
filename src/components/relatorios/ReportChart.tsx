@@ -1,36 +1,59 @@
-import React from 'react';
+import type { ReactNode } from 'react';
+import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
 
 type ReportChartProps = {
     title: string;
     description?: string;
-    children: React.ReactNode;
-    actions?: React.ReactNode;
+    children: ReactNode;
+    actions?: ReactNode;
     height?: number;
 };
 
 export default function ReportChart({ title, description, children, actions, height = 420 }: ReportChartProps) {
     return (
-        <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
-            <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <p className="text-xs font-semibold tracking-[0.20em] text-zinc-500 uppercase">ANÁLISE</p>
-
-                    <h2 className="mt-3 text-3xl font-bold text-white">{title}</h2>
-
-                    {description && <p className="mt-2 text-zinc-500">{description}</p>}
-                </div>
-
-                {actions && <div className="flex items-center gap-3">{actions}</div>}
-            </div>
-
-            <div
-                className="rounded-2xl border border-zinc-800 bg-black/20 p-4"
-                style={{
-                    minHeight: height,
-                }}
-            >
-                {children}
-            </div>
-        </section>
+        <Card component="section">
+            <CardContent sx={{ p: { xs: 2.5, md: 3.5 }, '&:last-child': { pb: { xs: 2.5, md: 3.5 } } }}>
+                <Stack
+                    direction={{ xs: 'column', lg: 'row' }}
+                    spacing={2}
+                    sx={{ mb: 3, justifyContent: 'space-between', alignItems: { lg: 'center' } }}
+                >
+                    <Box>
+                        <Typography
+                            variant="overline"
+                            color="text.secondary"
+                            sx={{ fontWeight: 800, letterSpacing: '.18em' }}
+                        >
+                            Análise
+                        </Typography>
+                        <Typography component="h2" variant="h5" sx={{ mt: 0.5, fontWeight: 800 }}>
+                            {title}
+                        </Typography>
+                        {description && (
+                            <Typography color="text.secondary" sx={{ mt: 0.75 }}>
+                                {description}
+                            </Typography>
+                        )}
+                    </Box>
+                    {actions && (
+                        <Stack direction="row" spacing={1.5}>
+                            {actions}
+                        </Stack>
+                    )}
+                </Stack>
+                <Box
+                    sx={{
+                        minHeight: height,
+                        p: { xs: 1, sm: 2 },
+                        border: 1,
+                        borderColor: 'divider',
+                        borderRadius: 3,
+                        bgcolor: 'rgba(2,6,23,.25)',
+                    }}
+                >
+                    {children}
+                </Box>
+            </CardContent>
+        </Card>
     );
 }

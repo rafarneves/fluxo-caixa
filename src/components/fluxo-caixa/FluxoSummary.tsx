@@ -4,6 +4,7 @@ import { ArrowDownCircle, ArrowUpCircle, Receipt, Briefcase, TrendingUp } from '
 
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 import StatCard from '@/components/ui/StatCard';
+import ResponsiveGrid from '@/components/ui/ResponsiveGrid';
 
 type Props = {
     entradas: number;
@@ -22,7 +23,7 @@ export default function FluxoSummary({
 }: Props) {
     const moeda = useConfiguracoes().formatarMoedaCompacta;
     return (
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-5">
+        <ResponsiveGrid columns={5}>
             <StatCard
                 titulo="Entradas"
                 valor={moeda(entradas)}
@@ -77,6 +78,6 @@ export default function FluxoSummary({
                 progresso={resultado >= 0 ? Math.min(resultado / 100, 100) : Math.min(Math.abs(resultado) / 100, 100)}
                 cor={resultado >= 0 ? 'green' : 'red'}
             />
-        </section>
+        </ResponsiveGrid>
     );
 }

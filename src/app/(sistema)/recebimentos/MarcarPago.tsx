@@ -1,5 +1,7 @@
 'use client';
 
+import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded';
+import { Button } from '@mui/material';
 import { marcarComoPago } from './actions';
 
 export default function MarcarPago({ id }: { id: string }) {
@@ -9,9 +11,9 @@ export default function MarcarPago({ id }: { id: string }) {
                 await marcarComoPago(id);
             }}
         >
-            <button className="rounded-xl bg-green-500 px-4 py-2 font-bold text-black hover:bg-green-400">
+            <Button type="submit" size="small" startIcon={<CheckCircleRounded />}>
                 Marcar Pago
-            </button>
+            </Button>
         </form>
     );
 }

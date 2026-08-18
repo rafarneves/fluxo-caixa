@@ -1,34 +1,39 @@
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
-import { Users, Gift, TrendingUp } from 'lucide-react';
+import AddRounded from '@mui/icons-material/AddRounded';
+import CardGiftcardRounded from '@mui/icons-material/CardGiftcardRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import TrendingUpRounded from '@mui/icons-material/TrendingUpRounded';
+import { Button, Card, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+
+import PageHeader from '@/components/ui/PageHeader';
+import ResponsiveGrid from '@/components/ui/ResponsiveGrid';
+import StatCard from '@/components/ui/StatCard';
 import { formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
+import { createClient } from '@/lib/supabase/server';
+
+type Indicacao = {
+    id: string;
+    cliente_indicador: string | null;
+    cliente_indicado: string | null;
+    valor_desconto: number;
+    status: string;
+    indicador: { nome: string } | null;
+    indicado: { nome: string } | null;
+};
+type IndicacaoComStatus = Indicacao & { beneficioAtivo: boolean };
 
 export default async function IndicacoesPage() {
     const supabase = await createClient();
     const { configuracoes } = await getContextoConfiguracoes();
     const formatMoney = (value: number) => formatarMoedaServidor(value, configuracoes);
-    const { data: indicacoes } = await supabase
+    const { data } = await supabase
         .from('indicacoes')
-        .select(
-            `
-        *,
-        indicador:cliente_indicador(
-          nome
-        ),
-        indicado:cliente_indicado(
-          nome
-        )
-      `
-        )
-        .order('created_at', {
-            ascending: false,
-        });
-
-    const indicacoesData = indicacoes ?? [];
+        .select('*, indicador:cliente_indicador(nome), indicado:cliente_indicado(nome)')
+        .order('created_at', { ascending: false });
+    const indicacoes = (data ?? []) as unknown as Indicacao[];
     const clientesIndicados = [
-        ...new Set(indicacoesData.map((indicacao: any) => indicacao.cliente_indicado).filter(Boolean)),
+        ...new Set(indicacoes.map((item) => item.cliente_indicado).filter((id): id is string => Boolean(id))),
     ];
-
     const { data: contratosAtivos } = clientesIndicados.length
         ? await supabase
               .from('contratos')
@@ -36,21 +41,15 @@ export default async function IndicacoesPage() {
               .in('cliente_id', clientesIndicados)
               .eq('status', 'Ativo')
         : { data: [] };
-
     const clientesComContratoAtivo = new Set((contratosAtivos ?? []).map((contrato) => contrato.cliente_id));
-
-    const indicacoesComStatus = indicacoesData.map((indicacao: any) => ({
-        ...indicacao,
-        beneficioAtivo: clientesComContratoAtivo.has(indicacao.cliente_indicado),
+    const lista: IndicacaoComStatus[] = indicacoes.map((item) => ({
+        ...item,
+        beneficioAtivo: Boolean(item.cliente_indicado && clientesComContratoAtivo.has(item.cliente_indicado)),
     }));
-
-    const idsAtivos = indicacoesComStatus
-        .filter((indicacao: any) => indicacao.beneficioAtivo && indicacao.status !== 'Ativo')
-        .map((indicacao: any) => indicacao.id);
-    const idsSuspensos = indicacoesComStatus
-        .filter((indicacao: any) => !indicacao.beneficioAtivo && indicacao.status !== 'Suspenso')
-        .map((indicacao: any) => indicacao.id);
-
+    const idsAtivos = lista.filter((item) => item.beneficioAtivo && item.status !== 'Ativo').map((item) => item.id);
+    const idsSuspensos = lista
+        .filter((item) => !item.beneficioAtivo && item.status !== 'Suspenso')
+        .map((item) => item.id);
     await Promise.all([
         idsAtivos.length
             ? supabase.from('indicacoes').update({ status: 'Ativo' }).in('id', idsAtivos)
@@ -59,184 +58,100 @@ export default async function IndicacoesPage() {
             ? supabase.from('indicacoes').update({ status: 'Suspenso' }).in('id', idsSuspensos)
             : Promise.resolve(),
     ]);
-
-    const totalIndicacoes = indicacoesComStatus.length;
-
-    const beneficiosAtivos = indicacoesComStatus.filter((item: any) => item.beneficioAtivo).length;
-
-    const beneficioMensal = indicacoesComStatus.reduce((total: number, item: any) => {
-        return total + (item.beneficioAtivo ? Number(item.valor_desconto) : 0);
-    }, 0);
-
-    return (
-        <main className="space-y-10">
-            <div className="flex items-start justify-between">
-                <div>
-                    <p className="text-xs font-semibold tracking-[0.22em] text-zinc-500 uppercase">INDICAÇÕES</p>
-
-                    <h1 className="mt-3 text-5xl font-bold text-white">Indicações</h1>
-
-                    <p className="mt-3 text-lg text-zinc-400">
-                        Controle de benefícios gerados por indicação de clientes.
-                    </p>
-                </div>
-
-                <Link
-                    href="/indicacoes/nova"
-
-                    className="rounded-2xl bg-green-500 px-6 py-4 font-bold text-black transition-all duration-300 hover:-translate-y-1 hover:bg-green-400 hover:shadow-xl hover:shadow-green-500/20"
-                >
-                    + Nova Indicação
-                </Link>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                <CardResumo
-                    titulo="Total Indicações"
-
-                    valor={String(totalIndicacoes)}
-
-                    icone={<Users size={22} />}
-
-                    cor="green"
-                />
-
-                <CardResumo
-                    titulo="Benefícios Ativos"
-
-                    valor={String(beneficiosAtivos)}
-
-                    icone={<Gift size={22} />}
-
-                    cor="blue"
-                />
-
-                <CardResumo
-                    titulo="Benefício Mensal"
-
-                    valor={formatMoney(beneficioMensal)}
-
-                    icone={<TrendingUp size={22} />}
-
-                    cor="yellow"
-                />
-            </div>
-
-            <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827]">
-                <table className="w-full">
-                    <thead className="bg-black/20">
-                        <tr>
-                            <th className="p-5 text-left text-zinc-400">Cliente Indicador</th>
-
-                            <th className="p-5 text-left text-zinc-400">Cliente Indicado</th>
-
-                            <th className="p-5 text-left text-zinc-400">Benefício</th>
-
-                            <th className="p-5 text-left text-zinc-400">Status</th>
-
-                            <th className="p-5 text-right text-zinc-400">Ações</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {indicacoesComStatus.map((indicacao: any) => (
-                            <tr
-                                key={indicacao.id}
-
-                                className="border-t border-zinc-800 transition hover:bg-black/20"
-                            >
-                                <td className="p-5 font-semibold text-white">{indicacao.indicador?.nome ?? '-'}</td>
-
-                                <td className="p-5 text-zinc-300">{indicacao.indicado?.nome ?? '-'}</td>
-
-                                <td className="p-5 font-bold text-yellow-400">
-                                    {formatMoney(Number(indicacao.valor_desconto))}
-                                </td>
-
-                                <td className="p-5">
-                                    {indicacao.beneficioAtivo ? (
-                                        <span className="rounded-full bg-green-500/10 px-3 py-1 text-sm text-green-400">
-                                            Ativo
-                                        </span>
-                                    ) : (
-                                        <span className="rounded-full bg-red-500/10 px-3 py-1 text-sm text-red-400">
-                                            Suspenso
-                                        </span>
-                                    )}
-                                </td>
-
-                                <td className="p-5 text-right">
-                                    <Link
-                                        href={`/indicacoes/editar/${indicacao.id}`}
-
-                                        className="rounded-xl bg-cyan-500/10 px-4 py-2 text-sm text-cyan-400 transition hover:bg-cyan-500/20"
-                                    >
-                                        Editar
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </main>
+    const beneficiosAtivos = lista.filter((item) => item.beneficioAtivo).length;
+    const beneficioMensal = lista.reduce(
+        (total, item) => total + (item.beneficioAtivo ? Number(item.valor_desconto) : 0),
+        0
     );
-}
-
-function CardResumo({
-    titulo,
-
-    valor,
-
-    icone,
-
-    cor,
-}: {
-    titulo: string;
-
-    valor: string;
-
-    icone: React.ReactNode;
-
-    cor: 'green' | 'blue' | 'yellow';
-}) {
-    const estilo = {
-        green: {
-            texto: 'text-green-400',
-            fundo: 'bg-green-500/10',
-            borda: 'border-green-500/20',
-        },
-
-        blue: {
-            texto: 'text-cyan-400',
-            fundo: 'bg-cyan-500/10',
-            borda: 'border-cyan-500/20',
-        },
-
-        yellow: {
-            texto: 'text-yellow-400',
-            fundo: 'bg-yellow-500/10',
-            borda: 'border-yellow-500/20',
-        },
-    }[cor];
-
     return (
-        <div
-            className={`group rounded-3xl border ${estilo.borda} bg-gradient-to-b from-[#171F2B] to-[#111827] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
-        >
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-zinc-500">{titulo}</p>
-
-                    <h2 className={`mt-4 text-4xl font-bold ${estilo.texto} `}>{valor}</h2>
-                </div>
-
-                <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${estilo.fundo} ${estilo.texto} transition duration-300 group-hover:scale-110`}
-                >
-                    {icone}
-                </div>
-            </div>
-        </div>
+        <main>
+            <PageHeader
+                title="Indicações"
+                description="Controle de benefícios gerados por indicação de clientes."
+                actions={
+                    <Button component={Link} href="/indicacoes/nova" startIcon={<AddRounded />}>
+                        Nova Indicação
+                    </Button>
+                }
+            />
+            <ResponsiveGrid columns={3}>
+                <StatCard
+                    titulo="Total Indicações"
+                    valor={String(lista.length)}
+                    cor="green"
+                    icone={<GroupsRounded />}
+                />
+                <StatCard
+                    titulo="Benefícios Ativos"
+                    valor={String(beneficiosAtivos)}
+                    cor="blue"
+                    icone={<CardGiftcardRounded />}
+                />
+                <StatCard
+                    titulo="Benefício Mensal"
+                    valor={formatMoney(beneficioMensal)}
+                    cor="yellow"
+                    icone={<TrendingUpRounded />}
+                />
+            </ResponsiveGrid>
+            <Card sx={{ mt: 3 }}>
+                <TableContainer>
+                    <Table sx={{ minWidth: 720 }}>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Cliente Indicador</TableCell>
+                                <TableCell>Cliente Indicado</TableCell>
+                                <TableCell>Benefício</TableCell>
+                                <TableCell>Status</TableCell>
+                                <TableCell align="right">Ações</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {lista.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center" sx={{ py: 7, color: 'text.secondary' }}>
+                                        Nenhuma indicação cadastrada.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                lista.map((indicacao) => (
+                                    <TableRow key={indicacao.id} hover>
+                                        <TableCell sx={{ fontWeight: 700 }}>
+                                            {indicacao.indicador?.nome ?? '-'}
+                                        </TableCell>
+                                        <TableCell>{indicacao.indicado?.nome ?? '-'}</TableCell>
+                                        <TableCell sx={{ color: 'warning.main', fontWeight: 800 }}>
+                                            {formatMoney(Number(indicacao.valor_desconto))}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={indicacao.beneficioAtivo ? 'Ativo' : 'Suspenso'}
+                                                size="small"
+                                                sx={{
+                                                    color: indicacao.beneficioAtivo ? '#4ade80' : '#f87171',
+                                                    bgcolor: indicacao.beneficioAtivo
+                                                        ? 'rgba(34,197,94,.1)'
+                                                        : 'rgba(239,68,68,.1)',
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Button
+                                                component={Link}
+                                                href={`/indicacoes/editar/${indicacao.id}`}
+                                                variant="outlined"
+                                                size="small"
+                                            >
+                                                Editar
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Card>
+        </main>
     );
 }

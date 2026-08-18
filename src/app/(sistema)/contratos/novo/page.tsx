@@ -1,271 +1,182 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import DescriptionRounded from '@mui/icons-material/DescriptionRounded';
+import {
+    Alert,
+    Button,
+    Card,
+    CardContent,
+    CircularProgress,
+    Grid,
+    MenuItem,
+    Stack,
+    TextField,
+    Typography,
+} from '@mui/material';
+import { criarContrato } from '@/actions/contratos';
+import PageHeader from '@/components/ui/PageHeader';
 import { createClient } from '@/lib/supabase/client';
 
-const supabase = createClient();
-import { criarContrato } from '@/actions/contratos';
-import Link from 'next/link';
-import { FilePlus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-
-type Cliente = {
-    id: string;
-    nome: string;
-};
-
-type Plano = {
-    id: string;
-    nome: string;
-};
+type Opcao = { id: string; nome: string };
 
 export default function NovoContratoPage() {
     const router = useRouter();
-
-    const [clientes, setClientes] = useState<Cliente[]>([]);
-
-    const [planos, setPlanos] = useState<Plano[]>([]);
-
-    const [carregandoOpcoes, setCarregandoOpcoes] = useState(true);
-
+    const [clientes, setClientes] = useState<Opcao[]>([]);
+    const [planos, setPlanos] = useState<Opcao[]>([]);
+    const [carregando, setCarregando] = useState(true);
     const [mensagem, setMensagem] = useState('');
-
+    const [erro, setErro] = useState(false);
     const [criando, setCriando] = useState(false);
-
     useEffect(() => {
-        async function carregarOpcoes() {
-            const [resultadoClientes, resultadoPlanos] = await Promise.all([
-                supabase.from('clientes').select('id, nome').order('nome', { ascending: true }),
-                supabase
-                    .from('planos')
-                    .select('id, nome')
-                    .eq('ativo', true)
-                    .order('ordem', { ascending: true }),
-            ]);
-
-            if (resultadoClientes.error || resultadoPlanos.error) {
-                setMensagem('Não foi possível carregar os clientes e planos. Atualize a página e tente novamente.');
+        const supabase = createClient();
+        void Promise.all([
+            supabase.from('clientes').select('id,nome').order('nome'),
+            supabase.from('planos').select('id,nome').eq('ativo', true).order('ordem'),
+        ]).then(([clientesResult, planosResult]) => {
+            if (clientesResult.error || planosResult.error) {
+                setMensagem('Não foi possível carregar os clientes e planos.');
+                setErro(true);
             } else {
-                setClientes(resultadoClientes.data ?? []);
-                setPlanos(resultadoPlanos.data ?? []);
+                setClientes(clientesResult.data ?? []);
+                setPlanos(planosResult.data ?? []);
             }
-
-            setCarregandoOpcoes(false);
-        }
-
-        carregarOpcoes();
+            setCarregando(false);
+        });
     }, []);
-
     async function enviarContrato(formData: FormData) {
         setCriando(true);
-
+        setMensagem('');
         try {
             const resultado = await criarContrato(formData);
-
             if (resultado?.success) {
+                setErro(false);
                 setMensagem('Contrato criado com sucesso! Recebimento gerado.');
-
                 setTimeout(() => {
                     router.push(`/contratos/${resultado.contratoId}`);
-
                     router.refresh();
-                }, 2000);
+                }, 1200);
             }
         } catch {
+            setErro(true);
             setMensagem('Não foi possível criar o contrato. Confira os dados e tente novamente.');
             setCriando(false);
         }
     }
-
     return (
-        <main className="space-y-8">
-            <div>
-                <p className="text-xs font-semibold tracking-[0.22em] text-zinc-500 uppercase">CONTRATOS</p>
-
-                <h1 className="mt-3 text-5xl font-bold text-white">Novo Contrato</h1>
-
-                <p className="mt-3 text-lg text-zinc-400">
-                    Crie um contrato e gere automaticamente o recebimento inicial.
-                </p>
-            </div>
-
+        <main>
+            <PageHeader
+                title="Novo Contrato"
+                description="Crie um contrato e gere automaticamente o recebimento inicial."
+            />
             {mensagem && (
-                <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-5 font-semibold text-green-400">
-                    ✓ {mensagem}
-                </div>
+                <Alert severity={erro ? 'error' : 'success'} variant="outlined" sx={{ mb: 3 }}>
+                    {mensagem}
+                </Alert>
             )}
-
-            <form
-                action={enviarContrato}
-
-                className="max-w-5xl space-y-8 rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8"
-            >
-                <div className="flex items-center gap-4 border-b border-zinc-800 pb-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-500/10 text-green-400">
-                        <FilePlus size={24} />
-                    </div>
-
-                    <div>
-                        <h2 className="text-xl font-bold">Informações do Contrato</h2>
-
-                        <p className="text-sm text-zinc-500">Vincule o contrato ao cliente.</p>
-                    </div>
-                </div>
-
-                <div>
-                    <label className="text-sm text-zinc-400">Cliente</label>
-
-                    <select
-                        name="cliente_id"
-
-                        required
-
-                        className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4"
-                    >
-                        <option value="">Selecione o cliente</option>
-
-                        {clientes.map((cliente) => (
-                            <option
-                                key={cliente.id}
-
-                                value={cliente.id}
+            <Card component="form" action={enviarContrato} sx={{ maxWidth: 1040 }}>
+                <CardContent sx={{ p: { xs: 2.5, md: 4 } }}>
+                    <Typography component="h2" variant="h5" sx={{ mb: 3, fontWeight: 800 }}>
+                        Informações do Contrato
+                    </Typography>
+                    <Grid container spacing={2.5}>
+                        <Grid size={12}>
+                            <TextField
+                                select
+                                name="cliente_id"
+                                label="Cliente"
+                                required
+                                defaultValue=""
+                                fullWidth
+                                disabled={carregando}
                             >
-                                {cliente.nome}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                    <div>
-                        <label className="text-sm text-zinc-400">Plano</label>
-
-                        <select
-                            name="plano_id"
-
-                            required
-
-                            className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4"
+                                <MenuItem value="">Selecione o cliente</MenuItem>
+                                {clientes.map((cliente) => (
+                                    <MenuItem key={cliente.id} value={cliente.id}>
+                                        {cliente.nome}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <TextField
+                                select
+                                name="plano_id"
+                                label="Plano"
+                                required
+                                defaultValue=""
+                                fullWidth
+                                disabled={carregando}
+                            >
+                                <MenuItem value="">
+                                    {carregando ? 'Carregando planos...' : 'Selecione o plano'}
+                                </MenuItem>
+                                {planos.map((plano) => (
+                                    <MenuItem key={plano.id} value={plano.id}>
+                                        {plano.nome}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <TextField
+                                name="valor"
+                                type="number"
+                                label="Valor mensal"
+                                required
+                                fullWidth
+                                slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 4 }}>
+                            <TextField
+                                name="vencimento"
+                                type="number"
+                                label="Dia vencimento"
+                                required
+                                fullWidth
+                                slotProps={{ htmlInput: { min: 1, max: 31 } }}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 4 }}>
+                            <TextField select name="recorrencia" label="Recorrência" defaultValue="Mensal" fullWidth>
+                                <MenuItem value="Mensal">Mensal</MenuItem>
+                                <MenuItem value="Trimestral">Trimestral</MenuItem>
+                                <MenuItem value="Anual">Anual</MenuItem>
+                            </TextField>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 4 }}>
+                            <TextField
+                                name="data_inicio"
+                                type="date"
+                                label="Data início"
+                                required
+                                fullWidth
+                                slotProps={{ inputLabel: { shrink: true } }}
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <TextField name="descricao" label="Descrição" multiline rows={5} fullWidth />
+                        </Grid>
+                    </Grid>
+                    <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
+                        <Button
+                            type="submit"
+                            disabled={criando || carregando}
+                            startIcon={
+                                criando ? <CircularProgress size={17} color="inherit" /> : <DescriptionRounded />
+                            }
                         >
-                            <option value="">
-                                {carregandoOpcoes ? 'Carregando planos...' : 'Selecione o plano'}
-                            </option>
-
-                            {planos.map((plano) => (
-                                <option
-                                    key={plano.id}
-
-                                    value={plano.id}
-                                >
-                                    {plano.nome}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="text-sm text-zinc-400">Valor mensal</label>
-
-                        <input
-                            name="valor"
-
-                            type="number"
-
-                            step="0.01"
-
-                            required
-
-                            placeholder="2500"
-
-                            className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4"
-                        />
-                    </div>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-3">
-                    <div>
-                        <label className="text-sm text-zinc-400">Dia vencimento</label>
-
-                        <input
-                            name="vencimento"
-
-                            type="number"
-
-                            min="1"
-
-                            max="31"
-
-                            required
-
-                            placeholder="10"
-
-                            className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="text-sm text-zinc-400">Recorrência</label>
-
-                        <select
-                            name="recorrencia"
-
-                            className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4"
-                        >
-                            <option value="Mensal">Mensal</option>
-
-                            <option value="Trimestral">Trimestral</option>
-
-                            <option value="Anual">Anual</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="text-sm text-zinc-400">Data início</label>
-
-                        <input
-                            name="data_inicio"
-
-                            type="date"
-
-                            required
-
-                            className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="text-sm text-zinc-400">Descrição</label>
-
-                    <textarea
-                        name="descricao"
-
-                        rows={5}
-
-                        placeholder="Detalhes do contrato..."
-
-                        className="mt-2 w-full rounded-xl border border-zinc-800 bg-[#0B0F14] p-4"
-                    />
-                </div>
-
-                <div className="flex gap-4">
-                    <button
-                        disabled={criando || carregandoOpcoes}
-
-                        className="rounded-xl bg-green-500 px-8 py-4 font-bold text-black transition hover:bg-green-400 disabled:opacity-50"
-                    >
-                        {criando ? 'Criando...' : 'Criar Contrato'}
-                    </button>
-
-                    <Link
-                        href="/contratos"
-
-                        className="rounded-xl bg-zinc-800 px-8 py-4 font-bold"
-                    >
-                        Cancelar
-                    </Link>
-                </div>
-            </form>
+                            {criando ? 'Criando...' : 'Criar Contrato'}
+                        </Button>
+                        <Button component={Link} href="/contratos" variant="outlined" color="inherit">
+                            Cancelar
+                        </Button>
+                    </Stack>
+                </CardContent>
+            </Card>
         </main>
     );
 }

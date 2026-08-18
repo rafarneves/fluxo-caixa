@@ -1,23 +1,24 @@
 'use client';
 
+import DeleteRounded from '@mui/icons-material/DeleteRounded';
+import { IconButton, Tooltip } from '@mui/material';
 import { removerCusto } from '../actions';
 
 export default function ExcluirCusto({ id }: { id: string }) {
     return (
-        <button
-            onClick={async () => {
-                const confirmar = confirm('Deseja realmente excluir este custo?');
-
-                if (!confirmar) return;
-
-                await removerCusto(id);
-
-                window.location.reload();
-            }}
-            className="text-xl text-red-400 transition hover:text-red-300"
-            title="Excluir custo"
-        >
-            🗑️
-        </button>
+        <Tooltip title="Excluir custo">
+            <IconButton
+                color="error"
+                aria-label="Excluir custo"
+                onClick={async () => {
+                    const confirmar = confirm('Deseja realmente excluir este custo?');
+                    if (!confirmar) return;
+                    await removerCusto(id);
+                    window.location.reload();
+                }}
+            >
+                <DeleteRounded />
+            </IconButton>
+        </Tooltip>
     );
 }

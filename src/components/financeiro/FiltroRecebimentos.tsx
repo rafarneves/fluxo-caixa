@@ -1,29 +1,50 @@
+'use client';
+
+import { useState } from 'react';
+import SearchRounded from '@mui/icons-material/SearchRounded';
+import { InputAdornment, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import NovoRecebimentoModal from './NovoRecebimentoModal';
 
-interface Props {
-    contratoId: string;
-}
-
-export default function FiltroRecebimentos({ contratoId }: Props) {
+export default function FiltroRecebimentos({ contratoId }: { contratoId: string }) {
+    const [status, setStatus] = useState('todos');
     return (
-        <div className="mb-6 flex items-center justify-between rounded-2xl bg-[#161B22] p-5">
-            <input
-                type="text"
-                placeholder="Pesquisar cliente..."
-                className="w-80 rounded-xl border border-zinc-700 bg-[#0D1117] px-4 py-3 outline-none focus:border-green-500"
-            />
-
-            <div className="flex items-center gap-3">
-                <button className="rounded-lg bg-green-500 px-4 py-2 font-semibold text-black">Todos</button>
-
-                <button className="rounded-lg bg-zinc-800 px-4 py-2 hover:bg-zinc-700">Pendentes</button>
-
-                <button className="rounded-lg bg-zinc-800 px-4 py-2 hover:bg-zinc-700">Pagos</button>
-
-                <button className="rounded-lg bg-zinc-800 px-4 py-2 hover:bg-zinc-700">Atrasados</button>
-
-                <NovoRecebimentoModal contratoId={contratoId} />
-            </div>
-        </div>
+        <Paper variant="outlined" sx={{ mb: 3, p: 2, borderRadius: 3 }}>
+            <Stack
+                direction={{ xs: 'column', lg: 'row' }}
+                spacing={2}
+                sx={{ alignItems: { lg: 'center' }, justifyContent: 'space-between' }}
+            >
+                <TextField
+                    size="small"
+                    type="search"
+                    placeholder="Pesquisar cliente..."
+                    aria-label="Pesquisar cliente"
+                    sx={{ width: { xs: '100%', lg: 320 } }}
+                    slotProps={{
+                        input: {
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchRounded fontSize="small" />
+                                </InputAdornment>
+                            ),
+                        },
+                    }}
+                />
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+                    <ToggleButtonGroup
+                        value={status}
+                        exclusive
+                        onChange={(_, value) => value && setStatus(value)}
+                        size="small"
+                    >
+                        <ToggleButton value="todos">Todos</ToggleButton>
+                        <ToggleButton value="pendentes">Pendentes</ToggleButton>
+                        <ToggleButton value="pagos">Pagos</ToggleButton>
+                        <ToggleButton value="atrasados">Atrasados</ToggleButton>
+                    </ToggleButtonGroup>
+                    <NovoRecebimentoModal contratoId={contratoId} />
+                </Stack>
+            </Stack>
+        </Paper>
     );
 }

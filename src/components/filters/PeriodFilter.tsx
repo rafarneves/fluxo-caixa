@@ -1,34 +1,17 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
-import { CalendarDays, Loader2 } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import CalendarMonthRounded from '@mui/icons-material/CalendarMonthRounded';
+import { Box, CircularProgress, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 const periodos = [
-    {
-        value: 'hoje',
-        label: 'Hoje',
-    },
-    {
-        value: 'semana',
-        label: 'Esta Semana',
-    },
-    {
-        value: 'mes',
-        label: 'Este Mês',
-    },
-    {
-        value: '30dias',
-        label: 'Últimos 30 dias',
-    },
-    {
-        value: 'ano',
-        label: 'Este Ano',
-    },
-    {
-        value: 'personalizado',
-        label: 'Personalizado',
-    },
+    { value: 'hoje', label: 'Hoje' },
+    { value: 'semana', label: 'Esta Semana' },
+    { value: 'mes', label: 'Este Mês' },
+    { value: '30dias', label: 'Últimos 30 dias' },
+    { value: 'ano', label: 'Este Ano' },
+    { value: 'personalizado', label: 'Personalizado' },
 ];
 
 export default function PeriodFilter() {
@@ -36,7 +19,6 @@ export default function PeriodFilter() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
-
     const periodo = searchParams.get('periodo') ?? 'mes';
     const hoje = new Date();
     const dataLocalISO = (data: Date) =>
@@ -45,18 +27,11 @@ export default function PeriodFilter() {
     const fimPadrao = dataLocalISO(hoje);
     const inicio = searchParams.get('inicio') ?? inicioPadrao;
     const fim = searchParams.get('fim') ?? fimPadrao;
-
-    function navegar(params: URLSearchParams) {
-        startTransition(() => {
-            router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-        });
-    }
-
+    const navegar = (params: URLSearchParams) =>
+        startTransition(() => router.replace(`${pathname}?${params.toString()}`, { scroll: false }));
     function alterarPeriodo(novoPeriodo: string) {
         const params = new URLSearchParams(searchParams.toString());
-
         params.set('periodo', novoPeriodo);
-
         if (novoPeriodo === 'personalizado') {
             if (!params.get('inicio')) params.set('inicio', inicioPadrao);
             if (!params.get('fim')) params.set('fim', fimPadrao);
@@ -64,84 +39,88 @@ export default function PeriodFilter() {
             params.delete('inicio');
             params.delete('fim');
         }
-
         navegar(params);
     }
-
     function alterarData(campo: 'inicio' | 'fim', value: string) {
         if (!value) return;
-
         const params = new URLSearchParams(searchParams.toString());
         params.set('periodo', 'personalizado');
         params.set(campo, value);
-
         const novoInicio = campo === 'inicio' ? value : inicio;
         const novoFim = campo === 'fim' ? value : fim;
-
-        if (novoInicio > novoFim) {
-            params.set(campo === 'inicio' ? 'fim' : 'inicio', value);
-        }
-
+        if (novoInicio > novoFim) params.set(campo === 'inicio' ? 'fim' : 'inicio', value);
         navegar(params);
     }
 
     return (
-        <div className="space-y-3">
-            <div className="flex flex-wrap gap-2 rounded-2xl border border-zinc-800 bg-[#161B22] p-1">
-                {periodos.map((item) => {
-                    const ativo = periodo === item.value;
-
-                    return (
-                        <button
-                            key={item.value}
-                            type="button"
-                            onClick={() => alterarPeriodo(item.value)}
-                            disabled={isPending}
-                            className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 disabled:opacity-60 ${
-                                ativo
-                                    ? `border border-green-500/40 bg-green-500/20 text-green-400 shadow-lg shadow-green-500/10`
-                                    : `border border-transparent text-zinc-400 hover:bg-zinc-800 hover:text-white`
-                            } `}
-                        >
+        <Stack spacing={1.5}>
+            <Paper
+                variant="outlined"
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: 0.75,
+                    p: 0.75,
+                    bgcolor: 'background.paper',
+                }}
+            >
+                <ToggleButtonGroup
+                    value={periodo}
+                    exclusive
+                    onChange={(_, value: string | null) => value && alterarPeriodo(value)}
+                    size="small"
+                    disabled={isPending}
+                    sx={{
+                        flexWrap: 'wrap',
+                        gap: 0.5,
+                        '& .MuiToggleButtonGroup-grouped': { m: 0, px: 2, border: 0, borderRadius: '10px !important' },
+                        '& .Mui-selected': {
+                            color: 'primary.light !important',
+                            bgcolor: 'rgba(34,197,94,.14) !important',
+                        },
+                    }}
+                >
+                    {periodos.map((item) => (
+                        <ToggleButton key={item.value} value={item.value}>
                             {item.label}
-                        </button>
-                    );
-                })}
-
-                {isPending && <Loader2 size={18} className="m-3 animate-spin text-green-400" />}
-            </div>
-
+                        </ToggleButton>
+                    ))}
+                </ToggleButtonGroup>
+                {isPending && <CircularProgress size={18} sx={{ mx: 1 }} />}
+            </Paper>
             {periodo === 'personalizado' && (
-                <div className="flex flex-col gap-3 rounded-2xl border border-green-500/20 bg-green-500/5 p-4 sm:flex-row sm:items-end">
-                    <CalendarDays size={20} className="hidden self-center text-green-400 sm:block" />
-
-                    <label className="flex-1 space-y-2">
-                        <span className="text-xs font-semibold tracking-wide text-zinc-400 uppercase">
-                            Data inicial
-                        </span>
-                        <input
+                <Paper
+                    variant="outlined"
+                    sx={{ p: 2, borderColor: 'rgba(34,197,94,.22)', bgcolor: 'rgba(34,197,94,.045)' }}
+                >
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'center' } }}>
+                        <Box sx={{ display: { xs: 'none', sm: 'flex' }, color: 'primary.light' }}>
+                            <CalendarMonthRounded />
+                        </Box>
+                        <TextField
                             type="date"
+                            label="Data inicial"
                             value={inicio}
-                            max={fim}
                             onChange={(event) => alterarData('inicio', event.target.value)}
                             disabled={isPending}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-200 scheme-dark transition outline-none focus:border-green-500 disabled:opacity-60"
+                            fullWidth
+                            size="small"
+                            slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: fim } }}
                         />
-                    </label>
-
-                    <label className="flex-1 space-y-2">
-                        <span className="text-xs font-semibold tracking-wide text-zinc-400 uppercase">Data final</span>
-                        <input
+                        <TextField
                             type="date"
+                            label="Data final"
                             value={fim}
-                            min={inicio}
                             onChange={(event) => alterarData('fim', event.target.value)}
                             disabled={isPending}
-                            className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-200 scheme-dark transition outline-none focus:border-green-500 disabled:opacity-60"
+                            fullWidth
+                            size="small"
+                            slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: inicio } }}
                         />
-                    </label>
-                </div>
+                    </Stack>
+                </Paper>
             )}
-        </div>
+        </Stack>
     );
 }

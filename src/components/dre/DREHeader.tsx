@@ -1,9 +1,11 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import DownloadRounded from '@mui/icons-material/DownloadRounded';
+import { Button } from '@mui/material';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 import PeriodFilter from '@/components/filters/PeriodFilter';
 
 type Props = {
@@ -18,10 +20,6 @@ type Props = {
     despesasPorCategoria: { categoria: string; valor: number }[];
 };
 
-function moeda(valor: number) {
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
 export default function DREHeader({
     receitaBruta,
     custos,
@@ -33,6 +31,8 @@ export default function DREHeader({
     fim,
     despesasPorCategoria,
 }: Props) {
+    const { empresa, formatarMoeda: moeda, fusoHorario } = useConfiguracoes();
+
     function exportarDRE() {
         const labels: Record<string, string> = {
             hoje: 'Hoje',
@@ -51,7 +51,7 @@ export default function DREHeader({
             periodo === 'personalizado' && inicio && fim
                 ? `${formatarDataPeriodo(inicio)} a ${formatarDataPeriodo(fim)}`
                 : (labels[periodo] ?? periodo);
-        const dataExportacao = new Date().toLocaleDateString('pt-BR');
+        const dataExportacao = new Intl.DateTimeFormat('pt-BR', { timeZone: fusoHorario }).format(new Date());
         const lucroBruto = receitaBruta - custos;
 
         const doc = new jsPDF();
@@ -70,6 +70,7 @@ export default function DREHeader({
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.text(`Período: ${periodoLabel}  •  Exportado em: ${dataExportacao}`, 20, 38);
+        doc.text(empresa, pageWidth - 20, 38, { align: 'right' });
 
         // --- Linha divisória verde ---
         doc.setDrawColor(74, 222, 128);
@@ -237,13 +238,9 @@ export default function DREHeader({
                     </p>
                 </div>
 
-                <button
-                    onClick={exportarDRE}
-                    className="inline-flex shrink-0 items-center gap-3 rounded-2xl bg-green-500 px-6 py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.02] hover:bg-green-400"
-                >
-                    <Download size={20} />
+                <Button onClick={exportarDRE} size="large" startIcon={<DownloadRounded />} sx={{ flexShrink: 0 }}>
                     Exportar DRE
-                </button>
+                </Button>
             </div>
 
             <PeriodFilter />

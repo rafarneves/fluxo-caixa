@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useMediaQuery, useTheme } from '@mui/material';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 
@@ -22,7 +23,9 @@ type Props = {
 };
 
 export default function FluxoChart({ recebimentos, despesas }: Props) {
-    const { formatarMoeda } = useConfiguracoes();
+    const theme = useTheme();
+    const mobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const { formatarMoeda, formatarMoedaCompacta } = useConfiguracoes();
 
     const chartData = useMemo(() => {
         // Group by YYYY-MM
@@ -65,21 +68,26 @@ export default function FluxoChart({ recebimentos, despesas }: Props) {
 
     if (chartData.length === 0) {
         return (
-            <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8 text-center text-zinc-500">
+            <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-4 text-center text-zinc-500 sm:p-8">
                 Não há dados para exibir no gráfico neste período.
             </section>
         );
     }
 
     return (
-        <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
-            <div className="mb-6">
+        <section className="min-w-0 overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-4 sm:p-8">
+            <div className="mb-5 sm:mb-6">
                 <h3 className="text-lg font-bold">Evolução do Fluxo</h3>
-                <p className="text-sm text-zinc-500">Comparativo entre Entradas (Recebimentos) e Saídas (Despesas)</p>
+                <p className="mt-1 text-sm leading-6 text-zinc-500">
+                    Comparativo entre Entradas (Recebimentos) e Saídas (Despesas)
+                </p>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-[250px] w-full min-w-0 sm:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <AreaChart
+                        data={chartData}
+                        margin={{ top: 10, right: mobile ? 0 : 10, left: mobile ? 0 : -10, bottom: 0 }}
+                    >
                         <defs>
                             <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#4ade80" stopOpacity={0.3} />
@@ -98,13 +106,16 @@ export default function FluxoChart({ recebimentos, despesas }: Props) {
                             axisLine={false}
                             dy={10}
                         />
-                        <YAxis
-                            stroke="#52525b"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                            tickFormatter={(value) => `R$ ${value}`}
-                        />
+                        {!mobile && (
+                            <YAxis
+                                stroke="#52525b"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                                width={76}
+                                tickFormatter={(value) => formatarMoedaCompacta(Number(value))}
+                            />
+                        )}
                         <Tooltip
                             contentStyle={{
                                 backgroundColor: '#18181b',

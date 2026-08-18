@@ -124,7 +124,7 @@ export default function FinanceCard({
                     </div>
 
                     <div
-                        className={`inline-flex max-w-full shrink-0 self-start items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold min-[900px]:self-auto ${
+                        className={`inline-flex max-w-full shrink-0 items-center gap-2 self-start rounded-full border px-4 py-2 text-sm font-semibold min-[900px]:self-auto ${
                             resultado >= 0
                                 ? 'border-green-500/20 bg-green-500/10 text-green-400'
                                 : 'border-red-500/20 bg-red-500/10 text-red-400'

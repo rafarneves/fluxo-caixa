@@ -1,104 +1,73 @@
 'use client';
 
 import { useState } from 'react';
+import AddRounded from '@mui/icons-material/AddRounded';
+import CloseRounded from '@mui/icons-material/CloseRounded';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField } from '@mui/material';
 import { criarRecebimento } from '@/actions/recebimentos';
 
-interface Props {
-    contratoId: string;
-}
-
-export default function NovoRecebimentoModal({ contratoId }: Props) {
+export default function NovoRecebimentoModal({ contratoId }: { contratoId: string }) {
     const [aberto, setAberto] = useState(false);
-
     return (
         <>
-            <button
-                onClick={() => setAberto(true)}
-                className="rounded-lg bg-green-500 px-5 py-2 font-semibold text-black hover:bg-green-400"
-            >
-                + Novo Recebimento
-            </button>
-
-            {aberto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-                    <div className="w-[650px] rounded-2xl bg-[#161B22] p-8">
-                        <div className="mb-8 flex items-center justify-between">
-                            <h2 className="text-2xl font-bold">Novo Recebimento</h2>
-
-                            <button
-                                onClick={() => setAberto(false)}
-                                className="text-2xl text-zinc-400 hover:text-white"
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        <form
-                            action={async (formData) => {
-                                await criarRecebimento({
-                                    contrato_id: contratoId,
-                                    competencia: String(formData.get('competencia')),
-                                    valor: Number(formData.get('valor')),
-                                    vencimento: String(formData.get('vencimento')),
-                                });
-
-                                setAberto(false);
-                            }}
-                        >
-                            <div className="grid grid-cols-2 gap-5">
-                                <div>
-                                    <label className="text-sm text-zinc-400">Competência</label>
-
-                                    <input
-                                        name="competencia"
-                                        required
-                                        className="mt-2 w-full rounded-xl border border-zinc-700 bg-[#0D1117] px-4 py-3"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="text-sm text-zinc-400">Valor</label>
-
-                                    <input
-                                        name="valor"
-                                        type="number"
-                                        required
-                                        className="mt-2 w-full rounded-xl border border-zinc-700 bg-[#0D1117] px-4 py-3"
-                                    />
-                                </div>
-
-                                <div className="col-span-2">
-                                    <label className="text-sm text-zinc-400">Vencimento</label>
-
-                                    <input
-                                        name="vencimento"
-                                        type="date"
-                                        required
-                                        className="mt-2 w-full rounded-xl border border-zinc-700 bg-[#0D1117] px-4 py-3"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mt-8 flex justify-end gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setAberto(false)}
-                                    className="rounded-lg bg-zinc-700 px-5 py-3"
-                                >
-                                    Cancelar
-                                </button>
-
-                                <button
-                                    type="submit"
-                                    className="rounded-lg bg-green-500 px-6 py-3 font-semibold text-black hover:bg-green-400"
-                                >
-                                    Salvar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <Button onClick={() => setAberto(true)} startIcon={<AddRounded />}>
+                Novo Recebimento
+            </Button>
+            <Dialog open={aberto} onClose={() => setAberto(false)} fullWidth maxWidth="sm">
+                <form
+                    action={async (formData) => {
+                        await criarRecebimento({
+                            contrato_id: contratoId,
+                            competencia: String(formData.get('competencia')),
+                            valor: Number(formData.get('valor')),
+                            vencimento: String(formData.get('vencimento')),
+                        });
+                        setAberto(false);
+                    }}
+                >
+                    <DialogTitle sx={{ pr: 6, fontWeight: 800 }}>Novo Recebimento</DialogTitle>
+                    <IconButton
+                        onClick={() => setAberto(false)}
+                        aria-label="Fechar"
+                        sx={{ position: 'absolute', top: 12, right: 12 }}
+                    >
+                        <CloseRounded />
+                    </IconButton>
+                    <DialogContent dividers>
+                        <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                                <TextField name="competencia" label="Competência" required fullWidth />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                                <TextField
+                                    name="valor"
+                                    label="Valor"
+                                    type="number"
+                                    required
+                                    fullWidth
+                                    slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                                />
+                            </Grid>
+                            <Grid size={12}>
+                                <TextField
+                                    name="vencimento"
+                                    label="Vencimento"
+                                    type="date"
+                                    required
+                                    fullWidth
+                                    slotProps={{ inputLabel: { shrink: true } }}
+                                />
+                            </Grid>
+                        </Grid>
+                    </DialogContent>
+                    <DialogActions sx={{ p: 2 }}>
+                        <Button type="button" variant="outlined" color="inherit" onClick={() => setAberto(false)}>
+                            Cancelar
+                        </Button>
+                        <Button type="submit">Salvar</Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
         </>
     );
 }

@@ -4,6 +4,7 @@ import { TrendingUp, Wallet, Receipt, Percent } from 'lucide-react';
 
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 import StatCard from '@/components/ui/StatCard';
+import ResponsiveGrid from '@/components/ui/ResponsiveGrid';
 
 type Props = {
     receitaBruta: number;
@@ -15,7 +16,7 @@ type Props = {
 export default function DRESummaryCards({ receitaBruta, custos, lucroLiquido, margem }: Props) {
     const moeda = useConfiguracoes().formatarMoedaCompacta;
     return (
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <ResponsiveGrid>
             <StatCard
                 titulo="Receita Bruta"
                 valor={moeda(receitaBruta)}
@@ -59,6 +60,6 @@ export default function DRESummaryCards({ receitaBruta, custos, lucroLiquido, ma
                 progresso={Math.min(margem, 100)}
                 cor={margem >= 30 ? 'green' : 'yellow'}
             />
-        </section>
+        </ResponsiveGrid>
     );
 }

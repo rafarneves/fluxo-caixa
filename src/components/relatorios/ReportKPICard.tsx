@@ -1,4 +1,5 @@
-import { type LucideIcon, TrendingDown, TrendingUp } from 'lucide-react';
+import { TrendingDown, TrendingUp, type LucideIcon } from 'lucide-react';
+import { Avatar, Box, Card, CardContent, Chip, Stack, Typography } from '@mui/material';
 
 import ReportKPIValue from '@/components/relatorios/ReportKPIValue';
 
@@ -9,39 +10,14 @@ type ReportKPICardProps = {
     description?: string;
     color?: 'green' | 'blue' | 'red' | 'yellow';
     trend?: number;
-
-    // NOVO
     isCurrency?: boolean;
 };
 
-const colors = {
-    green: {
-        bg: 'bg-green-500/10',
-        text: 'text-green-400',
-        border: 'border-green-500/20',
-        hover: 'hover:border-green-500/40 hover:shadow-green-500/10',
-    },
-
-    blue: {
-        bg: 'bg-cyan-500/10',
-        text: 'text-cyan-400',
-        border: 'border-cyan-500/20',
-        hover: 'hover:border-cyan-500/40 hover:shadow-cyan-500/10',
-    },
-
-    red: {
-        bg: 'bg-red-500/10',
-        text: 'text-red-400',
-        border: 'border-red-500/20',
-        hover: 'hover:border-red-500/40 hover:shadow-red-500/10',
-    },
-
-    yellow: {
-        bg: 'bg-yellow-500/10',
-        text: 'text-yellow-400',
-        border: 'border-yellow-500/20',
-        hover: 'hover:border-yellow-500/40 hover:shadow-yellow-500/10',
-    },
+const cores = {
+    green: { main: '#4ade80', soft: 'rgba(34,197,94,.11)', border: 'rgba(34,197,94,.22)' },
+    blue: { main: '#22d3ee', soft: 'rgba(6,182,212,.11)', border: 'rgba(6,182,212,.22)' },
+    red: { main: '#f87171', soft: 'rgba(239,68,68,.11)', border: 'rgba(239,68,68,.22)' },
+    yellow: { main: '#fbbf24', soft: 'rgba(234,179,8,.11)', border: 'rgba(234,179,8,.22)' },
 };
 
 export default function ReportKPICard({
@@ -53,42 +29,79 @@ export default function ReportKPICard({
     trend,
     isCurrency = true,
 }: ReportKPICardProps) {
-    const style = colors[color];
+    const tom = cores[color];
+    const positivo = (trend ?? 0) >= 0;
 
     return (
-        <div
-            className={`relative overflow-hidden rounded-3xl border ${style.border} bg-gradient-to-b from-[#171F2B] to-[#111827] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${style.hover} `}
+        <Card
+            sx={{
+                height: '100%',
+                borderColor: tom.border,
+                '&:hover': { transform: 'translateY(-3px)', boxShadow: `0 22px 55px ${tom.soft}` },
+            }}
         >
-            <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/5 blur-3xl" />
-
-            <div className="relative flex items-start justify-between">
-                <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold tracking-[0.18em] text-zinc-500 uppercase">{title}</p>
-
-                    <h2 className={`mt-4 text-3xl font-bold tracking-tight whitespace-nowrap ${style.text} `}>
-                        <ReportKPIValue value={value} isCurrency={isCurrency} />
-                    </h2>
-
-                    {description && <p className="mt-2 text-sm text-zinc-500">{description}</p>}
-                </div>
-
-                <div
-                    className={`ml-5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${style.bg} ${style.text} `}
-                >
-                    <Icon size={20} />
-                </div>
-            </div>
-
-            {trend !== undefined && (
-                <div className="relative mt-6 flex justify-end">
-                    <div
-                        className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${trend >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'} `}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: -45,
+                    right: -35,
+                    width: 130,
+                    height: 130,
+                    borderRadius: '50%',
+                    bgcolor: tom.soft,
+                    filter: 'blur(22px)',
+                }}
+            />
+            <CardContent sx={{ position: 'relative', p: 3, '&:last-child': { pb: 3 } }}>
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography
+                            variant="overline"
+                            color="text.secondary"
+                            sx={{ fontSize: 10, fontWeight: 800, letterSpacing: '.16em' }}
+                        >
+                            {title}
+                        </Typography>
+                        <Typography
+                            component="div"
+                            sx={{
+                                mt: 1,
+                                color: tom.main,
+                                fontSize: { xs: 26, sm: 30 },
+                                fontWeight: 800,
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            <ReportKPIValue value={value} isCurrency={isCurrency} />
+                        </Typography>
+                        {description && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+                                {description}
+                            </Typography>
+                        )}
+                    </Box>
+                    <Avatar
+                        variant="rounded"
+                        sx={{ color: tom.main, bgcolor: tom.soft, border: `1px solid ${tom.border}` }}
                     >
-                        {trend >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                        {Math.abs(trend).toFixed(1)}%
-                    </div>
-                </div>
-            )}
-        </div>
+                        <Icon size={20} />
+                    </Avatar>
+                </Stack>
+                {trend !== undefined && (
+                    <Box sx={{ mt: 2.5, textAlign: 'right' }}>
+                        <Chip
+                            icon={positivo ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                            label={`${Math.abs(trend).toFixed(1)}%`}
+                            size="small"
+                            sx={{
+                                color: positivo ? '#4ade80' : '#f87171',
+                                bgcolor: positivo ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)',
+                                '& .MuiChip-icon': { color: 'inherit' },
+                            }}
+                        />
+                    </Box>
+                )}
+            </CardContent>
+        </Card>
     );
 }
