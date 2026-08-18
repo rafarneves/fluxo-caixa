@@ -93,7 +93,7 @@ export default function FluxoCaixaClient({
     const custosContratos = filtrados.custos.reduce((total, item) => total + Number(item.valor), 0);
     const resultado = entradas - despesasFixas - despesasVariaveis - custosContratos;
     return (
-        <Stack spacing={4}>
+        <Stack spacing={{ xs: 3, sm: 4 }} sx={{ minWidth: 0 }}>
             <Grid container spacing={2}>
                 <Grid size={{ xs: 12, md: 4 }}>
                     <TextField

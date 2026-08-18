@@ -384,6 +384,7 @@ export default function Sidebar({
                             <Button
                                 type="submit"
                                 color="error"
+                                variant="contained"
                                 fullWidth
                                 startIcon={menuRecolhido ? undefined : <LogoutRounded fontSize="small" />}
                                 aria-label="Sair do sistema"
@@ -391,7 +392,14 @@ export default function Sidebar({
                                     minWidth: 0,
                                     justifyContent: menuRecolhido ? 'center' : 'flex-start',
                                     px: menuRecolhido ? 1 : 1.25,
-                                    color: 'text.secondary',
+                                    color: '#fff',
+                                    bgcolor: '#dc2626',
+                                    boxShadow: '0 8px 22px rgba(220, 38, 38, 0.28)',
+                                    '&:hover': {
+                                        color: '#fff',
+                                        bgcolor: '#b91c1c',
+                                        boxShadow: '0 10px 26px rgba(220, 38, 38, 0.38)',
+                                    },
                                 }}
                             >
                                 {menuRecolhido ? <LogoutRounded fontSize="small" /> : 'Sair do sistema'}

@@ -29,7 +29,7 @@ export default function FluxoHeader() {
                 href="/despesas/nova"
                 startIcon={<AddRounded />}
                 size="large"
-                sx={{ flexShrink: 0 }}
+                sx={{ width: { xs: '100%', sm: 'auto' }, flexShrink: 0 }}
             >
                 Nova Despesa
             </Button>
