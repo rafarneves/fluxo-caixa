@@ -1,74 +1,73 @@
 'use client';
 
+import { Box, Card, CardContent, LinearProgress, Stack, Typography } from '@mui/material';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 
-type Despesa = {
-    categoria: string | null;
-    valor: number;
-};
+type Despesa = { categoria: string | null; valor: number };
 
-type Props = {
-    despesas: Despesa[];
-};
-
-export default function ExpenseBreakdown({ despesas }: Props) {
+export default function ExpenseBreakdown({ despesas }: { despesas: Despesa[] }) {
     const moeda = useConfiguracoes().formatarMoeda;
     const categorias = despesas.reduce((acc: Record<string, number>, despesa) => {
         const categoria = despesa.categoria || 'Outros';
-
         acc[categoria] = (acc[categoria] || 0) + Number(despesa.valor);
-
         return acc;
     }, {});
-
     const lista = Object.entries(categorias).sort((a, b) => b[1] - a[1]);
-
     const total = lista.reduce((acc, [, valor]) => acc + valor, 0);
-
     return (
-        <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
-            <div className="mb-8">
-                <p className="text-xs font-semibold tracking-[0.20em] text-zinc-500 uppercase">ANÁLISE</p>
-
-                <h2 className="mt-3 text-2xl font-bold">Despesas por Categoria</h2>
-
-                <p className="mt-2 text-zinc-500">Distribuição dos custos operacionais.</p>
-            </div>
-
-            <div className="space-y-6">
-                {lista.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-zinc-700 py-10 text-center text-zinc-500">
+        <Card component="section">
+            <CardContent sx={{ p: { xs: 2.5, md: 3.5 }, '&:last-child': { pb: { xs: 2.5, md: 3.5 } } }}>
+                <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 800, letterSpacing: '.18em' }}>
+                    Análise
+                </Typography>
+                <Typography component="h2" variant="h5" sx={{ mt: 0.5, fontWeight: 800 }}>
+                    Despesas por Categoria
+                </Typography>
+                <Typography color="text.secondary" sx={{ mt: 0.75, mb: 3 }}>
+                    Distribuição dos custos operacionais.
+                </Typography>
+                {lista.length === 0 ? (
+                    <Box
+                        sx={{
+                            py: 5,
+                            border: 1,
+                            borderStyle: 'dashed',
+                            borderColor: 'divider',
+                            borderRadius: 3,
+                            color: 'text.secondary',
+                            textAlign: 'center',
+                        }}
+                    >
                         Nenhuma despesa cadastrada.
-                    </div>
+                    </Box>
+                ) : (
+                    <Stack spacing={2.5}>
+                        {lista.map(([categoria, valor]) => {
+                            const percentual = total > 0 ? (valor / total) * 100 : 0;
+                            return (
+                                <Box key={categoria}>
+                                    <Stack direction="row" sx={{ mb: 1, justifyContent: 'space-between' }}>
+                                        <Typography sx={{ fontWeight: 650 }}>{categoria}</Typography>
+                                        <Box sx={{ textAlign: 'right' }}>
+                                            <Typography sx={{ color: 'error.main', fontWeight: 800 }}>
+                                                {moeda(valor)}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {percentual.toFixed(1)}%
+                                            </Typography>
+                                        </Box>
+                                    </Stack>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={percentual}
+                                        sx={{ height: 8, borderRadius: 99, bgcolor: 'rgba(148,163,184,.12)' }}
+                                    />
+                                </Box>
+                            );
+                        })}
+                    </Stack>
                 )}
-
-                {lista.map(([categoria, valor]) => {
-                    const percentual = total > 0 ? (valor / total) * 100 : 0;
-
-                    return (
-                        <div key={categoria}>
-                            <div className="mb-3 flex justify-between">
-                                <span className="font-medium">{categoria}</span>
-
-                                <div className="text-right">
-                                    <p className="font-bold text-red-400">{moeda(valor)}</p>
-
-                                    <p className="text-xs text-zinc-500">{percentual.toFixed(1)}%</p>
-                                </div>
-                            </div>
-
-                            <div className="h-3 overflow-hidden rounded-full bg-zinc-800">
-                                <div
-                                    className="h-full rounded-full bg-green-500 transition-all"
-                                    style={{
-                                        width: `${percentual}%`,
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </section>
+            </CardContent>
+        </Card>
     );
 }

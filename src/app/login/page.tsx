@@ -1,34 +1,25 @@
 import Image from 'next/image';
+import { Box, Card, CardContent, Container, Typography } from '@mui/material';
 
 import LoginForm from './LoginForm';
 
 export default function LoginPage() {
     return (
-        <main className="flex min-h-screen items-center justify-center bg-[#080B0F] px-6 py-12">
-            <div className="w-full max-w-md">
-                <div className="mb-7 flex justify-center">
-                    <Image
-                        src="/logo-altuza-horizontal.png"
-                        alt="Altuza"
-                        width={210}
-                        height={70}
-                        priority
-                        className="h-auto w-[190px]"
-                    />
-                </div>
-
-                <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#151B24] to-[#0F131A] p-8 shadow-2xl shadow-black/30">
-                    <p className="text-xs font-semibold tracking-[0.22em] text-green-400 uppercase">Acesso seguro</p>
-                    <h1 className="mt-3 text-3xl font-bold text-white">Bem-vindo de volta</h1>
-                    <p className="mt-2 text-sm leading-6 text-zinc-400">
-                        Entre com o usuário administrador cadastrado no Supabase.
-                    </p>
-
-                    <LoginForm />
-                </section>
-
-                <p className="mt-6 text-center text-xs text-zinc-600">Altuza ERP · Ambiente administrativo</p>
-            </div>
-        </main>
+        <Box component="main" sx={{ display: 'grid', minHeight: '100dvh', placeItems: 'center', px: 2, py: 5, bgcolor: '#080b0f', backgroundImage: 'radial-gradient(circle at 50% 10%, rgba(34,197,94,.08), transparent 30rem)' }}>
+            <Container maxWidth="xs" disableGutters>
+                <Box sx={{ mb: 3, textAlign: 'center' }}>
+                    <Image src="/logo-altuza-horizontal.png" alt="Altuza" width={210} height={70} priority style={{ width: 190, height: 'auto' }} />
+                </Box>
+                <Card sx={{ borderRadius: 3, boxShadow: '0 28px 80px rgba(0,0,0,.32)' }}>
+                    <CardContent sx={{ p: { xs: 3, sm: 4 }, '&:last-child': { pb: { xs: 3, sm: 4 } } }}>
+                        <Typography variant="overline" color="primary.light" sx={{ fontWeight: 800, letterSpacing: '.2em' }}>Acesso seguro</Typography>
+                        <Typography component="h1" variant="h4" sx={{ mt: .75, fontWeight: 800 }}>Bem-vindo de volta</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>Entre com o usuário administrador cadastrado no Supabase.</Typography>
+                        <LoginForm />
+                    </CardContent>
+                </Card>
+                <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 3, textAlign: 'center' }}>Altuza ERP · Ambiente administrativo</Typography>
+            </Container>
+        </Box>
     );
 }

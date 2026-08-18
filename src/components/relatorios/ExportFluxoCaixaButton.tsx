@@ -1,55 +1,36 @@
 'use client';
 
 import { useState } from 'react';
+import PictureAsPdfRounded from '@mui/icons-material/PictureAsPdfRounded';
+import { Button, CircularProgress } from '@mui/material';
 
-import { FileText, Loader2 } from 'lucide-react';
-
-import { gerarPDFFluxoCaixa } from '@/lib/relatorios/fluxoCaixa';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
+import { gerarPDFFluxoCaixa } from '@/lib/relatorios/fluxoCaixa';
 
-type Linha = {
-    tipo: string;
-    descricao: string;
-    valor: number;
-};
+type Linha = { tipo: string; descricao: string; valor: number };
+type Props = { linhas: Linha[]; entradas: number; saidas: number; custos: number; saldo: number };
 
-type ExportFluxoCaixaButtonProps = {
-    linhas: Linha[];
-    entradas: number;
-    saidas: number;
-    custos: number;
-    saldo: number;
-};
-
-export default function ExportFluxoCaixaButton({
-    linhas,
-    entradas,
-    saidas,
-    custos,
-    saldo,
-}: ExportFluxoCaixaButtonProps) {
+export default function ExportFluxoCaixaButton({ linhas, entradas, saidas, custos, saldo }: Props) {
     const [loading, setLoading] = useState(false);
     const { moeda } = useConfiguracoes();
-
     async function handleExport() {
         try {
             setLoading(true);
-
             gerarPDFFluxoCaixa(linhas, entradas, saidas, custos, saldo, moeda);
         } finally {
             setLoading(false);
         }
     }
-
     return (
-        <button
+        <Button
             type="button"
             onClick={handleExport}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-sm font-semibold text-red-400 transition-all duration-300 hover:scale-105 hover:border-red-500/40 hover:shadow-lg hover:shadow-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+            variant="outlined"
+            color="error"
+            startIcon={loading ? <CircularProgress size={17} color="inherit" /> : <PictureAsPdfRounded />}
         >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
             Exportar PDF
-        </button>
+        </Button>
     );
 }

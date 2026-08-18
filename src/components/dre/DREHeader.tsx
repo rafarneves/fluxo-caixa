@@ -1,6 +1,7 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import DownloadRounded from '@mui/icons-material/DownloadRounded';
+import { Button } from '@mui/material';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -237,13 +238,9 @@ export default function DREHeader({
                     </p>
                 </div>
 
-                <button
-                    onClick={exportarDRE}
-                    className="inline-flex shrink-0 items-center gap-3 rounded-2xl bg-green-500 px-6 py-4 font-semibold text-black transition-all duration-300 hover:scale-[1.02] hover:bg-green-400"
-                >
-                    <Download size={20} />
+                <Button onClick={exportarDRE} size="large" startIcon={<DownloadRounded />} sx={{ flexShrink: 0 }}>
                     Exportar DRE
-                </button>
+                </Button>
             </div>
 
             <PeriodFilter />

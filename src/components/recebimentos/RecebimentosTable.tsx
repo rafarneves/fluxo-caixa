@@ -1,11 +1,32 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CalendarDays, ChevronLeft, ChevronRight, DollarSign, FileText, Search } from 'lucide-react';
+import CalendarMonthRounded from '@mui/icons-material/CalendarMonthRounded';
+import DescriptionRounded from '@mui/icons-material/DescriptionRounded';
+import SearchRounded from '@mui/icons-material/SearchRounded';
+import {
+    Avatar,
+    Box,
+    Card,
+    CardContent,
+    Grid,
+    InputAdornment,
+    MenuItem,
+    Pagination,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography,
+} from '@mui/material';
 
+import MarcarPago from '@/app/(sistema)/recebimentos/MarcarPago';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 import Badge from '@/components/ui/Badge';
-import MarcarPago from '@/app/(sistema)/recebimentos/MarcarPago';
 
 type Recebimento = {
     id: string;
@@ -13,80 +34,51 @@ type Recebimento = {
     valor: number;
     vencimento: string;
     status: string | null;
-
-    contratos: {
-        nome: string | null;
-
-        clientes: {
-            nome: string;
-            loja: string | null;
-        } | null;
-    } | null;
+    contratos: { nome: string | null; clientes: { nome: string; loja: string | null } | null } | null;
 };
-
-type Props = {
-    recebimentos: Recebimento[];
-};
-
 type FiltroStatus = 'todos' | 'pago' | 'pendente' | 'atrasado' | 'receber_hoje';
 type FiltroPeriodo = 'todos' | 'semanal' | 'mensal' | '6_meses' | 'personalizado';
-
 const ITENS_POR_PAGINA = 10;
-
-function normalizar(valor: string) {
-    return valor
+const normalizar = (valor: string) =>
+    valor
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLocaleLowerCase('pt-BR')
         .trim();
-}
 
-export default function RecebimentosTable({ recebimentos }: Props) {
+export default function RecebimentosTable({ recebimentos }: { recebimentos: Recebimento[] }) {
     const { formatarMoeda, formatarData } = useConfiguracoes();
-
     const [buscaCliente, setBuscaCliente] = useState('');
     const [statusFiltro, setStatusFiltro] = useState<FiltroStatus>('todos');
     const [periodoFiltro, setPeriodoFiltro] = useState<FiltroPeriodo>('todos');
     const [dataInicio, setDataInicio] = useState('');
     const [dataFim, setDataFim] = useState('');
     const [pagina, setPagina] = useState(1);
-
     const recebimentosFiltrados = useMemo(() => {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
         const dataHojeStr = hoje.toISOString().split('T')[0];
-
-        let filtrados = recebimentos;
-
+        let filtrados = [...recebimentos];
         if (buscaCliente) {
             const busca = normalizar(buscaCliente);
-            filtrados = filtrados.filter((item) => {
-                const nomeCliente = normalizar(item.contratos?.clientes?.nome ?? '');
-                const nomeLoja = normalizar(item.contratos?.clientes?.loja ?? '');
-                return nomeCliente.includes(busca) || nomeLoja.includes(busca);
-            });
+            filtrados = filtrados.filter(
+                (item) =>
+                    normalizar(item.contratos?.clientes?.nome ?? '').includes(busca) ||
+                    normalizar(item.contratos?.clientes?.loja ?? '').includes(busca)
+            );
         }
-
-        // Filtrar por Status
-        if (statusFiltro !== 'todos') {
+        if (statusFiltro !== 'todos')
             filtrados = filtrados.filter((item) => {
-                const dataVenc = new Date(item.vencimento + 'T00:00:00');
+                const dataVenc = new Date(`${item.vencimento}T00:00:00`);
                 dataVenc.setHours(0, 0, 0, 0);
-
                 if (statusFiltro === 'pago') return item.status === 'Pago';
                 if (statusFiltro === 'pendente') return item.status !== 'Pago' && dataVenc >= hoje;
                 if (statusFiltro === 'atrasado') return item.status !== 'Pago' && dataVenc < hoje;
-                if (statusFiltro === 'receber_hoje') return item.status !== 'Pago' && item.vencimento === dataHojeStr;
-                
-                return true;
+                return item.status !== 'Pago' && item.vencimento === dataHojeStr;
             });
-        }
-
-        // Filtrar por Período
         if (periodoFiltro !== 'todos') {
             let inicio: Date | null = null;
             let fim: Date | null = null;
-
             if (periodoFiltro === 'semanal') {
                 inicio = new Date(hoje);
                 inicio.setDate(hoje.getDate() - 7);
@@ -99,259 +91,250 @@ export default function RecebimentosTable({ recebimentos }: Props) {
                 inicio = new Date(hoje);
                 inicio.setMonth(hoje.getMonth() - 6);
                 fim = new Date(hoje);
-            } else if (periodoFiltro === 'personalizado' && dataInicio && dataFim) {
-                inicio = new Date(dataInicio + 'T00:00:00');
-                fim = new Date(dataFim + 'T00:00:00');
+            } else if (dataInicio && dataFim) {
+                inicio = new Date(`${dataInicio}T00:00:00`);
+                fim = new Date(`${dataFim}T00:00:00`);
             }
-
             if (inicio && fim) {
                 inicio.setHours(0, 0, 0, 0);
                 fim.setHours(23, 59, 59, 999);
-
                 filtrados = filtrados.filter((item) => {
-                    const dataVenc = new Date(item.vencimento + 'T00:00:00');
+                    const dataVenc = new Date(`${item.vencimento}T00:00:00`);
                     return dataVenc >= inicio! && dataVenc <= fim!;
                 });
             }
         }
-
-        // Ordenação: Hoje pros mais recentes (decrescente por data de vencimento)
-        filtrados.sort((a, b) => {
-            return new Date(b.vencimento).getTime() - new Date(a.vencimento).getTime();
-        });
-
-        return filtrados;
-    }, [recebimentos, statusFiltro, periodoFiltro, dataInicio, dataFim, buscaCliente]);
-
+        return filtrados.sort((a, b) => new Date(b.vencimento).getTime() - new Date(a.vencimento).getTime());
+    }, [buscaCliente, dataFim, dataInicio, periodoFiltro, recebimentos, statusFiltro]);
     const totalPaginas = Math.max(1, Math.ceil(recebimentosFiltrados.length / ITENS_POR_PAGINA));
     const paginaAtual = Math.min(pagina, totalPaginas);
     const indiceInicial = (paginaAtual - 1) * ITENS_POR_PAGINA;
-    const recebimentosPagina = recebimentosFiltrados.slice(indiceInicial, indiceInicial + ITENS_POR_PAGINA);
+    const lista = recebimentosFiltrados.slice(indiceInicial, indiceInicial + ITENS_POR_PAGINA);
+    const resetPagina = () => setPagina(1);
 
     return (
-        <section className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827] p-8">
-            <div className="mb-8 flex items-center justify-between">
-                <div>
-                    <p className="text-xs font-semibold tracking-[0.20em] text-zinc-500 uppercase">FINANCEIRO</p>
-                    <h2 className="mt-3 text-2xl font-bold">Histórico de Cobranças</h2>
-                    <p className="mt-2 text-zinc-500">Todos os recebimentos cadastrados</p>
-                </div>
-
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-green-500/20 bg-green-500/10 text-green-400">
-                    <FileText size={24} />
-                </div>
-            </div>
-
-            {/* Filtros */}
-            <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <label>
-                    <span className="mb-2 block text-sm text-zinc-400">Buscar</span>
-                    <div className="relative">
-                        <Search
-                            size={18}
-                            className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-zinc-500"
-                        />
-                        <input
-                            type="search"
+        <Card component="section">
+            <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+                <Stack
+                    direction="row"
+                    spacing={2}
+                    sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                    <Box>
+                        <Typography
+                            variant="overline"
+                            color="text.secondary"
+                            sx={{ fontWeight: 800, letterSpacing: '.18em' }}
+                        >
+                            Financeiro
+                        </Typography>
+                        <Typography component="h2" variant="h5" sx={{ mt: 0.5, fontWeight: 800 }}>
+                            Histórico de Cobranças
+                        </Typography>
+                        <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                            Todos os recebimentos cadastrados
+                        </Typography>
+                    </Box>
+                    <Avatar variant="rounded" sx={{ color: 'primary.light', bgcolor: 'rgba(34,197,94,.1)' }}>
+                        <DescriptionRounded />
+                    </Avatar>
+                </Stack>
+                <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+                        <TextField
+                            label="Buscar"
                             value={buscaCliente}
-                            onChange={(e) => {
-                                setBuscaCliente(e.target.value);
-                                setPagina(1);
+                            onChange={(event) => {
+                                setBuscaCliente(event.target.value);
+                                resetPagina();
                             }}
                             placeholder="Cliente ou loja"
-                            className="w-full rounded-xl border border-zinc-800 bg-[#11161d] py-3 pr-4 pl-11 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10"
+                            fullWidth
+                            size="small"
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchRounded fontSize="small" />
+                                        </InputAdornment>
+                                    ),
+                                },
+                            }}
                         />
-                    </div>
-                </label>
-
-                <label>
-                    <span className="mb-2 block text-sm text-zinc-400">Status</span>
-                    <select
-                        value={statusFiltro}
-                        onChange={(e) => {
-                            setStatusFiltro(e.target.value as FiltroStatus);
-                            setPagina(1);
-                        }}
-                        className="w-full rounded-xl border border-zinc-800 bg-[#11161d] px-4 py-3 text-sm text-white outline-none focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10"
-                    >
-                        <option value="todos">Todos</option>
-                        <option value="pago">Pagos</option>
-                        <option value="pendente">Pendentes</option>
-                        <option value="atrasado">Atrasados</option>
-                        <option value="receber_hoje">Receber Hoje</option>
-                    </select>
-                </label>
-
-                <label>
-                    <span className="mb-2 block text-sm text-zinc-400">Período de Vencimento</span>
-                    <select
-                        value={periodoFiltro}
-                        onChange={(e) => {
-                            setPeriodoFiltro(e.target.value as FiltroPeriodo);
-                            setPagina(1);
-                        }}
-                        className="w-full rounded-xl border border-zinc-800 bg-[#11161d] px-4 py-3 text-sm text-white outline-none focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10"
-                    >
-                        <option value="todos">Todos</option>
-                        <option value="semanal">Últimos 7 dias</option>
-                        <option value="mensal">Último mês</option>
-                        <option value="6_meses">Últimos 6 meses</option>
-                        <option value="personalizado">Personalizado</option>
-                    </select>
-                </label>
-
-                {periodoFiltro === 'personalizado' && (
-                    <>
-                        <label>
-                            <span className="mb-2 block text-sm text-zinc-400">Data Inicial</span>
-                            <input
-                                type="date"
-                                value={dataInicio}
-                                onChange={(e) => {
-                                    setDataInicio(e.target.value);
-                                    setPagina(1);
-                                }}
-                                className="w-full rounded-xl border border-zinc-800 bg-[#11161d] px-4 py-3 text-sm text-white outline-none focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10"
-                            />
-                        </label>
-                        
-                        <label>
-                            <span className="mb-2 block text-sm text-zinc-400">Data Final</span>
-                            <input
-                                type="date"
-                                value={dataFim}
-                                onChange={(e) => {
-                                    setDataFim(e.target.value);
-                                    setPagina(1);
-                                }}
-                                className="w-full rounded-xl border border-zinc-800 bg-[#11161d] px-4 py-3 text-sm text-white outline-none focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10"
-                            />
-                        </label>
-                    </>
-                )}
-            </div>
-
-            <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px]">
-                    <thead>
-                        <tr className="border-b border-zinc-800 bg-black/20">
-                            <th className="p-5 text-left text-xs tracking-[0.15em] text-zinc-500 uppercase">Cliente</th>
-                            <th className="p-5 text-left text-xs tracking-[0.15em] text-zinc-500 uppercase">Loja</th>
-                            <th className="p-5 text-left text-xs tracking-[0.15em] text-zinc-500 uppercase">Plano</th>
-                            <th className="p-5 text-left text-xs tracking-[0.15em] text-zinc-500 uppercase">Competência</th>
-                            <th className="p-5 text-left text-xs tracking-[0.15em] text-zinc-500 uppercase">Valor</th>
-                            <th className="p-5 text-left text-xs tracking-[0.15em] text-zinc-500 uppercase">Vencimento</th>
-                            <th className="p-5 text-center text-xs tracking-[0.15em] text-zinc-500 uppercase">Status</th>
-                            <th className="p-5 text-center text-xs tracking-[0.15em] text-zinc-500 uppercase">Ações</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {recebimentosPagina.map((item) => (
-                            <tr
-                                key={item.id}
-                                className="border-b border-zinc-900 transition-all duration-200 hover:bg-white/[0.03]"
-                            >
-                                <td className="p-5">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-500/10 font-bold text-green-400">
-                                            {(item.contratos?.clientes?.nome ?? 'C').charAt(0).toUpperCase()}
-                                        </div>
-
-                                        <div>
-                                            <p className="font-semibold text-white">
-                                                {item.contratos?.clientes?.nome ?? '-'}
-                                            </p>
-                                            <p className="text-sm text-zinc-500">Cliente</p>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td className="p-5 text-zinc-400">{item.contratos?.clientes?.loja ?? '-'}</td>
-
-                                <td className="p-5 text-zinc-300">{item.contratos?.nome ?? '-'}</td>
-
-                                <td className="p-5 text-zinc-400">{item.competencia ?? '-'}</td>
-
-                                <td className="p-5">
-                                    <div className="flex items-center gap-2 font-semibold text-green-400">
-                                        <DollarSign size={16} />
-                                        {formatarMoeda(Number(item.valor))}
-                                    </div>
-                                </td>
-
-                                <td className="p-5">
-                                    <div className="flex items-center gap-2 text-zinc-300">
-                                        <CalendarDays size={16} />
-                                        {formatarData(item.vencimento)}
-                                    </div>
-                                </td>
-
-                                <td className="p-5">
-                                    <div className="flex justify-center">
-                                        {item.status === 'Pago' ? (
-                                            <Badge color="green">Pago</Badge>
-                                        ) : (
-                                            <Badge color="yellow">Pendente</Badge>
-                                        )}
-                                    </div>
-                                </td>
-
-                                <td className="p-5">
-                                    <div className="flex justify-center">
-                                        {item.status !== 'Pago' && <MarcarPago id={item.id} />}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-
-                        {recebimentosPagina.length === 0 && (
-                            <tr>
-                                <td colSpan={8} className="py-12 text-center text-zinc-500">
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+                        <TextField
+                            select
+                            label="Status"
+                            value={statusFiltro}
+                            onChange={(event) => {
+                                setStatusFiltro(event.target.value as FiltroStatus);
+                                resetPagina();
+                            }}
+                            fullWidth
+                            size="small"
+                        >
+                            <MenuItem value="todos">Todos</MenuItem>
+                            <MenuItem value="pago">Pagos</MenuItem>
+                            <MenuItem value="pendente">Pendentes</MenuItem>
+                            <MenuItem value="atrasado">Atrasados</MenuItem>
+                            <MenuItem value="receber_hoje">Receber Hoje</MenuItem>
+                        </TextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+                        <TextField
+                            select
+                            label="Período de Vencimento"
+                            value={periodoFiltro}
+                            onChange={(event) => {
+                                setPeriodoFiltro(event.target.value as FiltroPeriodo);
+                                resetPagina();
+                            }}
+                            fullWidth
+                            size="small"
+                        >
+                            <MenuItem value="todos">Todos</MenuItem>
+                            <MenuItem value="semanal">Últimos 7 dias</MenuItem>
+                            <MenuItem value="mensal">Último mês</MenuItem>
+                            <MenuItem value="6_meses">Últimos 6 meses</MenuItem>
+                            <MenuItem value="personalizado">Personalizado</MenuItem>
+                        </TextField>
+                    </Grid>
+                    {periodoFiltro === 'personalizado' && (
+                        <>
+                            <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+                                <TextField
+                                    type="date"
+                                    label="Data Inicial"
+                                    value={dataInicio}
+                                    onChange={(event) => {
+                                        setDataInicio(event.target.value);
+                                        resetPagina();
+                                    }}
+                                    fullWidth
+                                    size="small"
+                                    slotProps={{ inputLabel: { shrink: true } }}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+                                <TextField
+                                    type="date"
+                                    label="Data Final"
+                                    value={dataFim}
+                                    onChange={(event) => {
+                                        setDataFim(event.target.value);
+                                        resetPagina();
+                                    }}
+                                    fullWidth
+                                    size="small"
+                                    slotProps={{ inputLabel: { shrink: true } }}
+                                />
+                            </Grid>
+                        </>
+                    )}
+                </Grid>
+            </CardContent>
+            <TableContainer>
+                <Table sx={{ minWidth: 960 }}>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Cliente</TableCell>
+                            <TableCell>Loja</TableCell>
+                            <TableCell>Plano</TableCell>
+                            <TableCell>Competência</TableCell>
+                            <TableCell>Valor</TableCell>
+                            <TableCell>Vencimento</TableCell>
+                            <TableCell align="center">Status</TableCell>
+                            <TableCell align="center">Ações</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {lista.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={8} align="center" sx={{ py: 7, color: 'text.secondary' }}>
                                     Nenhuma cobrança encontrada com os filtros atuais.
-                                </td>
-                            </tr>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            lista.map((item) => (
+                                <TableRow key={item.id} hover>
+                                    <TableCell>
+                                        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+                                            <Avatar
+                                                variant="rounded"
+                                                sx={{
+                                                    width: 38,
+                                                    height: 38,
+                                                    color: 'primary.light',
+                                                    bgcolor: 'rgba(34,197,94,.1)',
+                                                    fontSize: 15,
+                                                }}
+                                            >
+                                                {(item.contratos?.clientes?.nome ?? 'C').charAt(0).toUpperCase()}
+                                            </Avatar>
+                                            <Box>
+                                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                                    {item.contratos?.clientes?.nome ?? '-'}
+                                                </Typography>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    Cliente
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </TableCell>
+                                    <TableCell>{item.contratos?.clientes?.loja ?? '-'}</TableCell>
+                                    <TableCell>{item.contratos?.nome ?? '-'}</TableCell>
+                                    <TableCell>{item.competencia ?? '-'}</TableCell>
+                                    <TableCell sx={{ color: 'primary.light', fontWeight: 750 }}>
+                                        {formatarMoeda(Number(item.valor))}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
+                                            <CalendarMonthRounded fontSize="small" />
+                                            {formatarData(item.vencimento)}
+                                        </Stack>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Badge color={item.status === 'Pago' ? 'green' : 'yellow'}>
+                                            {item.status === 'Pago' ? 'Pago' : 'Pendente'}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        {item.status !== 'Pago' && <MarcarPago id={item.id} />}
+                                    </TableCell>
+                                </TableRow>
+                            ))
                         )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Paginação */}
+                    </TableBody>
+                </Table>
+            </TableContainer>
             {recebimentosFiltrados.length > 0 && (
-                <div className="mt-8 flex flex-col gap-3 border-t border-zinc-800 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm text-zinc-500">
+                <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={2}
+                    sx={{
+                        alignItems: { sm: 'center' },
+                        justifyContent: 'space-between',
+                        px: 3,
+                        py: 2.5,
+                        borderTop: 1,
+                        borderColor: 'divider',
+                    }}
+                >
+                    <Typography variant="body2" color="text.secondary">
                         Exibindo {indiceInicial + 1}–
                         {Math.min(indiceInicial + ITENS_POR_PAGINA, recebimentosFiltrados.length)} de{' '}
                         {recebimentosFiltrados.length}
-                    </p>
-
-                    <nav aria-label="Paginação de cobranças" className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setPagina((paginaAnterior) => Math.max(1, paginaAnterior - 1))}
-                            disabled={paginaAtual === 1}
-                            aria-label="Página anterior"
-                            className="rounded-lg border border-zinc-700 p-2 text-zinc-400 transition-colors hover:border-green-500/40 hover:text-green-400 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            <ChevronLeft size={18} />
-                        </button>
-
-                        <span className="min-w-24 text-center text-sm text-zinc-400">
-                            Página <strong className="text-white">{paginaAtual}</strong> de {totalPaginas}
-                        </span>
-
-                        <button
-                            type="button"
-                            onClick={() => setPagina((paginaAnterior) => Math.min(totalPaginas, paginaAnterior + 1))}
-                            disabled={paginaAtual === totalPaginas}
-                            aria-label="Próxima página"
-                            className="rounded-lg border border-zinc-700 p-2 text-zinc-400 transition-colors hover:border-green-500/40 hover:text-green-400 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            <ChevronRight size={18} />
-                        </button>
-                    </nav>
-                </div>
+                    </Typography>
+                    <Pagination
+                        count={totalPaginas}
+                        page={paginaAtual}
+                        onChange={(_, value) => setPagina(value)}
+                        color="primary"
+                        shape="rounded"
+                    />
+                </Stack>
             )}
-        </section>
+        </Card>
     );
 }

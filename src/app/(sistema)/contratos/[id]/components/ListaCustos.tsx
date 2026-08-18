@@ -1,62 +1,62 @@
 'use client';
 
+import {
+    Card,
+    CardContent,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+} from '@mui/material';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 
-type Custo = {
-    id: string;
-    categoria: string;
-    descricao: string | null;
-    valor: number;
-    competencia: string | null;
-};
+type Custo = { id: string; categoria: string; descricao: string | null; valor: number; competencia: string | null };
 
 export default function ListaCustos({ custos }: { custos: Custo[] }) {
     const formatMoney = useConfiguracoes().formatarMoeda;
     return (
-        <div className="rounded-3xl border border-zinc-800 bg-[#161B22] p-8">
-            <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Custos do Contrato</h2>
-
-                <span className="text-zinc-500">{custos.length} registros</span>
-            </div>
-
-            {custos.length === 0 && (
-                <div className="rounded-xl bg-zinc-900 p-8 text-center text-zinc-500">
-                    Nenhum custo cadastrado para este contrato.
-                </div>
-            )}
-
-            {custos.length > 0 && (
-                <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-zinc-800 text-left text-zinc-500">
-                            <th className="pb-4">Categoria</th>
-
-                            <th>Descrição</th>
-
-                            <th>Competência</th>
-
-                            <th className="text-right">Valor</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {custos.map((custo) => (
-                            <tr key={custo.id} className="border-b border-zinc-800">
-                                <td className="py-5">{custo.categoria}</td>
-
-                                <td>{custo.descricao || '-'}</td>
-
-                                <td>{custo.competencia || '-'}</td>
-
-                                <td className="text-right font-bold text-red-400">
-                                    {formatMoney(Number(custo.valor))}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-        </div>
+        <Card>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography component="h2" variant="h5" sx={{ fontWeight: 800 }}>
+                    Custos do Contrato
+                </Typography>
+                <Typography color="text.secondary">{custos.length} registros</Typography>
+            </CardContent>
+            <TableContainer>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Categoria</TableCell>
+                            <TableCell>Descrição</TableCell>
+                            <TableCell>Competência</TableCell>
+                            <TableCell align="right">Valor</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {custos.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                                    Nenhum custo cadastrado para este contrato.
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            custos.map((custo) => (
+                                <TableRow key={custo.id} hover>
+                                    <TableCell>{custo.categoria}</TableCell>
+                                    <TableCell>{custo.descricao || '-'}</TableCell>
+                                    <TableCell>{custo.competencia || '-'}</TableCell>
+                                    <TableCell align="right" sx={{ color: 'error.main', fontWeight: 800 }}>
+                                        {formatMoney(Number(custo.valor))}
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Card>
     );
 }

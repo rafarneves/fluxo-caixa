@@ -4,6 +4,7 @@ import { CalendarClock, Wallet, BadgeDollarSign, AlertTriangle } from 'lucide-re
 
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 import StatCard from '@/components/ui/StatCard';
+import ResponsiveGrid from '@/components/ui/ResponsiveGrid';
 
 type Props = {
     receberHoje: number;
@@ -15,7 +16,7 @@ type Props = {
 export default function RecebimentosSummary({ receberHoje, emAberto, recebido, atrasados }: Props) {
     const { formatarMoedaCompacta } = useConfiguracoes();
     return (
-        <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <ResponsiveGrid>
             <StatCard
                 titulo="Receber Hoje"
                 valor={formatarMoedaCompacta(receberHoje)}
@@ -59,6 +60,6 @@ export default function RecebimentosSummary({ receberHoje, emAberto, recebido, a
                 progresso={Math.min(atrasados * 10, 100)}
                 cor={atrasados > 0 ? 'red' : 'green'}
             />
-        </section>
+        </ResponsiveGrid>
     );
 }

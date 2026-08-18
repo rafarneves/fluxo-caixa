@@ -1,37 +1,56 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import { Box, Button, Stack, Typography } from '@mui/material';
 
-type ReportHeaderProps = {
-    title: string;
-    description?: string;
-    actions?: ReactNode;
-    backHref?: string | false;
-};
+type ReportHeaderProps = { title: string; description?: string; actions?: ReactNode; backHref?: string | false };
 
 export default function ReportHeader({ title, description, actions, backHref = '/relatorios' }: ReportHeaderProps) {
     return (
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
+        <Stack
+            component="header"
+            direction={{ xs: 'column', lg: 'row' }}
+            spacing={3}
+            sx={{ alignItems: { lg: 'center' }, justifyContent: 'space-between' }}
+        >
+            <Box>
                 {backHref && (
-                    <Link
+                    <Button
+                        component={Link}
                         href={backHref}
                         data-export-ignore
-                        className="mb-5 inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/70 px-4 py-2 text-sm font-semibold text-zinc-400 transition hover:border-green-500/40 hover:text-green-400"
+                        variant="outlined"
+                        color="inherit"
+                        startIcon={<ArrowBackRounded />}
+                        sx={{ mb: 2.5, color: 'text.secondary', borderColor: 'divider' }}
                     >
-                        <ArrowLeft size={17} />
                         Voltar
-                    </Link>
+                    </Button>
                 )}
-
-                <p className="text-xs font-semibold tracking-[0.22em] text-green-400 uppercase">RELATÓRIOS</p>
-
-                <h1 className="mt-3 text-4xl font-bold tracking-tight text-white">{title}</h1>
-
-                {description && <p className="mt-3 max-w-3xl leading-relaxed text-zinc-400">{description}</p>}
-            </div>
-
-            {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
-        </div>
+                <Typography
+                    variant="overline"
+                    color="primary.light"
+                    sx={{ display: 'block', fontWeight: 800, letterSpacing: '.2em' }}
+                >
+                    Relatórios
+                </Typography>
+                <Typography
+                    component="h1"
+                    sx={{ mt: 0.5, fontSize: { xs: 30, sm: 36 }, fontWeight: 800, letterSpacing: '-.035em' }}
+                >
+                    {title}
+                </Typography>
+                {description && (
+                    <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 760, lineHeight: 1.7 }}>
+                        {description}
+                    </Typography>
+                )}
+            </Box>
+            {actions && (
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+                    {actions}
+                </Stack>
+            )}
+        </Stack>
     );
 }

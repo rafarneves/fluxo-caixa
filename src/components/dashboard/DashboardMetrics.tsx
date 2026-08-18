@@ -4,6 +4,7 @@ import { Users, FileText, Wallet, Landmark } from 'lucide-react';
 
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 import StatCard from '@/components/ui/StatCard';
+import ResponsiveGrid from '@/components/ui/ResponsiveGrid';
 
 type Props = {
     totalClientes: number;
@@ -16,7 +17,7 @@ export default function DashboardMetrics({ totalClientes, contratosAtivos, fatur
     const { formatarMoedaCompacta } = useConfiguracoes();
 
     return (
-        <section className="grid grid-cols-1 gap-6 min-[900px]:grid-cols-2 min-[1440px]:grid-cols-4">
+        <ResponsiveGrid>
             <StatCard
                 titulo="Clientes"
 
@@ -88,6 +89,6 @@ export default function DashboardMetrics({ totalClientes, contratosAtivos, fatur
 
                 icone={<Landmark size={22} />}
             />
-        </section>
+        </ResponsiveGrid>
     );
 }

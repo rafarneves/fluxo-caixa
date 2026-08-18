@@ -1,24 +1,67 @@
-type Props = {
-    title: string;
-    value: string | number;
-    subtitle: string;
-    color?: string;
+import { Box, Card, CardContent, Typography } from '@mui/material';
+
+type Props = { title: string; value: string | number; subtitle: string; color?: string };
+
+const cores: Record<string, string> = {
+    'text-green-400': '#4ade80',
+    'text-red-400': '#f87171',
+    'text-cyan-400': '#22d3ee',
+    'text-yellow-400': '#fbbf24',
+    'text-white': '#f8fafc',
 };
 
 export default function MetricCard({ title, value, subtitle, color = 'text-white' }: Props) {
     return (
-        <div className="relative min-h-[220px] overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-br from-[#181f29] via-[#141a22] to-[#10151b] p-8 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-green-500/40">
-            <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-green-500/5 blur-3xl" />
-
-            <div className="relative flex h-full flex-col justify-between">
-                <div>
-                    <p className="text-xs tracking-[4px] text-zinc-500 uppercase">{title}</p>
-
-                    <h2 className={`mt-6 text-5xl leading-none font-bold whitespace-nowrap ${color} `}>{value}</h2>
-                </div>
-
-                <p className="text-lg text-zinc-400">{subtitle}</p>
-            </div>
-        </div>
+        <Card
+            sx={{
+                minHeight: 220,
+                '&:hover': { transform: 'translateY(-3px)', borderColor: 'rgba(34,197,94,.38)' },
+            }}
+        >
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: -40,
+                    right: -40,
+                    width: 160,
+                    height: 160,
+                    borderRadius: '50%',
+                    bgcolor: 'rgba(34,197,94,.06)',
+                    filter: 'blur(25px)',
+                }}
+            />
+            <CardContent
+                sx={{
+                    position: 'relative',
+                    display: 'flex',
+                    minHeight: 220,
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    p: 4,
+                    '&:last-child': { pb: 4 },
+                }}
+            >
+                <Box>
+                    <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: '.2em' }}>
+                        {title}
+                    </Typography>
+                    <Typography
+                        sx={{
+                            mt: 2.5,
+                            color: cores[color] ?? color,
+                            fontSize: { xs: 36, sm: 46 },
+                            lineHeight: 1,
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {value}
+                    </Typography>
+                </Box>
+                <Typography color="text.secondary" sx={{ fontSize: 17 }}>
+                    {subtitle}
+                </Typography>
+            </CardContent>
+        </Card>
     );
 }

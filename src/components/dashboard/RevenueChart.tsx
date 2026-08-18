@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { CalendarDays, TrendingUp } from 'lucide-react';
+import { Button, TextField } from '@mui/material';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 import { calcularEvolucaoFaturamentoPorPeriodo, type RecebimentoFaturamento } from '@/lib/financeiro';
 
@@ -145,19 +146,18 @@ export default function RevenueChart({
                         const ativo = periodo === filtro.valor;
 
                         return (
-                            <button
+                            <Button
                                 type="button"
                                 key={filtro.valor}
                                 onClick={() => setPeriodo(filtro.valor)}
                                 aria-pressed={ativo}
-                                className={`shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                                    ativo
-                                        ? 'bg-green-500/15 text-green-400 ring-1 ring-green-500/30'
-                                        : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                }`}
+                                size="small"
+                                variant={ativo ? 'contained' : 'text'}
+                                color={ativo ? 'primary' : 'inherit'}
+                                sx={{ flexShrink: 0, color: ativo ? undefined : 'text.secondary' }}
                             >
                                 {filtro.label}
-                            </button>
+                            </Button>
                         );
                     })}
                 </div>
@@ -168,24 +168,23 @@ export default function RevenueChart({
 
                         <label className="flex items-center gap-2 text-sm text-zinc-400">
                             <span>De</span>
-                            <input
+                            <TextField
                                 type="date"
                                 value={inicioPersonalizado}
-                                max={fimPersonalizado}
                                 onChange={(event) => setInicioPersonalizado(event.target.value)}
-                                className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white [color-scheme:dark] outline-none focus:border-green-500"
+                                size="small"
+                                slotProps={{ htmlInput: { max: fimPersonalizado } }}
                             />
                         </label>
 
                         <label className="flex items-center gap-2 text-sm text-zinc-400">
                             <span>Até</span>
-                            <input
+                            <TextField
                                 type="date"
                                 value={fimPersonalizado}
-                                min={inicioPersonalizado}
-                                max={hoje}
                                 onChange={(event) => setFimPersonalizado(event.target.value)}
-                                className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white [color-scheme:dark] outline-none focus:border-green-500"
+                                size="small"
+                                slotProps={{ htmlInput: { min: inicioPersonalizado, max: hoje } }}
                             />
                         </label>
                     </div>

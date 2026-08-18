@@ -1,163 +1,107 @@
 'use client';
 
 import { useState } from 'react';
+import SaveRounded from '@mui/icons-material/SaveRounded';
+import { Box, Button, Divider, Grid, MenuItem, Stack, TextField } from '@mui/material';
 import { criarDespesa } from './actions';
+
+const categorias = [
+    'Pró-labore',
+    'Salários',
+    'Estrutura',
+    'Softwares',
+    'Marketing',
+    'Transporte',
+    'Comercial',
+    'Telefonia',
+    'Equipamentos',
+    'Informática',
+    'Capacitação',
+    'Contabilidade e Jurídico',
+    'Impostos',
+    'Financeiro',
+    'Materiais',
+    'Benefícios',
+    'Eventos',
+    'Outros',
+];
 
 export default function FormDespesa() {
     const [tipo, setTipo] = useState('Fixa');
-
-    const inputClass = `
-    w-full
-    mt-2
-    bg-[#0B0F14]
-    border
-    border-zinc-800
-    rounded-xl
-    px-4
-    py-3
-    text-white
-    placeholder:text-zinc-600
-    outline-none
-    focus:border-green-500
-    transition
-  `;
-
-    const labelClass = `
-    text-sm
-    font-semibold
-    text-zinc-400
-  `;
-
     return (
-        <form
-            action={criarDespesa}
-
-            className="space-y-8"
-        >
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div className="md:col-span-2">
-                    <label className={labelClass}>Descrição</label>
-
-                    <input
+        <Box component="form" action={criarDespesa}>
+            <Grid container spacing={2.5}>
+                <Grid size={12}>
+                    <TextField
                         name="descricao"
-
+                        label="Descrição"
                         placeholder="Ex: Assinatura ChatGPT"
-
-                        className={inputClass}
-
                         required
+                        fullWidth
                     />
-                </div>
-
-                <div>
-                    <label className={labelClass}>Categoria</label>
-
-                    <select
-                        name="categoria"
-
-                        defaultValue="Softwares"
-
-                        className={inputClass}
-                    >
-                        <option>Pró-labore</option>
-                        <option>Salários</option>
-                        <option>Estrutura</option>
-                        <option>Softwares</option>
-                        <option>Marketing</option>
-                        <option>Transporte</option>
-                        <option>Comercial</option>
-                        <option>Telefonia</option>
-                        <option>Equipamentos</option>
-                        <option>Informática</option>
-                        <option>Capacitação</option>
-                        <option>Contabilidade e Jurídico</option>
-                        <option>Impostos</option>
-                        <option>Financeiro</option>
-                        <option>Materiais</option>
-                        <option>Benefícios</option>
-                        <option>Eventos</option>
-                        <option>Outros</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label className={labelClass}>Tipo da despesa</label>
-
-                    <select
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField select name="categoria" label="Categoria" defaultValue="Softwares" fullWidth>
+                        {categorias.map((categoria) => (
+                            <MenuItem key={categoria} value={categoria}>
+                                {categoria}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField
+                        select
                         name="tipo"
-
+                        label="Tipo da despesa"
                         value={tipo}
-
-                        onChange={(e) => setTipo(e.target.value)}
-
-                        className={inputClass}
+                        onChange={(event) => setTipo(event.target.value)}
+                        fullWidth
                     >
-                        <option value="Fixa">Fixa</option>
-
-                        <option value="Variável">Variável</option>
-                    </select>
-                </div>
-
-                {tipo === 'Fixa' && (
-                    <div>
-                        <label className={labelClass}>Dia do vencimento</label>
-
-                        <input
+                        <MenuItem value="Fixa">Fixa</MenuItem>
+                        <MenuItem value="Variável">Variável</MenuItem>
+                    </TextField>
+                </Grid>
+                {tipo === 'Fixa' ? (
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <TextField
                             name="dia_vencimento"
-
                             type="number"
-
-                            min="1"
-
-                            max="31"
-
+                            label="Dia do vencimento"
                             placeholder="Ex: 5"
-
-                            className={inputClass}
+                            fullWidth
+                            slotProps={{ htmlInput: { min: 1, max: 31 } }}
                         />
-                    </div>
-                )}
-
-                {tipo === 'Variável' && (
-                    <div>
-                        <label className={labelClass}>Data</label>
-
-                        <input
+                    </Grid>
+                ) : (
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <TextField
                             name="data"
-
                             type="date"
-
-                            className={inputClass}
+                            label="Data"
+                            fullWidth
+                            slotProps={{ inputLabel: { shrink: true } }}
                         />
-                    </div>
+                    </Grid>
                 )}
-
-                <div>
-                    <label className={labelClass}>Valor</label>
-
-                    <input
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField
                         name="valor"
-
                         type="number"
-
-                        step="0.01"
-
-                        min="0"
-
+                        label="Valor"
                         placeholder="Ex: 120,00"
-
-                        className={inputClass}
-
                         required
+                        fullWidth
+                        slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
                     />
-                </div>
-            </div>
-
-            <div className="flex justify-end border-t border-zinc-800 pt-4">
-                <button className="rounded-xl bg-green-500 px-10 py-4 font-bold text-black shadow-lg transition hover:bg-green-400">
+                </Grid>
+            </Grid>
+            <Divider sx={{ my: 3 }} />
+            <Stack direction="row" sx={{ justifyContent: 'flex-end' }}>
+                <Button type="submit" size="large" startIcon={<SaveRounded />}>
                     Salvar Despesa
-                </button>
-            </div>
-        </form>
+                </Button>
+            </Stack>
+        </Box>
     );
 }

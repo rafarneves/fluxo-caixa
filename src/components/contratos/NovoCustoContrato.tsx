@@ -1,62 +1,44 @@
 'use client';
 
+import SaveRounded from '@mui/icons-material/SaveRounded';
+import { Button, Card, CardContent, Grid, MenuItem, TextField, Typography } from '@mui/material';
 import { criarCustoContrato } from '@/actions/criarCustoContrato';
 
-type Props = {
-    contratoId: string;
-};
+const custos = ['Tráfego Pago', 'Designer', 'Social Media', 'Planejamento', 'Combustível', 'Alimentação'];
 
-export default function NovoCustoContrato({ contratoId }: Props) {
+export default function NovoCustoContrato({ contratoId }: { contratoId: string }) {
     return (
-        <form action={criarCustoContrato} className="rounded-3xl border border-zinc-800 bg-[#161B22] p-8">
-            <h2 className="mb-6 text-2xl font-bold">Adicionar Custo</h2>
-
-            <input type="hidden" name="contrato_id" value={contratoId} />
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                    <label className="mb-2 block text-sm text-zinc-400">Descrição</label>
-
-                    <select
-                        name="descricao"
-                        required
-                        className="w-full rounded-xl border border-zinc-700 bg-zinc-900 p-3"
-                    >
-                        <option value="">Selecione</option>
-
-                        <option value="Tráfego Pago">Tráfego Pago</option>
-
-                        <option value="Designer">Designer</option>
-
-                        <option value="Social Media">Social Media</option>
-
-                        <option value="Planejamento">Planejamento</option>
-
-                        <option value="Combustível">Combustível</option>
-
-                        <option value="Alimentação">Alimentação</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label className="mb-2 block text-sm text-zinc-400">Valor</label>
-
-                    <input
-                        type="number"
-                        name="valor"
-                        step="0.01"
-                        required
-                        className="w-full rounded-xl border border-zinc-700 bg-zinc-900 p-3"
-                    />
-                </div>
-            </div>
-
-            <button
-                type="submit"
-                className="mt-8 rounded-xl bg-green-500 px-6 py-3 font-semibold text-black hover:bg-green-400"
-            >
-                Salvar Custo
-            </button>
-        </form>
+        <Card component="form" action={criarCustoContrato}>
+            <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+                <Typography component="h2" variant="h5" sx={{ mb: 3, fontWeight: 800 }}>
+                    Adicionar Custo
+                </Typography>
+                <input type="hidden" name="contrato_id" value={contratoId} />
+                <Grid container spacing={2.5}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <TextField select name="descricao" label="Descrição" required defaultValue="" fullWidth>
+                            {custos.map((custo) => (
+                                <MenuItem key={custo} value={custo}>
+                                    {custo}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <TextField
+                            type="number"
+                            name="valor"
+                            label="Valor"
+                            required
+                            fullWidth
+                            slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                        />
+                    </Grid>
+                </Grid>
+                <Button type="submit" startIcon={<SaveRounded />} sx={{ mt: 3 }}>
+                    Salvar Custo
+                </Button>
+            </CardContent>
+        </Card>
     );
 }

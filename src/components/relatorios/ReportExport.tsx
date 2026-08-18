@@ -1,20 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-
-import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import DownloadRounded from '@mui/icons-material/DownloadRounded';
+import PictureAsPdfRounded from '@mui/icons-material/PictureAsPdfRounded';
+import TableViewRounded from '@mui/icons-material/TableViewRounded';
+import { Alert, Button, CircularProgress, Stack } from '@mui/material';
 
 import { exportPDF } from '@/lib/export/exportPDF';
 
 type ReportExportProps = {
     reportId?: string;
     reportTitle?: string;
-
     onExportPDF?: () => void | Promise<void>;
     onExportExcel?: () => void | Promise<void>;
-
     loadingExcel?: boolean;
-
     disabledPDF?: boolean;
     disabledExcel?: boolean;
 };
@@ -22,12 +21,9 @@ type ReportExportProps = {
 export default function ReportExport({
     reportId = 'report-content',
     reportTitle,
-
     onExportPDF,
     onExportExcel,
-
     loadingExcel = false,
-
     disabledPDF = false,
     disabledExcel = false,
 }: ReportExportProps) {
@@ -35,52 +31,30 @@ export default function ReportExport({
     const [loadingSpreadsheet, setLoadingSpreadsheet] = useState(false);
     const [loadingAll, setLoadingAll] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
     function getReport() {
         const report = document.getElementById(reportId);
-
-        if (!report) {
-            throw new Error('Não foi possível localizar o conteúdo do relatório para exportação.');
-        }
-
+        if (!report) throw new Error('Não foi possível localizar o conteúdo do relatório para exportação.');
         return report;
     }
-
     function getTitle() {
         return reportTitle ?? getReport().querySelector('h1')?.textContent?.trim() ?? 'Relatório';
     }
-
-    function csvCell(value: string) {
-        return `"${value.replace(/\s+/g, ' ').trim().replace(/"/g, '""')}"`;
-    }
-
+    const csvCell = (value: string) => `"${value.replace(/\s+/g, ' ').trim().replace(/"/g, '""')}"`;
     function downloadSpreadsheet() {
         const report = getReport();
         const tables = Array.from(report.querySelectorAll('table'));
-
-        if (tables.length === 0) {
-            throw new Error('Este relatório não possui uma tabela para exportar ao Excel.');
-        }
-
+        if (!tables.length) throw new Error('Este relatório não possui uma tabela para exportar ao Excel.');
         const lines: string[] = [];
-
         tables.forEach((table, tableIndex) => {
-            const section = table.closest('section');
-            const sectionTitle = section?.querySelector('h2')?.textContent?.trim();
-
+            const sectionTitle = table.closest('section')?.querySelector('h2')?.textContent?.trim();
             if (sectionTitle) lines.push(csvCell(sectionTitle));
-
             Array.from(table.rows).forEach((row) => {
                 const cells = Array.from(row.cells).filter((cell) => !cell.hasAttribute('data-export-ignore'));
                 lines.push(cells.map((cell) => csvCell(cell.textContent ?? '')).join(';'));
             });
-
             if (tableIndex < tables.length - 1) lines.push('');
         });
-
-        const blob = new Blob([`\uFEFF${lines.join('\r\n')}`], {
-            type: 'text/csv;charset=utf-8;',
-        });
+        const blob = new Blob([`\uFEFF${lines.join('\r\n')}`], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         const fileName = getTitle()
@@ -89,7 +63,6 @@ export default function ReportExport({
             .replace(/[^a-zA-Z0-9-_ ]/g, '')
             .trim()
             .replace(/\s+/g, '-');
-
         link.href = url;
         link.download = `${fileName || 'relatorio'}.csv`;
         document.body.appendChild(link);
@@ -97,106 +70,90 @@ export default function ReportExport({
         link.remove();
         URL.revokeObjectURL(url);
     }
-
-    async function handleExportPDF() {
+    async function run(setLoading: (value: boolean) => void, action: () => void | Promise<void>, fallback: string) {
         try {
             setError(null);
-            setLoadingPDF(true);
-
-            if (onExportPDF) {
-                await onExportPDF();
-            } else {
-                await exportPDF(reportId, {
-                    title: getTitle(),
-                    fileName: getTitle(),
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            setError(error instanceof Error ? error.message : 'Não foi possível exportar o PDF.');
+            setLoading(true);
+            await action();
+        } catch (caught) {
+            console.error(caught);
+            setError(caught instanceof Error ? caught.message : fallback);
         } finally {
-            setLoadingPDF(false);
+            setLoading(false);
         }
     }
-
-    async function handleExportExcel() {
-        try {
-            setError(null);
-            setLoadingSpreadsheet(true);
-
-            if (onExportExcel) await onExportExcel();
-            else downloadSpreadsheet();
-        } catch (error) {
-            console.error(error);
-            setError(error instanceof Error ? error.message : 'Não foi possível exportar a planilha.');
-        } finally {
-            setLoadingSpreadsheet(false);
-        }
-    }
-
-    async function handleExportAll() {
-        try {
-            setError(null);
-            setLoadingAll(true);
-
-            if (!disabledPDF) {
-                if (onExportPDF) await onExportPDF();
-                else await exportPDF(reportId, { title: getTitle(), fileName: getTitle() });
-            }
-
-            if (!disabledExcel) {
-                if (onExportExcel) await onExportExcel();
-                else downloadSpreadsheet();
-            }
-        } catch (error) {
-            console.error(error);
-            setError(error instanceof Error ? error.message : 'Não foi possível concluir as exportações.');
-        } finally {
-            setLoadingAll(false);
-        }
-    }
+    const handleExportPDF = () =>
+        run(
+            setLoadingPDF,
+            () => (onExportPDF ? onExportPDF() : exportPDF(reportId, { title: getTitle(), fileName: getTitle() })),
+            'Não foi possível exportar o PDF.'
+        );
+    const handleExportExcel = () =>
+        run(
+            setLoadingSpreadsheet,
+            () => (onExportExcel ? onExportExcel() : downloadSpreadsheet()),
+            'Não foi possível exportar a planilha.'
+        );
+    const handleExportAll = () =>
+        run(
+            setLoadingAll,
+            async () => {
+                if (!disabledPDF) {
+                    if (onExportPDF) await onExportPDF();
+                    else await exportPDF(reportId, { title: getTitle(), fileName: getTitle() });
+                }
+                if (!disabledExcel) {
+                    if (onExportExcel) await onExportExcel();
+                    else downloadSpreadsheet();
+                }
+            },
+            'Não foi possível concluir as exportações.'
+        );
+    const spinner = <CircularProgress size={17} color="inherit" />;
 
     return (
-        <div data-export-ignore className="flex flex-wrap items-center gap-3">
-            <button
+        <Stack
+            data-export-ignore
+            direction="row"
+            spacing={1.25}
+            sx={{ alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}
+        >
+            <Button
                 type="button"
                 onClick={handleExportPDF}
                 disabled={disabledPDF || loadingPDF}
-                className="inline-flex items-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-sm font-semibold text-red-400 transition hover:border-red-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+                variant="outlined"
+                color="error"
+                startIcon={loadingPDF ? spinner : <PictureAsPdfRounded />}
             >
-                {loadingPDF ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
                 Exportar PDF
-            </button>
-
-            <button
+            </Button>
+            <Button
                 type="button"
                 onClick={handleExportExcel}
                 disabled={disabledExcel || loadingExcel || loadingSpreadsheet}
-                className="inline-flex items-center gap-2 rounded-2xl border border-green-500/20 bg-green-500/10 px-5 py-3 text-sm font-semibold text-green-400 transition hover:border-green-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+                variant="outlined"
+                color="primary"
+                startIcon={loadingExcel || loadingSpreadsheet ? spinner : <TableViewRounded />}
             >
-                {loadingExcel || loadingSpreadsheet ? (
-                    <Loader2 size={18} className="animate-spin" />
-                ) : (
-                    <FileSpreadsheet size={18} />
-                )}
                 Exportar Excel
-            </button>
-
-            <button
+            </Button>
+            <Button
                 type="button"
                 onClick={handleExportAll}
                 disabled={(disabledPDF && disabledExcel) || loadingAll}
-                className="inline-flex items-center gap-2 rounded-2xl border border-zinc-700 bg-zinc-800/50 px-5 py-3 text-sm font-semibold text-zinc-300 transition hover:border-zinc-500 disabled:cursor-not-allowed disabled:opacity-50"
+                variant="outlined"
+                color="inherit"
+                startIcon={loadingAll ? spinner : <DownloadRounded />}
+                sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
-                {loadingAll ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
                 Exportar Tudo
-            </button>
-
+            </Button>
             {error && (
-                <p role="alert" className="w-full text-right text-xs text-red-400">
+                <Alert severity="error" variant="outlined" sx={{ width: '100%' }}>
                     {error}
-                </p>
+                </Alert>
             )}
-        </div>
+        </Stack>
     );
 }

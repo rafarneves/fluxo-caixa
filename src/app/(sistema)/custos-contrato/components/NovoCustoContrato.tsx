@@ -1,89 +1,96 @@
 'use client';
 
 import { useState } from 'react';
+import SaveRounded from '@mui/icons-material/SaveRounded';
+import {
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    CircularProgress,
+    FormControlLabel,
+    MenuItem,
+    Stack,
+    TextField,
+    Typography,
+} from '@mui/material';
 import { criarCustoContrato } from '../actions';
 
-type Contrato = {
-    id: string;
-    cliente: string;
-};
+type Contrato = { id: string; cliente: string };
+const categorias = [
+    'Editor',
+    'Designer',
+    'Tráfego Pago',
+    'Combustível',
+    'Pedágio',
+    'Alimentação',
+    'Hospedagem',
+    'Hotel',
+    'Freelancer',
+    'Impressão',
+    'Equipamentos',
+    'Outros',
+];
 
 export default function NovoCustoContrato({ contratos }: { contratos: Contrato[] }) {
     const [pending, setPending] = useState(false);
-
     return (
-        <form
+        <Card
+            component="form"
             action={async (formData) => {
                 setPending(true);
-
                 try {
                     await criarCustoContrato(formData);
-
                     window.location.reload();
                 } finally {
                     setPending(false);
                 }
             }}
-            className="space-y-5 rounded-2xl bg-[#161B22] p-6"
         >
-            <h2 className="text-2xl font-bold">Novo Custo do Contrato</h2>
-
-            <select name="contrato_id" required className="w-full rounded-xl bg-zinc-900 p-4">
-                <option value="">Selecione o contrato</option>
-
-                {contratos.map((c) => (
-                    <option key={c.id} value={c.id}>
-                        {c.cliente}
-                    </option>
-                ))}
-            </select>
-
-            <select name="categoria" required className="w-full rounded-xl bg-zinc-900 p-4">
-                <option value="">Categoria</option>
-
-                <option>Editor</option>
-                <option>Designer</option>
-                <option>Tráfego Pago</option>
-                <option>Combustível</option>
-                <option>Pedágio</option>
-                <option>Alimentação</option>
-                <option>Hospedagem</option>
-                <option>Hotel</option>
-                <option>Freelancer</option>
-                <option>Impressão</option>
-                <option>Equipamentos</option>
-                <option>Outros</option>
-            </select>
-
-            <input name="descricao" placeholder="Descrição" className="w-full rounded-xl bg-zinc-900 p-4" />
-
-            <input
-                name="valor"
-                type="number"
-                step="0.01"
-                placeholder="Valor"
-                required
-                className="w-full rounded-xl bg-zinc-900 p-4"
-            />
-
-            <input name="competencia" type="month" className="w-full rounded-xl bg-zinc-900 p-4" />
-
-            <label className="flex items-center gap-3">
-                <input type="checkbox" name="recorrente" />
-
-                <span>Custo recorrente</span>
-            </label>
-
-            <textarea
-                name="observacao"
-                placeholder="Observações"
-                rows={4}
-                className="w-full resize-none rounded-xl bg-zinc-900 p-4"
-            />
-
-            <button disabled={pending} className="w-full rounded-xl bg-green-500 px-8 py-4 font-bold text-black">
-                {pending ? 'Salvando...' : 'Salvar Custo'}
-            </button>
-        </form>
+            <CardContent>
+                <Stack spacing={2.1}>
+                    <Typography component="h2" variant="h5" sx={{ fontWeight: 800 }}>
+                        Novo Custo do Contrato
+                    </Typography>
+                    <TextField select name="contrato_id" label="Contrato" required defaultValue="">
+                        {contratos.map((contrato) => (
+                            <MenuItem key={contrato.id} value={contrato.id}>
+                                {contrato.cliente}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField select name="categoria" label="Categoria" required defaultValue="">
+                        {categorias.map((categoria) => (
+                            <MenuItem key={categoria} value={categoria}>
+                                {categoria}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField name="descricao" label="Descrição" />
+                    <TextField
+                        name="valor"
+                        type="number"
+                        label="Valor"
+                        required
+                        slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                    />
+                    <TextField
+                        name="competencia"
+                        type="month"
+                        label="Competência"
+                        slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                    <FormControlLabel control={<Checkbox name="recorrente" />} label="Custo recorrente" />
+                    <TextField name="observacao" label="Observações" multiline rows={4} />
+                    <Button
+                        type="submit"
+                        disabled={pending}
+                        startIcon={pending ? <CircularProgress size={17} color="inherit" /> : <SaveRounded />}
+                    >
+                        {pending ? 'Salvando...' : 'Salvar Custo'}
+                    </Button>
+                </Stack>
+            </CardContent>
+        </Card>
     );
 }
