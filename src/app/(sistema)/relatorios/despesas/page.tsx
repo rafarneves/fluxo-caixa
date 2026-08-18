@@ -5,29 +5,38 @@ import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
-export default async function RelatorioDespesasPage() {
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function RelatorioDespesasPage({ searchParams }: Props) {
     const { configuracoes } = await getContextoConfiguracoes();
-    const dados = await getDashboardExecutivo();
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const dados = await getDashboardExecutivo(periodo);
 
     const despesas = dados.despesas;
 
-    const totalDespesas = despesas.reduce((acc: number, item: any) => acc + Number(item.valor), 0);
+    const totalDespesas = despesas.reduce((acc, item) => acc + Number(item.valor), 0);
 
     const quantidade = despesas.length;
 
     const ticketMedio = quantidade === 0 ? 0 : totalDespesas / quantidade;
 
-    const categorias = new Set(despesas.map((d: any) => d.categoria)).size;
+    const categorias = new Set(despesas.map((despesa) => despesa.categoria).filter(Boolean)).size;
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="Despesas"
                 description="Relatório completo das despesas cadastradas no ERP."
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={
+                    <>
+                        <ReportPeriodFilter />
+                        <ReportExport reportTitle="Despesas" />
+                    </>
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -61,13 +70,13 @@ export default async function RelatorioDespesasPage() {
                     {
                         key: 'data',
                         title: 'Data',
-                        render: (item: any) => formatarDataServidor(item.data, configuracoes),
+                        render: (item) => (item.data ? formatarDataServidor(item.data, configuracoes) : '-'),
                     },
                     {
                         key: 'valor',
                         title: 'Valor',
                         align: 'right',
-                        render: (item: any) =>
+                        render: (item) =>
                             Number(item.valor).toLocaleString('pt-BR', {
                                 style: 'currency',
                                 currency: configuracoes.moeda,

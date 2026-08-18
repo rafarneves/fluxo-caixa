@@ -2,25 +2,59 @@ import { buscarDadosFinanceiros } from '@/lib/financeiro/buscarDados';
 import { calcularIndicadores } from '@/lib/financeiro/calcularIndicadores';
 import { getContextoConfiguracoes } from '@/lib/configuracoes-server';
 
-function getMesAno(data: string | Date, timeZone: string) {
+function getCompetencia(data: string | Date, timeZone: string) {
+    if (typeof data === 'string') {
+        const match = data.match(/^(\d{4})-(\d{2})/);
+
+        if (match) {
+            const [, year, month] = match;
+            const reference = new Date(Date.UTC(Number(year), Number(month) - 1, 15, 12));
+
+            return {
+                key: `${year}-${month}`,
+                label: reference.toLocaleDateString('pt-BR', {
+                    month: 'short',
+                    year: 'numeric',
+                    timeZone: 'UTC',
+                }),
+            };
+        }
+    }
+
     const d = new Date(data);
 
-    return d.toLocaleDateString('pt-BR', {
-        month: 'short',
-        year: '2-digit',
+    if (Number.isNaN(d.getTime())) return null;
+
+    const parts = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: '2-digit',
         timeZone,
-    });
+    }).formatToParts(d);
+    const year = parts.find((part) => part.type === 'year')?.value;
+    const month = parts.find((part) => part.type === 'month')?.value;
+
+    if (!year || !month) return null;
+
+    return {
+        key: `${year}-${month}`,
+        label: d.toLocaleDateString('pt-BR', {
+            month: 'short',
+            year: 'numeric',
+            timeZone,
+        }),
+    };
 }
 
-export async function getDashboardExecutivo() {
+export async function getDashboardExecutivo(periodo = 'todos') {
     const { configuracoes } = await getContextoConfiguracoes();
-    const dados = await buscarDadosFinanceiros();
+    const dados = await buscarDadosFinanceiros({ periodo });
 
     const indicadores = calcularIndicadores(dados, configuracoes.fusoHorario);
 
     const mapa = new Map<
         string,
         {
+            key: string;
             mes: string;
             recebido: number;
             despesas: number;
@@ -29,62 +63,75 @@ export async function getDashboardExecutivo() {
     >();
 
     dados.recebimentos
-        .filter((r: any) => r.status === 'Pago')
-        .forEach((r: any) => {
-            const chave = getMesAno(r.vencimento, configuracoes.fusoHorario);
+        .filter((r) => r.status === 'Pago')
+        .forEach((r) => {
+            const competencia = getCompetencia(r.vencimento, configuracoes.fusoHorario);
 
-            if (!mapa.has(chave)) {
-                mapa.set(chave, {
-                    mes: chave,
+            if (!competencia) return;
+
+            if (!mapa.has(competencia.key)) {
+                mapa.set(competencia.key, {
+                    key: competencia.key,
+                    mes: competencia.label,
                     recebido: 0,
                     despesas: 0,
                     custos: 0,
                 });
             }
 
-            mapa.get(chave)!.recebido += Number(r.valor);
+            mapa.get(competencia.key)!.recebido += Number(r.valor_recebido ?? r.valor);
         });
 
-    dados.despesas.forEach((d: any) => {
+    dados.despesas.forEach((d) => {
         if (!d.data) return;
 
-        const chave = getMesAno(d.data, configuracoes.fusoHorario);
+        const competencia = getCompetencia(d.data, configuracoes.fusoHorario);
 
-        if (!mapa.has(chave)) {
-            mapa.set(chave, {
-                mes: chave,
+        if (!competencia) return;
+
+        if (!mapa.has(competencia.key)) {
+            mapa.set(competencia.key, {
+                key: competencia.key,
+                mes: competencia.label,
                 recebido: 0,
                 despesas: 0,
                 custos: 0,
             });
         }
 
-        mapa.get(chave)!.despesas += Number(d.valor);
+        mapa.get(competencia.key)!.despesas += Number(d.valor);
     });
 
-    dados.custosContrato.forEach((c: any) => {
+    dados.custosContrato.forEach((c) => {
         if (!c.data) return;
 
-        const chave = getMesAno(c.data, configuracoes.fusoHorario);
+        const competencia = getCompetencia(c.data, configuracoes.fusoHorario);
 
-        if (!mapa.has(chave)) {
-            mapa.set(chave, {
-                mes: chave,
+        if (!competencia) return;
+
+        if (!mapa.has(competencia.key)) {
+            mapa.set(competencia.key, {
+                key: competencia.key,
+                mes: competencia.label,
                 recebido: 0,
                 despesas: 0,
                 custos: 0,
             });
         }
 
-        mapa.get(chave)!.custos += Number(c.valor);
+        mapa.get(competencia.key)!.custos += Number(c.valor);
     });
 
-    const grafico = Array.from(mapa.values()).map((item) => ({
-        ...item,
-        lucro: item.recebido - item.despesas - item.custos,
-    }));
-
-    grafico.sort((a, b) => a.mes.localeCompare(b.mes));
+    const grafico = Array.from(mapa.values())
+        .sort((a, b) => a.key.localeCompare(b.key))
+        .slice(-12)
+        .map((item) => ({
+            mes: item.mes,
+            recebido: item.recebido,
+            despesas: item.despesas,
+            custos: item.custos,
+            lucro: item.recebido - item.despesas - item.custos,
+        }));
 
     const resumo = {
         clientes: indicadores.totalClientes,

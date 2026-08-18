@@ -1,4 +1,9 @@
 import { buscarDadosFinanceiros } from '@/lib/financeiro/buscarDados';
+import type {
+    ContratoFinanceiro,
+    CustoContratoFinanceiro,
+    RecebimentoFinanceiroDetalhado,
+} from '@/lib/financeiro/buscarDados';
 
 export type RentabilidadeContrato = {
     id: string;
@@ -8,19 +13,32 @@ export type RentabilidadeContrato = {
     custos: number;
     lucro: number;
     margem: number;
+    movimentos: MovimentoRentabilidade[];
 };
 
-function calcularContrato(contrato: any, recebimentos: any[], custosContrato: any[]): RentabilidadeContrato {
-    const receita = recebimentos
-        .filter(
-            (recebimento: any) =>
-                String(recebimento.contrato_id) === String(contrato.id) && recebimento.status === 'Pago'
-        )
-        .reduce((total: number, recebimento: any) => total + Number(recebimento.valor), 0);
+export type MovimentoRentabilidade = {
+    id: string;
+    tipo: 'Receita' | 'Custo';
+    descricao: string;
+    data: string | null;
+    valor: number;
+};
 
-    const custos = custosContrato
-        .filter((custo: any) => String(custo.contrato_id) === String(contrato.id))
-        .reduce((total: number, custo: any) => total + Number(custo.valor), 0);
+function calcularContrato(
+    contrato: ContratoFinanceiro,
+    recebimentos: RecebimentoFinanceiroDetalhado[],
+    custosContrato: CustoContratoFinanceiro[]
+): RentabilidadeContrato {
+    const recebimentosContrato = recebimentos.filter(
+        (recebimento) => String(recebimento.contrato_id) === String(contrato.id) && recebimento.status === 'Pago'
+    );
+
+    const custosDoContrato = custosContrato.filter((custo) => String(custo.contrato_id) === String(contrato.id));
+    const receita = recebimentosContrato.reduce(
+        (total, recebimento) => total + Number(recebimento.valor_recebido ?? recebimento.valor),
+        0
+    );
+    const custos = custosDoContrato.reduce((total, custo) => total + Number(custo.valor), 0);
 
     const lucro = receita - custos;
 
@@ -34,10 +52,26 @@ function calcularContrato(contrato: any, recebimentos: any[], custosContrato: an
         custos,
         lucro,
         margem,
+        movimentos: [
+            ...recebimentosContrato.map((recebimento) => ({
+                id: `receita-${recebimento.id}`,
+                tipo: 'Receita' as const,
+                descricao: recebimento.competencia ? `Recebimento ${recebimento.competencia}` : 'Recebimento',
+                data: recebimento.vencimento ?? null,
+                valor: Number(recebimento.valor_recebido ?? recebimento.valor),
+            })),
+            ...custosDoContrato.map((custo) => ({
+                id: `custo-${custo.id}`,
+                tipo: 'Custo' as const,
+                descricao: custo.descricao ?? custo.categoria ?? custo.tipo ?? 'Custo do contrato',
+                data: custo.data ?? custo.created_at ?? null,
+                valor: -Number(custo.valor),
+            })),
+        ].sort((a, b) => String(b.data ?? '').localeCompare(String(a.data ?? ''))),
     };
 }
 
-export async function getRentabilidadeContratos(): Promise<{
+export async function getRentabilidadeContratos(periodo = 'todos'): Promise<{
     contratos: RentabilidadeContrato[];
     totais: {
         receita: number;
@@ -46,9 +80,9 @@ export async function getRentabilidadeContratos(): Promise<{
         margem: number;
     };
 }> {
-    const dados = await buscarDadosFinanceiros();
+    const dados = await buscarDadosFinanceiros({ periodo });
 
-    const contratos: RentabilidadeContrato[] = dados.contratos.map((contrato: any) =>
+    const contratos: RentabilidadeContrato[] = dados.contratos.map((contrato) =>
         calcularContrato(contrato, dados.recebimentos, dados.custosContrato)
     );
 
@@ -78,10 +112,10 @@ export async function getRentabilidadeContratos(): Promise<{
     };
 }
 
-export async function getRentabilidadeContrato(id: string): Promise<RentabilidadeContrato | null> {
-    const dados = await buscarDadosFinanceiros();
+export async function getRentabilidadeContrato(id: string, periodo = 'todos'): Promise<RentabilidadeContrato | null> {
+    const dados = await buscarDadosFinanceiros({ periodo });
 
-    const contrato = dados.contratos.find((item: any) => String(item.id).trim() === String(id).trim());
+    const contrato = dados.contratos.find((item) => String(item.id).trim() === String(id).trim());
 
     if (!contrato) {
         return null;

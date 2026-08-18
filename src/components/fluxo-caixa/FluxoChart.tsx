@@ -28,7 +28,7 @@ export default function FluxoChart({ recebimentos, despesas }: Props) {
         // Group by YYYY-MM
         const map = new Map<string, { entradas: number; saidas: number }>();
 
-        recebimentos.forEach(r => {
+        recebimentos.forEach((r) => {
             if (!r.vencimento) return;
             const month = r.vencimento.substring(0, 7); // YYYY-MM
             const current = map.get(month) || { entradas: 0, saidas: 0 };
@@ -36,7 +36,7 @@ export default function FluxoChart({ recebimentos, despesas }: Props) {
             map.set(month, current);
         });
 
-        despesas.forEach(d => {
+        despesas.forEach((d) => {
             let month = '';
             if (d.data) {
                 month = d.data.substring(0, 7);
@@ -45,20 +45,20 @@ export default function FluxoChart({ recebimentos, despesas }: Props) {
                 month = new Date().toISOString().substring(0, 7);
             }
             if (!month) return;
-            
+
             const current = map.get(month) || { entradas: 0, saidas: 0 };
             current.saidas += Number(d.valor);
             map.set(month, current);
         });
 
         const sortedMonths = Array.from(map.keys()).sort();
-        
-        return sortedMonths.map(month => {
+
+        return sortedMonths.map((month) => {
             const [year, m] = month.split('-');
             return {
                 name: `${m}/${year}`,
                 entradas: map.get(month)?.entradas || 0,
-                saidas: map.get(month)?.saidas || 0
+                saidas: map.get(month)?.saidas || 0,
             };
         });
     }, [recebimentos, despesas]);
@@ -90,43 +90,47 @@ export default function FluxoChart({ recebimentos, despesas }: Props) {
                                 <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <XAxis 
-                            dataKey="name" 
-                            stroke="#52525b" 
+                        <XAxis
+                            dataKey="name"
+                            stroke="#52525b"
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
                             dy={10}
                         />
-                        <YAxis 
-                            stroke="#52525b" 
+                        <YAxis
+                            stroke="#52525b"
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
                             tickFormatter={(value) => `R$ ${value}`}
                         />
-                        <Tooltip 
-                            contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '0.75rem' }}
+                        <Tooltip
+                            contentStyle={{
+                                backgroundColor: '#18181b',
+                                borderColor: '#27272a',
+                                borderRadius: '0.75rem',
+                            }}
                             itemStyle={{ color: '#fff' }}
-                            formatter={(value: number) => formatarMoeda(value)}
+                            formatter={(value) => formatarMoeda(Number(value ?? 0))}
                         />
-                        <Area 
-                            type="monotone" 
-                            dataKey="entradas" 
+                        <Area
+                            type="monotone"
+                            dataKey="entradas"
                             name="Entradas"
-                            stroke="#4ade80" 
+                            stroke="#4ade80"
                             strokeWidth={3}
-                            fillOpacity={1} 
-                            fill="url(#colorEntradas)" 
+                            fillOpacity={1}
+                            fill="url(#colorEntradas)"
                         />
-                        <Area 
-                            type="monotone" 
-                            dataKey="saidas" 
+                        <Area
+                            type="monotone"
+                            dataKey="saidas"
                             name="Saídas"
-                            stroke="#f87171" 
+                            stroke="#f87171"
                             strokeWidth={3}
-                            fillOpacity={1} 
-                            fill="url(#colorSaidas)" 
+                            fillOpacity={1}
+                            fill="url(#colorSaidas)"
                         />
                     </AreaChart>
                 </ResponsiveContainer>

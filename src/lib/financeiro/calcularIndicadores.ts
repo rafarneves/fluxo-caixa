@@ -1,24 +1,33 @@
 import { calcularFinanceiro } from '@/lib/financeiro';
+import type {
+    ClienteFinanceiro,
+    ContratoFinanceiro,
+    CustoContratoFinanceiro,
+    DespesaFinanceira,
+    RecebimentoFinanceiroDetalhado,
+} from '@/lib/financeiro/buscarDados';
 
 type DadosFinanceiros = {
-    clientes: any[];
-    contratos: any[];
-    recebimentos: any[];
-    despesas: any[];
-    custosContrato: any[];
+    clientes: ClienteFinanceiro[];
+    contratos: ContratoFinanceiro[];
+    recebimentos: RecebimentoFinanceiroDetalhado[];
+    despesas: DespesaFinanceira[];
+    custosContrato: CustoContratoFinanceiro[];
 };
 
 export function calcularIndicadores(
     { clientes, contratos, recebimentos, despesas, custosContrato }: DadosFinanceiros,
     timeZone = 'America/Sao_Paulo'
 ) {
-    const financeiro = calcularFinanceiro(recebimentos);
+    const financeiro = calcularFinanceiro(recebimentos, timeZone);
 
     const totalClientes = clientes.length;
 
-    const contratosAtivos = contratos.length;
+    const contratosAtivosData = contratos.filter((contrato) => contrato.status === 'Ativo');
 
-    const faturamentoMensal = contratos.reduce((total, contrato) => total + Number(contrato.valor), 0);
+    const contratosAtivos = contratosAtivosData.length;
+
+    const faturamentoMensal = contratosAtivosData.reduce((total, contrato) => total + Number(contrato.valor), 0);
 
     const despesasTotal = despesas.reduce((total, despesa) => total + Number(despesa.valor), 0);
 
@@ -32,26 +41,44 @@ export function calcularIndicadores(
 
     const margem = financeiro.recebido === 0 ? 0 : (lucro / financeiro.recebido) * 100;
 
+    const formatarDataAtividade = (data: string) => {
+        const dataCivil = data.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+        if (dataCivil) return `${dataCivil[3]}/${dataCivil[2]}/${dataCivil[1]}`;
+
+        return new Intl.DateTimeFormat('pt-BR', { timeZone }).format(new Date(data));
+    };
+
     const atividades = [
-        ...clientes.slice(0, 3).map((cliente: any) => ({
-            id: cliente.id,
+        ...clientes.map((cliente) => ({
+            id: `cliente-${cliente.id}`,
             titulo: 'Novo cliente cadastrado',
             descricao: cliente.nome,
-            data: new Intl.DateTimeFormat('pt-BR', { timeZone }).format(new Date(cliente.created_at)),
+            data: formatarDataAtividade(cliente.created_at),
+            ordem: new Date(cliente.created_at).getTime(),
             tipo: 'cliente' as const,
         })),
 
         ...recebimentos
-            .filter((r: any) => r.status === 'Pago')
-            .slice(0, 3)
-            .map((r: any) => ({
-                id: r.id,
+            .filter((r) => r.status === 'Pago')
+            .map((r) => ({
+                id: `pagamento-${r.id}`,
                 titulo: 'Pagamento recebido',
                 descricao: r.contratos?.clientes?.nome ?? 'Cliente',
-                data: 'Recente',
+                data: formatarDataAtividade(r.vencimento),
+                ordem: new Date(r.vencimento).getTime(),
                 tipo: 'pagamento' as const,
             })),
-    ].slice(0, 6);
+    ]
+        .sort((a, b) => b.ordem - a.ordem)
+        .slice(0, 6)
+        .map((atividade) => ({
+            id: atividade.id,
+            titulo: atividade.titulo,
+            descricao: atividade.descricao,
+            data: atividade.data,
+            tipo: atividade.tipo,
+        }));
 
     return {
         totalClientes,

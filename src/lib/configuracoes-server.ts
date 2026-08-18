@@ -53,6 +53,14 @@ export function formatarMoedaServidor(valor: number, configuracoes: Configuracoe
 }
 
 export function formatarDataServidor(data: string | Date, configuracoes: Configuracoes) {
+    if (typeof data === 'string') {
+        const dataCivil = data.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+        if (dataCivil) {
+            return `${dataCivil[3]}/${dataCivil[2]}/${dataCivil[1]}`;
+        }
+    }
+
     return new Intl.DateTimeFormat('pt-BR', {
         timeZone: configuracoes.fusoHorario,
     }).format(new Date(data));

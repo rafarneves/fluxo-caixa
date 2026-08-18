@@ -5,12 +5,16 @@ import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
-export default async function DRECompletoPage() {
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function DRECompletoPage({ searchParams }: Props) {
     const { configuracoes } = await getContextoConfiguracoes();
-    const dados = await getDashboardExecutivo();
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const dados = await getDashboardExecutivo(periodo);
 
     const receitaBruta = dados.recebido;
 
@@ -57,13 +61,18 @@ export default async function DRECompletoPage() {
     ];
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="DRE Completo"
 
                 description="Demonstrativo completo do resultado do exercício."
 
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={
+                    <>
+                        <ReportPeriodFilter />
+                        <ReportExport reportTitle="DRE Completo" />
+                    </>
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -153,7 +162,7 @@ export default async function DRECompletoPage() {
 
                         align: 'right',
 
-                        render: (item: any) =>
+                        render: (item) =>
                             item.valor.toLocaleString(
                                 'pt-BR',
 

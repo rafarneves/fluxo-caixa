@@ -148,11 +148,17 @@ export function calcularEvolucaoFaturamentoPorPeriodo(
     }));
 }
 
-export function calcularFinanceiro(recebimentos: RecebimentoFinanceiro[]) {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    const hojeString = hoje.toISOString().split('T')[0];
+export function calcularFinanceiro(recebimentos: RecebimentoFinanceiro[], timeZone = 'America/Sao_Paulo') {
+    const hojePartes = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone,
+    }).formatToParts(new Date());
+    const ano = hojePartes.find((parte) => parte.type === 'year')?.value;
+    const mes = hojePartes.find((parte) => parte.type === 'month')?.value;
+    const dia = hojePartes.find((parte) => parte.type === 'day')?.value;
+    const hojeString = `${ano}-${mes}-${dia}`;
 
     const recebido = recebimentos
         .filter((r) => r.status === 'Pago')
@@ -167,10 +173,7 @@ export function calcularFinanceiro(recebimentos: RecebimentoFinanceiro[]) {
     const atrasados = recebimentos.filter((r) => {
         if (r.status === 'Pago') return false;
 
-        const vencimento = new Date(r.vencimento);
-        vencimento.setHours(0, 0, 0, 0);
-
-        return vencimento < hoje;
+        return r.vencimento.slice(0, 10) < hojeString;
     });
 
     return {

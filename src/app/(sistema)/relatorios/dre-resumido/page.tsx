@@ -5,12 +5,16 @@ import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
-export default async function DREResumidoPage() {
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function DREResumidoPage({ searchParams }: Props) {
     const { configuracoes } = await getContextoConfiguracoes();
-    const dados = await getDashboardExecutivo();
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const dados = await getDashboardExecutivo(periodo);
 
     const receita = dados.recebido;
 
@@ -23,13 +27,18 @@ export default async function DREResumidoPage() {
     const margem = receita === 0 ? 0 : (lucro / receita) * 100;
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="DRE Resumido"
 
                 description="Demonstrativo resumido do resultado do exercício."
 
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={
+                    <>
+                        <ReportPeriodFilter />
+                        <ReportExport reportTitle="DRE Resumido" />
+                    </>
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">

@@ -14,13 +14,20 @@ export default async function RelatorioClientesPage() {
 
     const clientes = dados.clientes;
     const contratos = dados.contratos;
+    const contratosAtivos = contratos.filter((contrato) => contrato.status === 'Ativo');
+    const limiteNovosClientes = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const novosClientes = clientes.filter((cliente) => {
+        const cadastro = new Date(cliente.created_at).getTime();
+
+        return Number.isFinite(cadastro) && cadastro >= limiteNovosClientes;
+    }).length;
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="Clientes"
                 description="Relatório completo dos clientes cadastrados."
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={<ReportExport reportTitle="Clientes" />}
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -28,7 +35,7 @@ export default async function RelatorioClientesPage() {
 
                 <ReportKPICard
                     title="Contratos Ativos"
-                    value={contratos.length}
+                    value={contratosAtivos.length}
                     icon={FileText}
                     color="green"
                     isCurrency={false}
@@ -36,10 +43,11 @@ export default async function RelatorioClientesPage() {
 
                 <ReportKPICard
                     title="Novos Clientes"
-                    value={clientes.slice(0, 30).length}
+                    value={novosClientes}
                     icon={UserPlus}
                     color="yellow"
                     isCurrency={false}
+                    description="Últimos 30 dias"
                 />
 
                 <ReportKPICard title="Ticket Médio" value={dados.ticketMedio} icon={TrendingUp} color="green" />
@@ -64,7 +72,7 @@ export default async function RelatorioClientesPage() {
                     {
                         key: 'created_at',
                         title: 'Cadastro',
-                        render: (item: any) => formatarDataServidor(item.created_at, configuracoes),
+                        render: (item) => formatarDataServidor(item.created_at, configuracoes),
                     },
                 ]}
                 data={clientes}

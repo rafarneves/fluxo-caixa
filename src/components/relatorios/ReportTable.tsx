@@ -14,6 +14,7 @@ type ReportTableProps<T> = {
     data: T[];
     actions?: React.ReactNode;
     emptyMessage?: string;
+    rowKey?: (item: T, index: number) => React.Key;
 };
 
 export default function ReportTable<T>({
@@ -23,7 +24,18 @@ export default function ReportTable<T>({
     data,
     actions,
     emptyMessage = 'Nenhum registro encontrado.',
+    rowKey,
 }: ReportTableProps<T>) {
+    function getRowKey(item: T, index: number) {
+        if (rowKey) return rowKey(item, index);
+
+        if (typeof item === 'object' && item !== null && 'id' in item) {
+            return String(item.id);
+        }
+
+        return index;
+    }
+
     return (
         <section className="overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-b from-[#171F2B] to-[#111827]">
             <div className="flex flex-col gap-6 border-b border-zinc-800 p-8 lg:flex-row lg:items-center lg:justify-between">
@@ -45,6 +57,7 @@ export default function ReportTable<T>({
                             {columns.map((column) => (
                                 <th
                                     key={String(column.key)}
+                                    data-export-ignore={column.key === 'acoes' ? '' : undefined}
                                     className={`px-6 py-4 text-xs tracking-[0.18em] text-zinc-500 uppercase ${
                                         column.align === 'center'
                                             ? 'text-center'
@@ -68,10 +81,11 @@ export default function ReportTable<T>({
                             </tr>
                         ) : (
                             data.map((item, index) => (
-                                <tr key={index} className="border-b border-zinc-800 hover:bg-black/20">
+                                <tr key={getRowKey(item, index)} className="border-b border-zinc-800 hover:bg-black/20">
                                     {columns.map((column) => (
                                         <td
                                             key={String(column.key)}
+                                            data-export-ignore={column.key === 'acoes' ? '' : undefined}
                                             className={`px-6 py-5 text-sm text-zinc-300 ${
                                                 column.align === 'center'
                                                     ? 'text-center'
@@ -80,7 +94,11 @@ export default function ReportTable<T>({
                                                       : 'text-left'
                                             } `}
                                         >
-                                            {column.render ? column.render(item) : (item as any)[column.key]}
+                                            {column.render
+                                                ? column.render(item)
+                                                : ((item as Record<string, unknown>)[
+                                                      String(column.key)
+                                                  ] as React.ReactNode)}
                                         </td>
                                     ))}
                                 </tr>

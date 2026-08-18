@@ -4,13 +4,17 @@ import { ArrowDownCircle, ArrowUpCircle, Wallet, Landmark } from 'lucide-react';
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportTable from '@/components/relatorios/ReportTable';
-import ExportFluxoCaixaButton from '@/components/relatorios/ExportFluxoCaixaButton';
+import ReportExport from '@/components/relatorios/ReportExport';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
-export default async function FluxoCaixaRelatorioPage() {
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function FluxoCaixaRelatorioPage({ searchParams }: Props) {
     const { configuracoes } = await getContextoConfiguracoes();
-    const dados = await getDashboardExecutivo();
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const dados = await getDashboardExecutivo(periodo);
 
     const entradas = Number(dados.recebido ?? 0);
     const despesas = Number(dados.despesasTotal ?? 0);
@@ -48,13 +52,10 @@ export default async function FluxoCaixaRelatorioPage() {
                 title="Fluxo de Caixa"
                 description="Relatório consolidado de entradas, saídas e saldo financeiro."
                 actions={
-                    <ExportFluxoCaixaButton
-                        linhas={linhas}
-                        entradas={entradas}
-                        saidas={saidas}
-                        custos={custos}
-                        saldo={saldo}
-                    />
+                    <>
+                        <ReportPeriodFilter />
+                        <ReportExport reportTitle="Fluxo de Caixa" />
+                    </>
                 }
             />
 
@@ -84,7 +85,7 @@ export default async function FluxoCaixaRelatorioPage() {
                         key: 'valor',
                         title: 'Valor',
                         align: 'right',
-                        render: (item: any) =>
+                        render: (item) =>
                             Number(item.valor).toLocaleString('pt-BR', {
                                 style: 'currency',
                                 currency: configuracoes.moeda,

@@ -1,22 +1,33 @@
 import { getContextoConfiguracoes } from '@/lib/configuracoes-server';
 import { DollarSign, Wallet, TrendingUp, Percent, Eye } from 'lucide-react';
+import Link from 'next/link';
 
 import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportExport from '@/components/relatorios/ReportExport';
+import ReportTable from '@/components/relatorios/ReportTable';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
 
 import { getRentabilidadeContratos } from '@/lib/relatorios/rentabilidade';
 
-export default async function RelatorioRentabilidadeContratosPage() {
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function RelatorioRentabilidadeContratosPage({ searchParams }: Props) {
     const { configuracoes } = await getContextoConfiguracoes();
-    const { contratos, totais } = await getRentabilidadeContratos();
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const { contratos, totais } = await getRentabilidadeContratos(periodo);
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="Rentabilidade dos Contratos"
                 description="Visualize a rentabilidade de todos os contratos da empresa."
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={
+                    <>
+                        <ReportPeriodFilter />
+                        <ReportExport reportTitle="Rentabilidade dos Contratos" />
+                    </>
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -58,73 +69,65 @@ export default async function RelatorioRentabilidadeContratosPage() {
                 />
             </section>
 
-            <section className="overflow-hidden rounded-3xl border border-zinc-800 bg-[#111827]">
-                <table className="min-w-full">
-                    <thead className="border-b border-zinc-800">
-                        <tr>
-                            <th className="px-6 py-5 text-left text-xs text-zinc-500">Cliente</th>
-
-                            <th className="px-6 py-5 text-left text-xs text-zinc-500">Contrato</th>
-
-                            <th className="px-6 py-5 text-right text-xs text-zinc-500">Receita</th>
-
-                            <th className="px-6 py-5 text-right text-xs text-zinc-500">Custos</th>
-
-                            <th className="px-6 py-5 text-right text-xs text-zinc-500">Lucro</th>
-
-                            <th className="px-6 py-5 text-right text-xs text-zinc-500">Margem</th>
-
-                            <th className="px-6 py-5 text-center text-xs text-zinc-500">Ações</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {contratos.map((item: any) => (
-                            <tr key={item.id} className="border-b border-zinc-800">
-                                <td className="px-6 py-5 text-zinc-300">{item.cliente}</td>
-
-                                <td className="px-6 py-5 text-zinc-300">{item.contrato}</td>
-
-                                <td className="px-6 py-5 text-right text-zinc-300">
-                                    {item.receita.toLocaleString('pt-BR', {
-                                        style: 'currency',
-                                        currency: configuracoes.moeda,
-                                    })}
-                                </td>
-
-                                <td className="px-6 py-5 text-right text-zinc-300">
-                                    {item.custos.toLocaleString('pt-BR', {
-                                        style: 'currency',
-                                        currency: configuracoes.moeda,
-                                    })}
-                                </td>
-
-                                <td className="px-6 py-5 text-right text-zinc-300">
-                                    {item.lucro.toLocaleString('pt-BR', {
-                                        style: 'currency',
-                                        currency: configuracoes.moeda,
-                                    })}
-                                </td>
-
-                                <td className="px-6 py-5 text-right text-zinc-300">{item.margem.toFixed(1)}%</td>
-
-                                <td className="px-6 py-5 text-center">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            window.location.assign(`/relatorios/rentabilidade/${item.id}`);
-                                        }}
-                                        className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-black"
-                                    >
-                                        <Eye size={16} />
-                                        Ver detalhes
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </section>
+            <ReportTable
+                title="Rentabilidade dos Contratos"
+                description="Resultado financeiro consolidado por contrato."
+                columns={[
+                    { key: 'cliente', title: 'Cliente' },
+                    { key: 'contrato', title: 'Contrato' },
+                    {
+                        key: 'receita',
+                        title: 'Receita',
+                        align: 'right',
+                        render: (item) =>
+                            item.receita.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: configuracoes.moeda,
+                            }),
+                    },
+                    {
+                        key: 'custos',
+                        title: 'Custos',
+                        align: 'right',
+                        render: (item) =>
+                            item.custos.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: configuracoes.moeda,
+                            }),
+                    },
+                    {
+                        key: 'lucro',
+                        title: 'Lucro',
+                        align: 'right',
+                        render: (item) =>
+                            item.lucro.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: configuracoes.moeda,
+                            }),
+                    },
+                    {
+                        key: 'margem',
+                        title: 'Margem',
+                        align: 'right',
+                        render: (item) => `${item.margem.toFixed(1)}%`,
+                    },
+                    {
+                        key: 'acoes',
+                        title: 'Ações',
+                        align: 'center',
+                        render: (item) => (
+                            <Link
+                                href={`/relatorios/rentabilidade/${item.id}?periodo=${periodo}`}
+                                className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-green-400"
+                            >
+                                <Eye size={16} />
+                                Ver detalhes
+                            </Link>
+                        ),
+                    },
+                ]}
+                data={contratos}
+            />
         </main>
     );
 }

@@ -5,8 +5,14 @@ import { drawHeader } from '@/lib/pdf/header';
 import { drawCards } from '@/lib/pdf/cards';
 import { drawTable } from '@/lib/pdf/table';
 
+type LinhaFluxoCaixa = {
+    tipo: string;
+    descricao: string;
+    valor: number;
+};
+
 export async function gerarPDFFluxoCaixa(
-    linhas: any[],
+    linhas: LinhaFluxoCaixa[],
     entradas: number,
     saidas: number,
     custos: number,

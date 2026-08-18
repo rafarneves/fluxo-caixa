@@ -6,23 +6,32 @@ import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
 
 import { getRentabilidadeContratos } from '@/lib/relatorios/rentabilidade';
 import { formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
 
-export default async function RelatorioRentabilidadeContratosPage() {
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function RelatorioRentabilidadeContratosPage({ searchParams }: Props) {
     const { configuracoes } = await getContextoConfiguracoes();
     const formatMoney = (value: number) => formatarMoedaServidor(value, configuracoes);
-    const { contratos, totais } = await getRentabilidadeContratos();
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const { contratos, totais } = await getRentabilidadeContratos(periodo);
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
-                title="Rentabilidade dos Contratos"
+                title="Custos por Contrato"
 
-                description="Visualize a rentabilidade de todos os contratos da empresa."
+                description="Compare custos, receitas e resultado financeiro por contrato."
 
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={
+                    <>
+                        <ReportPeriodFilter />
+                        <ReportExport reportTitle="Custos por Contrato" />
+                    </>
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -90,7 +99,7 @@ export default async function RelatorioRentabilidadeContratosPage() {
 
                         align: 'right',
 
-                        render: (item: any) => formatMoney(item.receita),
+                        render: (item) => formatMoney(item.receita),
                     },
 
                     {
@@ -100,7 +109,7 @@ export default async function RelatorioRentabilidadeContratosPage() {
 
                         align: 'right',
 
-                        render: (item: any) => formatMoney(item.custos),
+                        render: (item) => formatMoney(item.custos),
                     },
 
                     {
@@ -110,7 +119,7 @@ export default async function RelatorioRentabilidadeContratosPage() {
 
                         align: 'right',
 
-                        render: (item: any) => formatMoney(item.lucro),
+                        render: (item) => formatMoney(item.lucro),
                     },
 
                     {
@@ -120,7 +129,7 @@ export default async function RelatorioRentabilidadeContratosPage() {
 
                         align: 'right',
 
-                        render: (item: any) => `${item.margem.toFixed(1)}%`,
+                        render: (item) => `${item.margem.toFixed(1)}%`,
                     },
 
                     {
@@ -130,9 +139,9 @@ export default async function RelatorioRentabilidadeContratosPage() {
 
                         align: 'center',
 
-                        render: (item: any) => (
+                        render: (item) => (
                             <Link
-                                href={`/relatorios/rentabilidade/${item.id}`}
+                                href={`/relatorios/rentabilidade/${item.id}?periodo=${periodo}`}
 
                                 className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:border-emerald-500 hover:text-emerald-400"
                             >

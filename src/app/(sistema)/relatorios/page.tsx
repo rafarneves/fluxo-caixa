@@ -10,6 +10,7 @@ import {
     Users,
     FileText,
     ArrowRight,
+    Percent,
 } from 'lucide-react';
 
 const relatorios = [
@@ -60,6 +61,12 @@ const relatorios = [
         descricao: 'Custos organizados individualmente por contrato.',
         icon: FileText,
         href: '/relatorios/custos-contrato',
+    },
+    {
+        titulo: 'Rentabilidade',
+        descricao: 'Receita, custos, lucro e margem detalhados por contrato.',
+        icon: Percent,
+        href: '/relatorios/rentabilidade',
     },
     {
         titulo: 'Clientes',

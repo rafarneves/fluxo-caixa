@@ -4,20 +4,41 @@ import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportChart from '@/components/relatorios/ReportChart';
 import ReportTable from '@/components/relatorios/ReportTable';
-import ReportExport from '@/components/relatorios/ReportExport';
 import ExecutiveChart from '@/components/relatorios/ExecutiveChart';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
+import DashboardReportExport from '@/components/relatorios/DashboardReportExport';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
-export default async function DashboardExecutivoPage() {
-    const dados = await getDashboardExecutivo();
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function DashboardExecutivoPage({ searchParams }: Props) {
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const dados = await getDashboardExecutivo(periodo);
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="Dashboard Executivo"
                 description="Resumo executivo dos principais indicadores financeiros da empresa."
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={
+                    <>
+                        <ReportPeriodFilter />
+                        <DashboardReportExport
+                            periodo={periodo}
+                            indicadores={{
+                                recebido: dados.kpis.recebido,
+                                emAberto: dados.kpis.emAberto,
+                                lucro: dados.kpis.lucro,
+                                despesas: dados.kpis.despesas,
+                                clientes: dados.resumo.clientes,
+                                margem: dados.kpis.margem,
+                            }}
+                            evolucao={dados.grafico}
+                            atividades={dados.atividades}
+                        />
+                    </>
+                }
             />
 
             <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">

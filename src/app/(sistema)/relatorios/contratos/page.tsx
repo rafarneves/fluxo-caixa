@@ -13,21 +13,22 @@ export default async function RelatorioContratosPage() {
     const dados = await getDashboardExecutivo();
 
     const contratos = dados.contratos;
+    const contratosAtivos = contratos.filter((contrato) => contrato.status === 'Ativo');
 
-    const faturamento = contratos.reduce((acc: number, contrato: any) => acc + Number(contrato.valor), 0);
+    const faturamento = contratosAtivos.reduce((acc, contrato) => acc + Number(contrato.valor), 0);
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="Contratos"
                 description="Relatório completo dos contratos cadastrados no ERP."
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={<ReportExport reportTitle="Contratos" />}
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                 <ReportKPICard
                     title="Contratos Ativos"
-                    value={contratos.length}
+                    value={contratosAtivos.length}
                     icon={FileText}
                     color="green"
                     isCurrency={false}
@@ -48,23 +49,23 @@ export default async function RelatorioContratosPage() {
 
             <ReportTable
                 title="Lista de Contratos"
-                description="Todos os contratos ativos cadastrados no sistema."
+                description="Todos os contratos cadastrados no sistema."
                 columns={[
                     {
                         key: 'cliente',
                         title: 'Cliente',
-                        render: (item: any) => item.clientes?.nome ?? '-',
+                        render: (item) => item.clientes?.nome ?? '-',
                     },
                     {
                         key: 'nome',
                         title: 'Plano',
-                        render: (item: any) => item.nome ?? '-',
+                        render: (item) => item.nome ?? '-',
                     },
                     {
                         key: 'valor',
                         title: 'Valor',
                         align: 'right',
-                        render: (item: any) =>
+                        render: (item) =>
                             Number(item.valor).toLocaleString('pt-BR', {
                                 style: 'currency',
                                 currency: configuracoes.moeda,

@@ -5,16 +5,20 @@ import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
 
-export default async function RelatorioCustosPage() {
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function RelatorioCustosPage({ searchParams }: Props) {
     const { configuracoes } = await getContextoConfiguracoes();
-    const dados = await getDashboardExecutivo();
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const dados = await getDashboardExecutivo(periodo);
 
     const custos = dados.custosContrato;
 
-    const totalCustos = custos.reduce((total: number, custo: any) => total + Number(custo.valor), 0);
+    const totalCustos = custos.reduce((total, custo) => total + Number(custo.valor), 0);
 
     const quantidade = custos.length;
 
@@ -23,11 +27,16 @@ export default async function RelatorioCustosPage() {
     const participacao = dados.recebido > 0 ? (totalCustos / dados.recebido) * 100 : 0;
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="Custos"
                 description="Relatório completo dos custos registrados no ERP."
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={
+                    <>
+                        <ReportPeriodFilter />
+                        <ReportExport reportTitle="Custos" />
+                    </>
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -59,23 +68,23 @@ export default async function RelatorioCustosPage() {
                     {
                         key: 'descricao',
                         title: 'Descrição',
-                        render: (item: any) => item.descricao ?? '-',
+                        render: (item) => item.descricao ?? '-',
                     },
                     {
                         key: 'categoria',
                         title: 'Categoria',
-                        render: (item: any) => item.categoria ?? '-',
+                        render: (item) => item.categoria ?? '-',
                     },
                     {
                         key: 'data',
                         title: 'Data',
-                        render: (item: any) => (item.data ? formatarDataServidor(item.data, configuracoes) : '-'),
+                        render: (item) => (item.data ? formatarDataServidor(item.data, configuracoes) : '-'),
                     },
                     {
                         key: 'valor',
                         title: 'Valor',
                         align: 'right',
-                        render: (item: any) =>
+                        render: (item) =>
                             Number(item.valor).toLocaleString('pt-BR', {
                                 style: 'currency',
                                 currency: configuracoes.moeda,

@@ -5,35 +5,54 @@ import ReportHeader from '@/components/relatorios/ReportHeader';
 import ReportKPICard from '@/components/relatorios/ReportKPICard';
 import ReportExport from '@/components/relatorios/ReportExport';
 import ReportTable from '@/components/relatorios/ReportTable';
+import ReportPeriodFilter from '@/components/relatorios/ReportPeriodFilter';
 
 import { getDashboardExecutivo } from '@/lib/relatorios/dashboard';
+import { getStatusRecebimento } from '@/lib/relatorios/recebimentos';
 
-export default async function RelatorioRecebimentosPage() {
+type Props = { searchParams?: Promise<{ periodo?: string }> };
+
+export default async function RelatorioRecebimentosPage({ searchParams }: Props) {
     const { configuracoes } = await getContextoConfiguracoes();
-    const dados = await getDashboardExecutivo();
+    const { periodo = 'mes' } = (await searchParams) ?? {};
+    const dados = await getDashboardExecutivo(periodo);
 
     const recebimentos = dados.recebimentos;
 
-    const pagos = recebimentos.filter((r: any) => r.status === 'Pago');
+    const recebimentosClassificados = recebimentos.map((recebimento) => ({
+        ...recebimento,
+        statusRelatorio: getStatusRecebimento(recebimento, configuracoes.fusoHorario),
+    }));
 
-    const pendentes = recebimentos.filter((r: any) => r.status !== 'Pago' && r.status !== 'Vencido');
+    const recebimentosValidos = recebimentosClassificados.filter(
+        (recebimento) => recebimento.statusRelatorio !== 'Cancelado'
+    );
 
-    const vencidos = recebimentos.filter((r: any) => r.status === 'Vencido');
+    const pagos = recebimentosValidos.filter((recebimento) => recebimento.statusRelatorio === 'Pago');
 
-    const totalValor = recebimentos.reduce((total: number, item: any) => total + Number(item.valor), 0);
+    const pendentes = recebimentosValidos.filter((recebimento) => recebimento.statusRelatorio === 'Pendente');
 
-    const totalPago = pagos.reduce((total: number, item: any) => total + Number(item.valor), 0);
+    const vencidos = recebimentosValidos.filter((recebimento) => recebimento.statusRelatorio === 'Vencido');
 
-    const totalPendente = pendentes.reduce((total: number, item: any) => total + Number(item.valor), 0);
+    const totalValor = recebimentosValidos.reduce((total, item) => total + Number(item.valor), 0);
 
-    const totalVencido = vencidos.reduce((total: number, item: any) => total + Number(item.valor), 0);
+    const totalPago = pagos.reduce((total, item) => total + Number(item.valor_recebido ?? item.valor), 0);
+
+    const totalPendente = pendentes.reduce((total, item) => total + Number(item.valor), 0);
+
+    const totalVencido = vencidos.reduce((total, item) => total + Number(item.valor), 0);
 
     return (
-        <main className="space-y-8">
+        <main id="report-content" className="space-y-8">
             <ReportHeader
                 title="Recebimentos"
                 description="Relatório completo de cobranças e recebimentos."
-                actions={<ReportExport disabledPDF disabledExcel />}
+                actions={
+                    <>
+                        <ReportPeriodFilter />
+                        <ReportExport reportTitle="Recebimentos" />
+                    </>
+                }
             />
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -77,7 +96,7 @@ export default async function RelatorioRecebimentosPage() {
 
                         title: 'Cliente',
 
-                        render: (item: any) => item.contratos?.clientes?.nome ?? '-',
+                        render: (item) => item.contratos?.clientes?.nome ?? '-',
                     },
 
                     {
@@ -85,11 +104,11 @@ export default async function RelatorioRecebimentosPage() {
 
                         title: 'Vencimento',
 
-                        render: (item: any) => formatarDataServidor(item.vencimento, configuracoes),
+                        render: (item) => formatarDataServidor(item.vencimento, configuracoes),
                     },
 
                     {
-                        key: 'status',
+                        key: 'statusRelatorio',
 
                         title: 'Status',
                     },
@@ -101,7 +120,7 @@ export default async function RelatorioRecebimentosPage() {
 
                         align: 'right',
 
-                        render: (item: any) =>
+                        render: (item) =>
                             Number(item.valor).toLocaleString('pt-BR', {
                                 style: 'currency',
                                 currency: configuracoes.moeda,
@@ -109,7 +128,7 @@ export default async function RelatorioRecebimentosPage() {
                     },
                 ]}
 
-                data={recebimentos}
+                data={recebimentosClassificados}
             />
         </main>
     );
