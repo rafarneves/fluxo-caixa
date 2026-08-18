@@ -1,4 +1,8 @@
 import type { Metadata } from 'next';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+
+import AppThemeProvider from '@/components/theme/AppThemeProvider';
+
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -6,14 +10,14 @@ export const metadata: Metadata = {
     description: 'Sistema de gestão',
 };
 
-export default function RootLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="pt-BR">
-            <body className="bg-[#0B0F14] text-white">{children}</body>
+            <body>
+                <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+                    <AppThemeProvider>{children}</AppThemeProvider>
+                </AppRouterCacheProvider>
+            </body>
         </html>
     );
 }

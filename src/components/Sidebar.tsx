@@ -1,123 +1,117 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-
 import {
-    LayoutDashboard,
-    Users,
-    FileText,
-    BadgeDollarSign,
-    ArrowLeftRight,
-    Receipt,
-    BarChart3,
-    Handshake,
-    Settings,
-    FileBarChart2,
-    LogOut,
-    PanelLeftClose,
-    PanelLeftOpen,
-} from 'lucide-react';
+    ArticleRounded,
+    AssessmentRounded,
+    BarChartRounded,
+    ChevronLeftRounded,
+    ChevronRightRounded,
+    CloseRounded,
+    DashboardRounded,
+    HandshakeRounded,
+    LogoutRounded,
+    MenuRounded,
+    PaymentsRounded,
+    PeopleAltRounded,
+    ReceiptLongRounded,
+    SettingsRounded,
+    SwapHorizRounded,
+} from '@mui/icons-material';
+import {
+    AppBar,
+    Avatar,
+    Box,
+    Button,
+    Divider,
+    Drawer,
+    IconButton,
+    List,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    ListSubheader,
+    Stack,
+    Toolbar,
+    Tooltip,
+    Typography,
+} from '@mui/material';
 
 import { logout } from '@/app/login/actions';
 
 const SIDEBAR_STORAGE_KEY = 'altuza-sidebar-recolhida';
+const DRAWER_WIDTH = 280;
+const DRAWER_COLLAPSED_WIDTH = 76;
 
 const grupos = [
     {
         titulo: 'DASHBOARD',
-        itens: [
-            {
-                nome: 'Dashboard',
-                href: '/',
-                icon: LayoutDashboard,
-            },
-        ],
+        itens: [{ nome: 'Dashboard', href: '/', icon: DashboardRounded }],
     },
     {
         titulo: 'FINANCEIRO',
         itens: [
-            {
-                nome: 'Cobranças',
-                href: '/recebimentos',
-                icon: BadgeDollarSign,
-            },
-            {
-                nome: 'Fluxo de Caixa',
-                href: '/fluxo-caixa',
-                icon: ArrowLeftRight,
-            },
-            {
-                nome: 'DRE',
-                href: '/dre',
-                icon: BarChart3,
-            },
-            {
-                nome: 'Despesas',
-                href: '/despesas',
-                icon: Receipt,
-            },
+            { nome: 'Cobranças', href: '/recebimentos', icon: PaymentsRounded },
+            { nome: 'Fluxo de Caixa', href: '/fluxo-caixa', icon: SwapHorizRounded },
+            { nome: 'DRE', href: '/dre', icon: BarChartRounded },
+            { nome: 'Despesas', href: '/despesas', icon: ReceiptLongRounded },
         ],
     },
     {
         titulo: 'OPERAÇÃO',
         itens: [
-            {
-                nome: 'Clientes',
-                href: '/clientes',
-                icon: Users,
-            },
-            {
-                nome: 'Contratos',
-                href: '/contratos',
-                icon: FileText,
-            },
-            {
-                nome: 'Indicações',
-                href: '/indicacoes',
-                icon: Handshake,
-            },
+            { nome: 'Clientes', href: '/clientes', icon: PeopleAltRounded },
+            { nome: 'Contratos', href: '/contratos', icon: ArticleRounded },
+            { nome: 'Indicações', href: '/indicacoes', icon: HandshakeRounded },
         ],
     },
     {
         titulo: 'GESTÃO',
         itens: [
-            {
-                nome: 'Relatórios',
-                href: '/relatorios',
-                icon: FileBarChart2,
-            },
-            {
-                nome: 'Configurações',
-                href: '/configuracoes',
-                icon: Settings,
-            },
+            { nome: 'Relatórios', href: '/relatorios', icon: AssessmentRounded },
+            { nome: 'Configurações', href: '/configuracoes', icon: SettingsRounded },
         ],
     },
 ];
 
-export default function Sidebar({ userEmail }: { userEmail: string }) {
+const rotasAuxiliares = [
+    { nome: 'Dashboard', href: '/dashboard', grupo: 'DASHBOARD' },
+    { nome: 'Contas a Pagar', href: '/contas-pagar', grupo: 'FINANCEIRO' },
+    { nome: 'Custos', href: '/custos', grupo: 'FINANCEIRO' },
+    { nome: 'Custos por Contrato', href: '/custos-contrato', grupo: 'FINANCEIRO' },
+];
+
+function rotaAtiva(pathname: string, href: string) {
+    return pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
+}
+
+export default function Sidebar({ children, userEmail }: { children: ReactNode; userEmail: string }) {
     const pathname = usePathname();
     const router = useRouter();
+    const [menuMobileAberto, setMenuMobileAberto] = useState(false);
     const [recolhida, setRecolhida] = useState(false);
     const userName = userEmail.includes('@') ? userEmail.split('@')[0] : userEmail;
     const userInitial = userName.charAt(0).toUpperCase();
 
+    const paginaAtual = useMemo(() => {
+        const itens = grupos.flatMap((grupo) => grupo.itens.map((item) => ({ ...item, grupo: grupo.titulo })));
+        return (
+            [...itens, ...rotasAuxiliares]
+                .sort((a, b) => b.href.length - a.href.length)
+                .find((item) => rotaAtiva(pathname, item.href)) ?? itens[0]
+        );
+    }, [pathname]);
+
     useEffect(() => {
-        const mediaTelaMenor = window.matchMedia('(max-width: 1099px)');
-
-        function ajustarAoTamanhoDaTela() {
-            const preferenciaSalva = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
-            setRecolhida(mediaTelaMenor.matches || preferenciaSalva === 'true');
-        }
-
-        ajustarAoTamanhoDaTela();
-        mediaTelaMenor.addEventListener('change', ajustarAoTamanhoDaTela);
-
-        return () => mediaTelaMenor.removeEventListener('change', ajustarAoTamanhoDaTela);
+        setRecolhida(window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true');
     }, []);
+
+    useEffect(() => {
+        setMenuMobileAberto(false);
+    }, [pathname]);
 
     function alternarSidebar() {
         setRecolhida((estadoAtual) => {
@@ -127,139 +121,449 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
         });
     }
 
-    return (
-        <aside
-            className={`relative z-30 flex h-screen shrink-0 flex-col overflow-hidden border-r border-zinc-900 bg-[#06080B] transition-[width] duration-300 ease-out ${
-                recolhida ? 'w-20' : 'w-72'
-            }`}
-        >
-            {/* LOGO */}
-            <div
-                className={`flex h-[72px] shrink-0 items-center border-b border-zinc-900 ${
-                    recolhida ? 'justify-center px-2' : 'justify-between gap-3 px-4'
-                }`}
+    function conteudoDrawer(menuRecolhido: boolean, mobile = false) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    height: '100%',
+                    minHeight: 0,
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    bgcolor: '#06090d',
+                }}
             >
-                {!recolhida && (
-                    <Image
-                        src="/logo-altuza-horizontal.png"
-                        alt="Altuza"
-                        width={135}
-                        height={48}
-                        className="w-[135px] select-none"
-                        draggable={false}
-                    />
-                )}
-
-                <button
-                    type="button"
-                    onClick={alternarSidebar}
-                    aria-label={recolhida ? 'Expandir menu lateral' : 'Recolher menu lateral'}
-                    aria-expanded={!recolhida}
-                    title={recolhida ? 'Expandir menu' : 'Recolher menu'}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-800 text-zinc-500 transition-colors hover:border-green-500/30 hover:bg-green-500/10 hover:text-green-400"
+                <Box
+                    sx={{
+                        display: 'flex',
+                        minHeight: 68,
+                        alignItems: 'center',
+                        justifyContent: menuRecolhido ? 'center' : 'space-between',
+                        gap: 1,
+                        px: menuRecolhido ? 1 : 2,
+                    }}
                 >
-                    {recolhida ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
-                </button>
-            </div>
+                    {menuRecolhido ? (
+                        <Avatar
+                            variant="rounded"
+                            sx={{
+                                width: 40,
+                                height: 40,
+                                bgcolor: 'primary.main',
+                                color: 'primary.contrastText',
+                                fontWeight: 900,
+                            }}
+                        >
+                            A
+                        </Avatar>
+                    ) : (
+                        <Image
+                            src="/logo-altuza-horizontal.png"
+                            alt="Altuza"
+                            width={135}
+                            height={48}
+                            priority
+                            draggable={false}
+                            style={{ width: 135, height: 'auto', objectFit: 'contain' }}
+                        />
+                    )}
 
-            {/* MENU */}
-            <nav
-                aria-label="Menu principal"
-                className={`sidebar-scroll min-h-0 flex-1 space-y-4 overflow-x-hidden overflow-y-auto overscroll-contain py-3 ${
-                    recolhida ? 'px-2' : 'px-3'
-                }`}
-            >
-                {grupos.map((grupo) => (
-                    <div key={grupo.titulo}>
-                        {recolhida ? (
-                            <div className="mx-2 mb-2 h-px bg-zinc-900" aria-hidden="true" />
-                        ) : (
-                            <p className="mb-1.5 px-3 text-[10px] font-bold tracking-[0.22em] text-zinc-600">
-                                {grupo.titulo}
-                            </p>
-                        )}
+                    {!mobile && !menuRecolhido && (
+                        <Tooltip title="Recolher menu" placement="right">
+                            <IconButton
+                                size="small"
+                                onClick={alternarSidebar}
+                                aria-label="Recolher menu lateral"
+                                aria-expanded="true"
+                                sx={{ color: 'text.secondary' }}
+                            >
+                                <ChevronLeftRounded />
+                            </IconButton>
+                        </Tooltip>
+                    )}
 
-                        <div className="space-y-0.5">
+                    {mobile && (
+                        <IconButton
+                            size="small"
+                            onClick={() => setMenuMobileAberto(false)}
+                            aria-label="Fechar menu principal"
+                            sx={{ color: 'text.secondary' }}
+                        >
+                            <CloseRounded />
+                        </IconButton>
+                    )}
+                </Box>
+
+                <Divider />
+
+                <Box
+                    component="nav"
+                    aria-label="Menu principal"
+                    className="sidebar-scroll"
+                    sx={{ flex: 1, minHeight: 0, overflowY: 'auto', py: 1.25 }}
+                >
+                    {grupos.map((grupo) => (
+                        <List
+                            key={grupo.titulo}
+                            disablePadding
+                            subheader={
+                                menuRecolhido ? undefined : (
+                                    <ListSubheader
+                                        component="div"
+                                        disableSticky
+                                        sx={{
+                                            bgcolor: 'transparent',
+                                            color: 'text.disabled',
+                                            fontSize: 10,
+                                            fontWeight: 800,
+                                            lineHeight: '30px',
+                                            letterSpacing: '0.2em',
+                                            px: 2.25,
+                                        }}
+                                    >
+                                        {grupo.titulo}
+                                    </ListSubheader>
+                                )
+                            }
+                            sx={{ mb: menuRecolhido ? 1 : 0.75, px: 1 }}
+                        >
+                            {menuRecolhido && <Divider sx={{ mx: 1, mb: 0.75 }} />}
+
                             {grupo.itens.map((item) => {
                                 const Icon = item.icon;
-                                const ativo =
-                                    pathname === item.href ||
-                                    (item.href !== '/' && pathname.startsWith(`${item.href}/`));
-
-                                return (
-                                    <Link
-                                        key={item.href}
+                                const ativo = rotaAtiva(pathname, item.href);
+                                const link = (
+                                    <ListItemButton
+                                        component={Link}
                                         href={item.href}
+                                        prefetch
+                                        selected={ativo}
+                                        aria-current={ativo ? 'page' : undefined}
+                                        aria-label={menuRecolhido ? item.nome : undefined}
+                                        onClick={() => mobile && setMenuMobileAberto(false)}
                                         onMouseEnter={() => router.prefetch(item.href)}
                                         onFocus={() => router.prefetch(item.href)}
-                                        title={recolhida ? item.nome : undefined}
-                                        aria-label={recolhida ? item.nome : undefined}
-                                        className={`relative flex h-10 items-center rounded-xl border transition-all duration-300 ${
-                                            recolhida ? 'justify-center px-2' : 'gap-3 px-3'
-                                        } ${
-                                            ativo
-                                                ? `border-green-500/30 bg-green-500/10 text-green-400 shadow-lg shadow-green-500/10`
-                                                : `border-transparent text-zinc-400 hover:bg-zinc-900 hover:text-white`
-                                        } `}
+                                        sx={{
+                                            position: 'relative',
+                                            minHeight: 44,
+                                            justifyContent: menuRecolhido ? 'center' : 'flex-start',
+                                            border: '1px solid transparent',
+                                            borderRadius: 2.5,
+                                            px: menuRecolhido ? 1 : 1.5,
+                                            mb: 0.5,
+                                            color: ativo ? 'primary.light' : 'text.secondary',
+                                            transition: (theme) =>
+                                                theme.transitions.create([
+                                                    'background-color',
+                                                    'border-color',
+                                                    'color',
+                                                    'transform',
+                                                ]),
+                                            '&::before': ativo
+                                                ? {
+                                                      position: 'absolute',
+                                                      top: 10,
+                                                      bottom: 10,
+                                                      left: -9,
+                                                      width: 3,
+                                                      borderRadius: '0 8px 8px 0',
+                                                      bgcolor: 'primary.main',
+                                                      content: '""',
+                                                  }
+                                                : undefined,
+                                            '&.Mui-selected': {
+                                                borderColor: 'rgba(34, 197, 94, 0.24)',
+                                                bgcolor: 'rgba(34, 197, 94, 0.11)',
+                                            },
+                                            '&.Mui-selected:hover': { bgcolor: 'rgba(34, 197, 94, 0.16)' },
+                                            '&:hover': {
+                                                color: 'text.primary',
+                                                bgcolor: 'rgba(148, 163, 184, 0.08)',
+                                                transform: menuRecolhido ? 'none' : 'translateX(2px)',
+                                            },
+                                        }}
                                     >
-                                        {ativo && (
-                                            <div className="absolute top-2 bottom-2 left-0 w-1 rounded-r-full bg-green-400" />
+                                        <ListItemIcon
+                                            sx={{
+                                                minWidth: menuRecolhido ? 0 : 38,
+                                                justifyContent: 'center',
+                                                color: 'inherit',
+                                            }}
+                                        >
+                                            <Icon fontSize="small" />
+                                        </ListItemIcon>
+
+                                        {!menuRecolhido && (
+                                            <ListItemText
+                                                primary={item.nome}
+                                                slotProps={{
+                                                    primary: {
+                                                        noWrap: true,
+                                                        sx: {
+                                                            fontSize: 14,
+                                                            fontWeight: ativo ? 650 : 500,
+                                                        },
+                                                    },
+                                                }}
+                                            />
                                         )}
+                                    </ListItemButton>
+                                );
 
-                                        <Icon className="shrink-0" size={19} strokeWidth={2} />
-
-                                        {!recolhida && <span className="truncate text-sm font-medium">{item.nome}</span>}
-                                    </Link>
+                                return menuRecolhido ? (
+                                    <Tooltip key={item.href} title={item.nome} placement="right">
+                                        {link}
+                                    </Tooltip>
+                                ) : (
+                                    <Box key={item.href}>{link}</Box>
                                 );
                             })}
-                        </div>
-                    </div>
-                ))}
-            </nav>
+                        </List>
+                    ))}
+                </Box>
 
-            {/* RODAPÉ */}
-            <div className={`shrink-0 border-t border-zinc-900 ${recolhida ? 'p-2' : 'p-3'}`}>
-                <div className={`flex items-center ${recolhida ? 'justify-center' : 'gap-3'}`}>
-                    <div
-                        title={recolhida ? userEmail : undefined}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-500 text-sm font-bold text-black"
+                <Divider />
+
+                <Box sx={{ p: menuRecolhido ? 1 : 1.5 }}>
+                    <Stack
+                        direction="row"
+                        spacing={1.25}
+                        sx={{
+                            alignItems: 'center',
+                            justifyContent: menuRecolhido ? 'center' : 'flex-start',
+                        }}
                     >
-                        {userInitial}
-                    </div>
+                        <Tooltip title={menuRecolhido ? userEmail : ''} placement="right">
+                            <Avatar
+                                sx={{
+                                    width: 38,
+                                    height: 38,
+                                    bgcolor: 'primary.main',
+                                    color: 'primary.contrastText',
+                                    fontSize: 15,
+                                    fontWeight: 800,
+                                }}
+                            >
+                                {userInitial}
+                            </Avatar>
+                        </Tooltip>
 
-                    {!recolhida && (
-                        <div className="min-w-0">
-                            <p className="max-w-40 truncate text-sm font-semibold text-white capitalize">{userName}</p>
+                        {!menuRecolhido && (
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                                <Typography
+                                    noWrap
+                                    variant="body2"
+                                    sx={{ color: 'text.primary', fontWeight: 700, textTransform: 'capitalize' }}
+                                >
+                                    {userName}
+                                </Typography>
+                                <Typography noWrap variant="caption" color="text.secondary">
+                                    {userEmail}
+                                </Typography>
+                            </Box>
+                        )}
+                    </Stack>
 
-                            <p className="max-w-40 truncate text-xs text-zinc-500">{userEmail}</p>
-                        </div>
-                    )}
-                </div>
+                    <Divider sx={{ my: 1.25 }} />
 
-                <div className={`${recolhida ? 'mt-2 pt-2' : 'mt-3 pt-3'} border-t border-zinc-900`}>
-                    {!recolhida && (
-                        <>
-                            <p className="text-xs text-zinc-600">Altuza ERP</p>
-
-                            <p className="text-xs text-zinc-700">Versão 1.0.0</p>
-                        </>
-                    )}
-
-                    <form action={logout} className={recolhida ? '' : 'mt-2'}>
-                        <button
-                            type="submit"
-                            title={recolhida ? 'Sair do sistema' : undefined}
-                            aria-label={recolhida ? 'Sair do sistema' : undefined}
-                            className={`flex h-10 items-center rounded-lg text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-red-400 ${
-                                recolhida ? 'w-full justify-center' : 'w-full gap-2 px-2'
-                            }`}
-                        >
-                            <LogOut className="shrink-0" size={16} />
-                            {!recolhida && 'Sair do sistema'}
-                        </button>
+                    <form action={logout}>
+                        <Tooltip title={menuRecolhido ? 'Sair do sistema' : ''} placement="right">
+                            <Button
+                                type="submit"
+                                color="error"
+                                fullWidth
+                                startIcon={menuRecolhido ? undefined : <LogoutRounded fontSize="small" />}
+                                aria-label="Sair do sistema"
+                                sx={{
+                                    minWidth: 0,
+                                    justifyContent: menuRecolhido ? 'center' : 'flex-start',
+                                    px: menuRecolhido ? 1 : 1.25,
+                                    color: 'text.secondary',
+                                }}
+                            >
+                                {menuRecolhido ? <LogoutRounded fontSize="small" /> : 'Sair do sistema'}
+                            </Button>
+                        </Tooltip>
                     </form>
-                </div>
-            </div>
-        </aside>
+
+                    {!menuRecolhido && (
+                        <Typography
+                            variant="caption"
+                            color="text.disabled"
+                            sx={{ display: 'block', mt: 0.75, px: 1.25 }}
+                        >
+                            Altuza ERP · v1.0.0
+                        </Typography>
+                    )}
+                </Box>
+            </Box>
+        );
+    }
+
+    const larguraDesktop = recolhida ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH;
+
+    return (
+        <Box
+            sx={{
+                display: 'flex',
+                width: '100%',
+                height: '100dvh',
+                overflow: 'hidden',
+                bgcolor: 'background.default',
+            }}
+        >
+            <Drawer
+                id="menu-lateral-mobile"
+                variant="temporary"
+                open={menuMobileAberto}
+                onClose={() => setMenuMobileAberto(false)}
+                ModalProps={{ keepMounted: true }}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            display: { xs: 'block', md: 'none' },
+                            width: DRAWER_WIDTH,
+                            maxWidth: 'calc(100vw - 48px)',
+                            borderRight: 1,
+                            borderColor: 'divider',
+                            backgroundImage: 'none',
+                        },
+                    },
+                }}
+                sx={{ display: { xs: 'block', md: 'none' } }}
+            >
+                {conteudoDrawer(false, true)}
+            </Drawer>
+
+            <Drawer
+                variant="permanent"
+                open
+                slotProps={{
+                    paper: {
+                        sx: {
+                            position: 'relative',
+                            width: larguraDesktop,
+                            height: '100dvh',
+                            overflowX: 'hidden',
+                            borderRight: 1,
+                            borderColor: 'divider',
+                            backgroundImage: 'none',
+                            transition: (theme) => theme.transitions.create('width'),
+                        },
+                    },
+                }}
+                sx={{
+                    display: { xs: 'none', md: 'block' },
+                    width: larguraDesktop,
+                    flexShrink: 0,
+                    transition: (theme) => theme.transitions.create('width'),
+                }}
+            >
+                {conteudoDrawer(recolhida)}
+            </Drawer>
+
+            <Box
+                sx={{
+                    display: 'flex',
+                    minWidth: 0,
+                    flex: 1,
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                }}
+            >
+                <AppBar
+                    position="static"
+                    color="transparent"
+                    elevation={0}
+                    sx={{
+                        zIndex: (theme) => theme.zIndex.appBar,
+                        flexShrink: 0,
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                        bgcolor: 'rgba(11, 15, 20, 0.86)',
+                        backdropFilter: 'blur(18px)',
+                    }}
+                >
+                    <Toolbar sx={{ minHeight: { xs: 60, sm: 64 }, gap: 1.5, px: { xs: 1.5, sm: 2.5 } }}>
+                        <IconButton
+                            onClick={() => setMenuMobileAberto(true)}
+                            aria-label="Abrir menu principal"
+                            aria-controls="menu-lateral-mobile"
+                            aria-expanded={menuMobileAberto}
+                            sx={{ display: { xs: 'inline-flex', md: 'none' }, color: 'text.primary' }}
+                        >
+                            <MenuRounded />
+                        </IconButton>
+
+                        {recolhida && (
+                            <Tooltip title="Expandir menu">
+                                <IconButton
+                                    onClick={alternarSidebar}
+                                    aria-label="Expandir menu lateral"
+                                    aria-expanded="false"
+                                    sx={{ display: { xs: 'none', md: 'inline-flex' }, color: 'text.secondary' }}
+                                >
+                                    <ChevronRightRounded />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography
+                                variant="overline"
+                                color="primary.light"
+                                sx={{
+                                    display: { xs: 'none', sm: 'block' },
+                                    lineHeight: 1.15,
+                                    letterSpacing: '0.13em',
+                                    fontWeight: 800,
+                                }}
+                            >
+                                {paginaAtual.grupo}
+                            </Typography>
+                            <Typography
+                                component="p"
+                                noWrap
+                                sx={{
+                                    color: 'text.primary',
+                                    fontSize: { xs: 16, sm: 18 },
+                                    lineHeight: 1.25,
+                                    fontWeight: 750,
+                                }}
+                            >
+                                {paginaAtual.nome}
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ flex: 1 }} />
+
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: { xs: 'none', lg: 'block' } }}
+                        >
+                            Altuza ERP
+                        </Typography>
+                    </Toolbar>
+                </AppBar>
+
+                <Box
+                    component="main"
+                    className="erp-content"
+                    sx={{
+                        minWidth: 0,
+                        flex: 1,
+                        overflowX: 'hidden',
+                        overflowY: 'auto',
+                        overscrollBehavior: 'contain',
+                        p: { xs: 2, sm: 3, lg: 4 },
+                    }}
+                >
+                    <Box key={pathname} className="route-content">
+                        {children}
+                    </Box>
+                </Box>
+            </Box>
+        </Box>
     );
 }

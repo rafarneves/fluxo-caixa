@@ -12,13 +12,7 @@ export default async function SistemaLayout({ children }: { children: ReactNode 
 
     return (
         <ConfiguracoesProvider configuracoes={configuracoes}>
-            <div className="flex h-screen overflow-hidden bg-[#0B0F14] text-white">
-                <Sidebar userEmail={user.email ?? 'Administrador'} />
-
-                <main className="erp-content h-screen min-w-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 lg:p-10">
-                    {children}
-                </main>
-            </div>
+            <Sidebar userEmail={user.email ?? 'Administrador'}>{children}</Sidebar>
         </ConfiguracoesProvider>
     );
 }
