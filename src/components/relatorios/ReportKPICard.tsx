@@ -48,8 +48,8 @@ export default function ReportKPICard({
                     width: 130,
                     height: 130,
                     borderRadius: '50%',
-                    bgcolor: tom.soft,
-                    filter: 'blur(22px)',
+                    background: `radial-gradient(circle, ${tom.soft} 0%, transparent 70%)`,
+                    pointerEvents: 'none',
                 }}
             />
             <CardContent sx={{ position: 'relative', p: 3, '&:last-child': { pb: 3 } }}>

@@ -48,8 +48,8 @@ export default function StatCard({
                     width: 145,
                     height: 145,
                     borderRadius: '50%',
-                    bgcolor: tom.soft,
-                    filter: 'blur(24px)',
+                    background: `radial-gradient(circle, ${tom.soft} 0%, transparent 70%)`,
+                    pointerEvents: 'none',
                 }}
             />
             <CardContent

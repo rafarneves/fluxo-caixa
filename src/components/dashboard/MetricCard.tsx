@@ -26,8 +26,8 @@ export default function MetricCard({ title, value, subtitle, color = 'text-white
                     width: 160,
                     height: 160,
                     borderRadius: '50%',
-                    bgcolor: 'rgba(34,197,94,.06)',
-                    filter: 'blur(25px)',
+                    background: 'radial-gradient(circle, rgba(34,197,94,.06) 0%, transparent 70%)',
+                    pointerEvents: 'none',
                 }}
             />
             <CardContent
