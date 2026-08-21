@@ -37,21 +37,13 @@ export default function StatCard({
                 minWidth: 0,
                 height: '100%',
                 borderColor: tom.border,
+                // O brilho do canto e pintado no proprio fundo do card. Como elemento
+                // absoluto ele vazava para fora das bordas arredondadas no mobile.
+                backgroundImage: `radial-gradient(145px 145px at calc(100% + 10px) -20px, ${tom.soft} 0%, transparent 70%),
+                    linear-gradient(180deg, rgba(23, 31, 43, 0.96), rgba(17, 24, 39, 0.96))`,
                 '&:hover': { transform: 'translateY(-3px)', boxShadow: `0 20px 55px ${tom.soft}` },
             }}
         >
-            <Box
-                sx={{
-                    position: 'absolute',
-                    top: -55,
-                    right: -40,
-                    width: 145,
-                    height: 145,
-                    borderRadius: '50%',
-                    background: `radial-gradient(circle, ${tom.soft} 0%, transparent 70%)`,
-                    pointerEvents: 'none',
-                }}
-            />
             <CardContent
                 sx={{ position: 'relative', p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}
             >
@@ -90,7 +82,6 @@ export default function StatCard({
                                 height: 46,
                                 color: tom.main,
                                 bgcolor: tom.soft,
-                                border: `1px solid ${tom.border}`,
                             }}
                         >
                             {icone}
