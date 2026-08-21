@@ -9,12 +9,12 @@ type ContratoCliente = {
     valor: number;
     status: string;
     data_inicio: string | null;
+    loja: string | null;
 };
 
 type Cliente = {
     id: string;
     nome: string;
-    loja: string | null;
     cidade: string | null;
     estado: string | null;
     bairro: string | null;
@@ -55,7 +55,8 @@ export default async function ClientesPage() {
         id,
         valor,
         status,
-        data_inicio
+        data_inicio,
+        loja
       )
     `
         )

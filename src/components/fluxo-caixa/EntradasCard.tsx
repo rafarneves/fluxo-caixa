@@ -8,9 +8,9 @@ type Recebimento = {
     valor: number;
     contratos: {
         nome: string | null;
+        loja: string | null;
         clientes: {
             nome: string;
-            loja: string | null;
         } | null;
     } | null;
 };
@@ -55,9 +55,9 @@ export default function EntradasCard({ recebimentos }: Props) {
                             <div className="min-w-0">
                                 <p className="font-semibold break-words">
                                     {item.contratos?.clientes?.nome ?? '-'}
-                                    {item.contratos?.clientes?.loja && (
+                                    {item.contratos?.loja && (
                                         <span className="ml-2 text-sm font-normal text-zinc-400">
-                                            ({item.contratos.clientes.loja})
+                                            ({item.contratos.loja})
                                         </span>
                                     )}
                                 </p>

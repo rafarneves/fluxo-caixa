@@ -13,6 +13,12 @@ export async function criarContrato(formData: FormData) {
         throw new Error('Informe o plano do contrato');
     }
 
+    const loja = String(formData.get('loja') ?? '').trim();
+
+    if (!loja) {
+        throw new Error('Informe o nome da loja');
+    }
+
     const descricao = String(formData.get('descricao') ?? '');
 
     const valor = Number(formData.get('valor'));
@@ -59,6 +65,8 @@ export async function criarContrato(formData: FormData) {
             cliente_id,
 
             nome: plano,
+
+            loja,
 
             descricao,
 

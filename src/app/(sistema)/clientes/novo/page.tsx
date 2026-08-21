@@ -16,7 +16,6 @@ const mascaraTelefone = (valor: string) => {
 export default function NovoClientePage() {
     const router = useRouter();
     const [nome, setNome] = useState('');
-    const [loja, setLoja] = useState('');
     const [telefone, setTelefone] = useState('');
     const [erro, setErro] = useState<string | null>(null);
     const [salvando, setSalvando] = useState(false);
@@ -35,7 +34,6 @@ export default function NovoClientePage() {
         const supabase = createClient();
         const { error } = await supabase.from('clientes').insert({
             nome,
-            loja,
             telefone: telefoneLimpo,
             status: 'Ativo',
         });
@@ -68,14 +66,6 @@ export default function NovoClientePage() {
                                     value={nome}
                                     onChange={(event) => setNome(event.target.value)}
                                     required
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <TextField
-                                    label="Nome da loja"
-                                    value={loja}
-                                    onChange={(event) => setLoja(event.target.value)}
                                     fullWidth
                                 />
                             </Grid>

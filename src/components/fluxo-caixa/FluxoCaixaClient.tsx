@@ -13,7 +13,7 @@ type Recebimento = {
     valor: number;
     vencimento: string;
     status: string;
-    contratos: { nome: string | null; clientes: { nome: string; loja: string | null } | null } | null;
+    contratos: { nome: string | null; loja: string | null; clientes: { nome: string } | null } | null;
 };
 type Despesa = {
     id: string;
@@ -74,7 +74,7 @@ export default function FluxoCaixaClient({
             rec = rec.filter(
                 (item) =>
                     normalizar(item.contratos?.clientes?.nome ?? '').includes(termo) ||
-                    normalizar(item.contratos?.clientes?.loja ?? '').includes(termo) ||
+                    normalizar(item.contratos?.loja ?? '').includes(termo) ||
                     normalizar(item.contratos?.nome ?? '').includes(termo)
             );
             desp = desp.filter(

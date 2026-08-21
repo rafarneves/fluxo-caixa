@@ -15,9 +15,9 @@ export default async function RecebimentosPage() {
       *,
       contratos (
         nome,
+        loja,
         clientes (
-          nome,
-          loja
+          nome
         )
       )
     `

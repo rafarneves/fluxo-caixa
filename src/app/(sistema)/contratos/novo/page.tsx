@@ -84,7 +84,7 @@ export default function NovoContratoPage() {
                         Informações do Contrato
                     </Typography>
                     <Grid container spacing={2.5}>
-                        <Grid size={12}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <TextField
                                 select
                                 name="cliente_id"
@@ -101,6 +101,16 @@ export default function NovoContratoPage() {
                                     </MenuItem>
                                 ))}
                             </TextField>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <TextField
+                                name="loja"
+                                label="Nome da loja"
+                                required
+                                fullWidth
+                                placeholder="Ex.: Loja Centro"
+                                slotProps={{ htmlInput: { maxLength: 120 } }}
+                            />
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
                             <TextField

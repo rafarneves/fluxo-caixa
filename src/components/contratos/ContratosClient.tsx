@@ -32,7 +32,8 @@ type Contrato = {
     data_inicio: string | null;
     vencimento: number | null;
     status: string;
-    clientes: { id: string; nome: string; loja: string | null } | null;
+    loja: string | null;
+    clientes: { id: string; nome: string } | null;
 };
 const normalizar = (valor: string) =>
     valor
@@ -49,9 +50,7 @@ export default function ContratosClient({ contratos }: { contratos: Contrato[] }
     const lojas = useMemo(
         () =>
             Array.from(
-                new Set(
-                    contratos.map((contrato) => contrato.clientes?.loja).filter((loja): loja is string => Boolean(loja))
-                )
+                new Set(contratos.map((contrato) => contrato.loja).filter((loja): loja is string => Boolean(loja)))
             ).sort((a, b) => a.localeCompare(b, 'pt-BR')),
         [contratos]
     );
@@ -62,12 +61,12 @@ export default function ContratosClient({ contratos }: { contratos: Contrato[] }
                 const correspondeBusca =
                     !termo ||
                     normalizar(contrato.clientes?.nome ?? '').includes(termo) ||
-                    normalizar(contrato.clientes?.loja ?? '').includes(termo) ||
+                    normalizar(contrato.loja ?? '').includes(termo) ||
                     normalizar(contrato.nome ?? '').includes(termo);
                 return (
                     correspondeBusca &&
                     (statusFiltro === 'todos' || contrato.status === statusFiltro) &&
-                    (lojaFiltro === 'todas' || contrato.clientes?.loja === lojaFiltro)
+                    (lojaFiltro === 'todas' || contrato.loja === lojaFiltro)
                 );
             }),
         [busca, contratos, lojaFiltro, statusFiltro]
@@ -168,7 +167,7 @@ export default function ContratosClient({ contratos }: { contratos: Contrato[] }
                                                 {contrato.clientes?.nome ?? '-'}
                                             </Typography>
                                         </TableCell>
-                                        <TableCell>{contrato.clientes?.loja ?? '-'}</TableCell>
+                                        <TableCell>{contrato.loja ?? '-'}</TableCell>
                                         <TableCell>
                                             <Typography
                                                 component={Link}

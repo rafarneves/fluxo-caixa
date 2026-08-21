@@ -15,8 +15,7 @@ export default async function ContratosPage() {
       *,
       clientes (
         id,
-        nome,
-        loja
+        nome
       )
     `
         )

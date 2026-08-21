@@ -15,9 +15,9 @@ export default async function FluxoCaixaPage() {
       *,
       contratos (
         nome,
+        loja,
         clientes (
-          nome,
-          loja
+          nome
         )
       )
     `

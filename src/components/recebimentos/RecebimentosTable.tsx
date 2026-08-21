@@ -34,7 +34,7 @@ type Recebimento = {
     valor: number;
     vencimento: string;
     status: string | null;
-    contratos: { nome: string | null; clientes: { nome: string; loja: string | null } | null } | null;
+    contratos: { nome: string | null; loja: string | null; clientes: { nome: string } | null } | null;
 };
 type FiltroStatus = 'todos' | 'pago' | 'pendente' | 'atrasado' | 'receber_hoje';
 type FiltroPeriodo = 'todos' | 'semanal' | 'mensal' | '6_meses' | 'personalizado';
@@ -64,7 +64,7 @@ export default function RecebimentosTable({ recebimentos }: { recebimentos: Rece
             filtrados = filtrados.filter(
                 (item) =>
                     normalizar(item.contratos?.clientes?.nome ?? '').includes(busca) ||
-                    normalizar(item.contratos?.clientes?.loja ?? '').includes(busca)
+                    normalizar(item.contratos?.loja ?? '').includes(busca)
             );
         }
         if (statusFiltro !== 'todos')
@@ -282,7 +282,7 @@ export default function RecebimentosTable({ recebimentos }: { recebimentos: Rece
                                             </Box>
                                         </Stack>
                                     </TableCell>
-                                    <TableCell>{item.contratos?.clientes?.loja ?? '-'}</TableCell>
+                                    <TableCell>{item.contratos?.loja ?? '-'}</TableCell>
                                     <TableCell>{item.contratos?.nome ?? '-'}</TableCell>
                                     <TableCell>{item.competencia ?? '-'}</TableCell>
                                     <TableCell sx={{ color: 'primary.light', fontWeight: 750 }}>

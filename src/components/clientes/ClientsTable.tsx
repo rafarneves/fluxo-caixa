@@ -28,11 +28,10 @@ import {
 import { inativarCliente } from '@/actions/clientes';
 import { useConfiguracoes } from '@/components/configuracoes/ConfiguracoesProvider';
 
-type ContratoCliente = { id: string; valor: number; status: string };
+type ContratoCliente = { id: string; valor: number; status: string; loja: string | null };
 type Cliente = {
     id: string;
     nome: string;
-    loja: string | null;
     cidade: string | null;
     estado: string | null;
     bairro: string | null;
@@ -47,6 +46,13 @@ const normalizar = (valor: string) =>
         .replace(/[\u0300-\u036f]/g, '')
         .toLocaleLowerCase('pt-BR')
         .trim();
+// A loja e cadastrada no contrato, entao um cliente pode aparecer com mais de uma.
+const lojasDoCliente = (cliente: Cliente) =>
+    Array.from(
+        new Set(
+            (cliente.contratos ?? []).map((contrato) => contrato.loja).filter((loja): loja is string => Boolean(loja))
+        )
+    ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
 export default function ClientsTable({ clientes }: { clientes: Cliente[] }) {
     const { formatarMoeda } = useConfiguracoes();
@@ -60,7 +66,9 @@ export default function ClientsTable({ clientes }: { clientes: Cliente[] }) {
         return clientes.filter((cliente) => {
             const statusCliente = normalizar(cliente.status ?? '');
             const correspondeNome =
-                !nome || normalizar(cliente.nome).includes(nome) || normalizar(cliente.loja ?? '').includes(nome);
+                !nome ||
+                normalizar(cliente.nome).includes(nome) ||
+                normalizar(lojasDoCliente(cliente).join(' ')).includes(nome);
             const localizacaoCliente = normalizar(
                 [cliente.bairro, cliente.cidade, cliente.estado].filter(Boolean).join(' ')
             );
@@ -207,7 +215,7 @@ export default function ClientsTable({ clientes }: { clientes: Cliente[] }) {
                                                 {cliente.nome}
                                             </Typography>
                                         </TableCell>
-                                        <TableCell>{cliente.loja || '-'}</TableCell>
+                                        <TableCell>{lojasDoCliente(cliente).join(', ') || '-'}</TableCell>
                                         <TableCell>{localizacao || 'Sem localização'}</TableCell>
                                         <TableCell>{cliente.contratos?.length ?? 0}</TableCell>
                                         <TableCell sx={{ color: 'primary.light', fontWeight: 750 }}>
