@@ -2,6 +2,15 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { formatarDataServidor, formatarMoedaServidor, getContextoConfiguracoes } from '@/lib/configuracoes-server';
 
+// Contratos antigos guardam apenas a recorrencia; os novos guardam a fidelidade em meses.
+function formatarFidelidade(contrato: { fidelidade_meses?: number | null; recorrencia?: string | null }) {
+    if (contrato.fidelidade_meses) {
+        return `${contrato.fidelidade_meses} ${contrato.fidelidade_meses === 1 ? 'mês' : 'meses'}`;
+    }
+
+    return contrato.recorrencia ?? '-';
+}
+
 export default async function ClienteDetalhe({
     params,
 }: {
@@ -126,7 +135,7 @@ export default async function ClienteDetalhe({
                                         {contrato.nome}
                                     </Link>
 
-                                    <p className="mt-2 text-zinc-500">{contrato.recorrencia ?? 'Mensal'}</p>
+                                    <p className="mt-2 text-zinc-500">{formatarFidelidade(contrato)}</p>
                                 </div>
 
                                 <div className="text-right">
@@ -156,9 +165,9 @@ export default async function ClienteDetalhe({
                                 </div>
 
                                 <div>
-                                    <p className="text-zinc-500">Recorrência</p>
+                                    <p className="text-zinc-500">Fidelidade</p>
 
-                                    <p className="mt-2">{contrato.recorrencia ?? '-'}</p>
+                                    <p className="mt-2">{formatarFidelidade(contrato)}</p>
                                 </div>
                             </div>
                         </div>

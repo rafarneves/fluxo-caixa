@@ -7,17 +7,10 @@ export async function criarContrato(formData: FormData) {
     const supabase = await createClient();
     const cliente_id = String(formData.get('cliente_id'));
 
-    const plano_id = String(formData.get('plano_id'));
+    const plano = String(formData.get('plano') ?? '').trim();
 
-    const { data: plano, error: erroPlano } = await supabase
-        .from('planos')
-        .select('nome')
-        .eq('id', plano_id)
-        .eq('ativo', true)
-        .single();
-
-    if (erroPlano || !plano) {
-        throw new Error('Plano inválido ou inativo');
+    if (!plano) {
+        throw new Error('Informe o plano do contrato');
     }
 
     const descricao = String(formData.get('descricao') ?? '');
@@ -26,20 +19,46 @@ export async function criarContrato(formData: FormData) {
 
     const vencimento = Number(formData.get('vencimento'));
 
-    const recorrencia = String(formData.get('recorrencia'));
+    const fidelidade_meses = Number(formData.get('fidelidade_meses'));
+
+    if (!Number.isInteger(fidelidade_meses) || fidelidade_meses < 1 || fidelidade_meses > 24) {
+        throw new Error('A fidelidade contratual deve ser de 1 a 24 meses');
+    }
 
     const data_inicio = String(formData.get('data_inicio'));
 
     const data_fim_input = String(formData.get('data_fim') ?? '');
+
+    // Uma cobranca por mes durante toda a fidelidade, sempre no dia de vencimento
+    // escolhido (ajustado quando o mes nao tem esse dia).
+    const [anoInicio, mesInicio] = data_inicio.split('-').map(Number);
+
+    const doisDigitos = (numero: number) => String(numero).padStart(2, '0');
+
+    const competencias = Array.from({ length: fidelidade_meses }, (_, indice) => {
+        const base = new Date(Date.UTC(anoInicio, mesInicio - 1 + indice, 1));
+
+        const ano = base.getUTCFullYear();
+
+        const mes = base.getUTCMonth() + 1;
+
+        const ultimoDia = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
+
+        return {
+            competencia: `${ano}-${doisDigitos(mes)}`,
+
+            vencimento: `${ano}-${doisDigitos(mes)}-${doisDigitos(Math.min(vencimento, ultimoDia))}`,
+        };
+    });
+
+    const data_fim = data_fim_input || competencias[competencias.length - 1].vencimento;
 
     const { data: contrato, error } = await supabase
         .from('contratos')
         .insert({
             cliente_id,
 
-            plano_id,
-
-            nome: plano.nome,
+            nome: plano,
 
             descricao,
 
@@ -47,11 +66,11 @@ export async function criarContrato(formData: FormData) {
 
             vencimento,
 
-            recorrencia,
+            fidelidade_meses,
 
             data_inicio,
 
-            data_fim: data_fim_input || null,
+            data_fim,
 
             status: 'Ativo',
         })
@@ -62,54 +81,19 @@ export async function criarContrato(formData: FormData) {
         throw new Error('Erro ao criar contrato');
     }
 
-    const recebimentos: Array<{
-        contrato_id: string;
-        competencia: string;
-        valor: number;
-        valor_original: number;
-        vencimento: string;
-        status: string;
-    }> = [];
+    const recebimentos = competencias.map((parcela) => ({
+        contrato_id: contrato.id,
 
-    const inicio = new Date(data_inicio);
+        competencia: parcela.competencia,
 
-    let fim;
+        valor,
 
-    if (data_fim_input) {
-        fim = new Date(data_fim_input);
-    } else {
-        fim = new Date(inicio);
+        valor_original: valor,
 
-        fim.setMonth(fim.getMonth() + 11);
-    }
+        vencimento: parcela.vencimento,
 
-    const atual = new Date(inicio.getFullYear(), inicio.getMonth(), vencimento);
-
-    while (atual <= fim) {
-        recebimentos.push({
-            contrato_id: contrato.id,
-
-            competencia: atual.toISOString().slice(0, 7),
-
-            valor,
-
-            valor_original: valor,
-
-            vencimento: atual.toISOString().split('T')[0],
-
-            status: 'Pendente',
-        });
-
-        if (recorrencia === 'Mensal') {
-            atual.setMonth(atual.getMonth() + 1);
-        } else if (recorrencia === 'Trimestral') {
-            atual.setMonth(atual.getMonth() + 3);
-        } else if (recorrencia === 'Anual') {
-            atual.setFullYear(atual.getFullYear() + 1);
-        } else {
-            atual.setMonth(atual.getMonth() + 1);
-        }
-    }
+        status: 'Pendente',
+    }));
 
     if (recebimentos.length) {
         const { error: erroRecebimentos } = await supabase.from('recebimentos').insert(recebimentos);

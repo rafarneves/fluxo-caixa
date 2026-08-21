@@ -17,34 +17,36 @@ import {
     Typography,
 } from '@mui/material';
 import { criarContrato } from '@/actions/contratos';
+import CurrencyField from '@/components/ui/CurrencyField';
 import PageHeader from '@/components/ui/PageHeader';
 import { createClient } from '@/lib/supabase/client';
 
 type Opcao = { id: string; nome: string };
 
+const MESES_FIDELIDADE = Array.from({ length: 24 }, (_, indice) => indice + 1);
+
 export default function NovoContratoPage() {
     const router = useRouter();
     const [clientes, setClientes] = useState<Opcao[]>([]);
-    const [planos, setPlanos] = useState<Opcao[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [mensagem, setMensagem] = useState('');
     const [erro, setErro] = useState(false);
     const [criando, setCriando] = useState(false);
     useEffect(() => {
         const supabase = createClient();
-        void Promise.all([
-            supabase.from('clientes').select('id,nome').order('nome'),
-            supabase.from('planos').select('id,nome').eq('ativo', true).order('ordem'),
-        ]).then(([clientesResult, planosResult]) => {
-            if (clientesResult.error || planosResult.error) {
-                setMensagem('Não foi possível carregar os clientes e planos.');
-                setErro(true);
-            } else {
-                setClientes(clientesResult.data ?? []);
-                setPlanos(planosResult.data ?? []);
-            }
-            setCarregando(false);
-        });
+        void supabase
+            .from('clientes')
+            .select('id,nome')
+            .order('nome')
+            .then((clientesResult) => {
+                if (clientesResult.error) {
+                    setMensagem('Não foi possível carregar os clientes.');
+                    setErro(true);
+                } else {
+                    setClientes(clientesResult.data ?? []);
+                }
+                setCarregando(false);
+            });
     }, []);
     async function enviarContrato(formData: FormData) {
         setCriando(true);
@@ -102,33 +104,16 @@ export default function NovoContratoPage() {
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
                             <TextField
-                                select
-                                name="plano_id"
+                                name="plano"
                                 label="Plano"
                                 required
-                                defaultValue=""
                                 fullWidth
-                                disabled={carregando}
-                            >
-                                <MenuItem value="">
-                                    {carregando ? 'Carregando planos...' : 'Selecione o plano'}
-                                </MenuItem>
-                                {planos.map((plano) => (
-                                    <MenuItem key={plano.id} value={plano.id}>
-                                        {plano.nome}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
+                                placeholder="Ex.: Plano Performance"
+                                slotProps={{ htmlInput: { maxLength: 120 } }}
+                            />
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField
-                                name="valor"
-                                type="number"
-                                label="Valor mensal"
-                                required
-                                fullWidth
-                                slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
-                            />
+                            <CurrencyField name="valor" label="Valor mensal" required fullWidth />
                         </Grid>
                         <Grid size={{ xs: 12, md: 4 }}>
                             <TextField
@@ -141,10 +126,19 @@ export default function NovoContratoPage() {
                             />
                         </Grid>
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <TextField select name="recorrencia" label="Recorrência" defaultValue="Mensal" fullWidth>
-                                <MenuItem value="Mensal">Mensal</MenuItem>
-                                <MenuItem value="Trimestral">Trimestral</MenuItem>
-                                <MenuItem value="Anual">Anual</MenuItem>
+                            <TextField
+                                select
+                                name="fidelidade_meses"
+                                label="Fidelidade contratual"
+                                defaultValue={12}
+                                required
+                                fullWidth
+                            >
+                                {MESES_FIDELIDADE.map((meses) => (
+                                    <MenuItem key={meses} value={meses}>
+                                        {meses} {meses === 1 ? 'mês' : 'meses'}
+                                    </MenuItem>
+                                ))}
                             </TextField>
                         </Grid>
                         <Grid size={{ xs: 12, md: 4 }}>

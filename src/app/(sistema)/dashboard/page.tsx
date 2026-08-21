@@ -53,6 +53,7 @@ type Despesa = {
 };
 
 type DistribuicaoPlanoRpc = {
+    // Texto livre do plano (contratos.nome), usado como chave da distribuicao.
     plano_id: string;
     slug: string;
     nome: string;

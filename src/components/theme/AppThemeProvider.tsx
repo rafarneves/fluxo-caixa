@@ -112,6 +112,17 @@ const theme = createTheme({
             },
         },
         MuiSelect: {
+            defaultProps: {
+                // Abre a lista abaixo do campo, com rolagem, em vez de cobrir o input
+                // quando ha muitas opcoes.
+                MenuProps: {
+                    anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                    transformOrigin: { vertical: 'top', horizontal: 'left' },
+                    slotProps: {
+                        paper: { sx: { maxHeight: 264, mt: 0.5 } },
+                    },
+                },
+            },
             styleOverrides: {
                 select: {
                     boxSizing: 'content-box',
