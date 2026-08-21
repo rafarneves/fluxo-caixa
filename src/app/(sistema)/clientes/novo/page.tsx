@@ -13,49 +13,16 @@ const mascaraTelefone = (valor: string) => {
         ? numeros.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
         : numeros.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
 };
-const mascaraCep = (valor: string) => valor.replace(/\D/g, '').replace(/^(\d{5})(\d)/, '$1-$2');
-
 export default function NovoClientePage() {
     const router = useRouter();
     const [nome, setNome] = useState('');
     const [loja, setLoja] = useState('');
     const [telefone, setTelefone] = useState('');
-    const [cep, setCep] = useState('');
-    const [rua, setRua] = useState('');
-    const [numero, setNumero] = useState('');
-    const [bairro, setBairro] = useState('');
-    const [cidade, setCidade] = useState('');
-    const [estado, setEstado] = useState('');
     const [erro, setErro] = useState<string | null>(null);
     const [salvando, setSalvando] = useState(false);
-    async function buscarCep(valor: string) {
-        const cepLimpo = valor.replace(/\D/g, '');
-        if (cepLimpo.length !== 8) return;
-        try {
-            const resposta = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-            const dados = (await resposta.json()) as {
-                erro?: boolean;
-                logradouro?: string;
-                bairro?: string;
-                localidade?: string;
-                uf?: string;
-            };
-            if (dados.erro) {
-                setErro('CEP não encontrado.');
-                return;
-            }
-            setRua(dados.logradouro ?? '');
-            setBairro(dados.bairro ?? '');
-            setCidade(dados.localidade ?? '');
-            setEstado(dados.uf ?? '');
-        } catch {
-            setErro('Erro ao consultar CEP.');
-        }
-    }
     async function salvarCliente() {
         setErro(null);
         const telefoneLimpo = telefone.replace(/\D/g, '');
-        const cepLimpo = cep.replace(/\D/g, '');
         if (nome.trim().length < 3) {
             setErro('Informe um nome válido.');
             return;
@@ -64,26 +31,14 @@ export default function NovoClientePage() {
             setErro('Informe um telefone válido com DDD.');
             return;
         }
-        if (cepLimpo.length !== 8 || cidade.trim().length < 2) {
-            setErro('Informe e busque um CEP válido antes de salvar.');
-            return;
-        }
         setSalvando(true);
         const supabase = createClient();
-        const { error } = await supabase
-            .from('clientes')
-            .insert({
-                nome,
-                loja,
-                telefone: telefoneLimpo,
-                cep: cepLimpo,
-                rua,
-                numero,
-                bairro,
-                cidade,
-                estado,
-                status: 'Ativo',
-            });
+        const { error } = await supabase.from('clientes').insert({
+            nome,
+            loja,
+            telefone: telefoneLimpo,
+            status: 'Ativo',
+        });
         setSalvando(false);
         if (error) {
             setErro(error.message);
@@ -133,40 +88,6 @@ export default function NovoClientePage() {
                                     fullWidth
                                     slotProps={{ htmlInput: { maxLength: 15 } }}
                                 />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <TextField
-                                    label="CEP"
-                                    value={cep}
-                                    onChange={(event) => {
-                                        const valor = mascaraCep(event.target.value);
-                                        setCep(valor);
-                                        void buscarCep(valor);
-                                    }}
-                                    placeholder="00000-000"
-                                    fullWidth
-                                    slotProps={{ htmlInput: { maxLength: 9 } }}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <TextField
-                                    label="Número"
-                                    value={numero}
-                                    onChange={(event) => setNumero(event.target.value)}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <TextField label="Rua" value={rua} fullWidth disabled />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <TextField label="Bairro" value={bairro} fullWidth disabled />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 8 }}>
-                                <TextField label="Cidade" value={cidade} fullWidth disabled />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <TextField label="Estado" value={estado} fullWidth disabled />
                             </Grid>
                         </Grid>
                         <Button

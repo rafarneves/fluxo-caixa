@@ -8,7 +8,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import PageLoading from '@/components/ui/PageLoading';
 import { createClient } from '@/lib/supabase/client';
 
-type Cliente = { nome: string | null; telefone: string | null; cidade: string | null };
+type Cliente = { nome: string | null; telefone: string | null };
 
 export default function EditarCliente() {
     const router = useRouter();
@@ -20,7 +20,7 @@ export default function EditarCliente() {
         const supabase = createClient();
         void supabase
             .from('clientes')
-            .select('nome,telefone,cidade')
+            .select('nome,telefone')
             .eq('id', id)
             .single()
             .then(({ data, error }) => {
@@ -35,7 +35,7 @@ export default function EditarCliente() {
         const supabase = createClient();
         const { error } = await supabase
             .from('clientes')
-            .update({ nome: cliente?.nome, telefone: cliente?.telefone, cidade: cliente?.cidade })
+            .update({ nome: cliente?.nome, telefone: cliente?.telefone })
             .eq('id', id);
         setSalvando(false);
         if (error) {
@@ -66,12 +66,6 @@ export default function EditarCliente() {
                             label="Telefone"
                             value={cliente.telefone ?? ''}
                             onChange={(event) => setCliente({ ...cliente, telefone: event.target.value })}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Cidade"
-                            value={cliente.cidade ?? ''}
-                            onChange={(event) => setCliente({ ...cliente, cidade: event.target.value })}
                             fullWidth
                         />
                         <Button
